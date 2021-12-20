@@ -1,0 +1,14 @@
+{
+  "name": "not-a-robot-agency/acf-extended-pro",
+  "type": "wordpress-plugin",
+  "description": "",
+  "require": {
+    "php": ">=5.6"
+  },
+  "authors": [
+    {
+      "name": "Chris Jezowicz",
+      "email": "me@chrisjezowicz.com"
+    }
+  ]
+}
