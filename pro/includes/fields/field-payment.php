@@ -376,75 +376,45 @@ class acfe_payment extends acf_field{
     
     function render_value($field){
     
-        // failed decrypt
-        if(!$this->validate_payment_object($field['value'])){
-            
-            ?><em style="color:#999;"><?php _e('Payment meta is invalid.', 'acfe'); ?></em><?php
-            return;
-            
-        }
-    
-        // vars
-        $value = $field['value'];
-        $data = $this->format_value($value, false, $field);
+        // validate
+        $value = $this->validate_payment_object($field['value']);
         
-        // currency symbol
-        $symbol = acfe_get_currency($data['currency'], 'symbol');
-        
-        // gateway url
-        $url = '';
-        
-        if($value['gateway'] === 'stripe'){
-            
-            $url = "https://dashboard.stripe.com/payments/{$data['id']}";
-            if($value['mode'] === 'test') $url = "https://dashboard.stripe.com/test/payments/{$data['id']}";
-            
-        }elseif($value['gateway'] === 'paypal'){
-            
-            $url = "https://www.paypal.com/activity/payment/{$data['id']}";
-            if($value['mode'] === 'test') $url = "https://www.sandbox.paypal.com/activity/payment/{$data['id']}";
-            
-        }
+        // format
+        $value = $this->format_payment_object($value, $field);
     
         ?>
         <div class="acfe-payment-value">
             <div class="gateway">
-                <strong><?php _e('Gateway', 'acfe'); ?>:</strong> <?php echo $data['gateway']; ?>
+                <strong><?php _e('Gateway', 'acfe'); ?>:</strong> <?php echo $value['gateway']; ?><?php echo $value['mode'] === __('Test', 'acfe') ? " ({$value['mode']})" : ''; ?>
             </div>
-    
-            <?php if($value['mode'] === 'test'): ?>
-            <div class="mode">
-                <strong><?php _e('Mode', 'acfe'); ?>:</strong> <?php echo $data['mode']; ?>
-            </div>
-            <?php endif; ?>
     
             <div class="amount">
-                <strong><?php _e('Amount', 'acfe'); ?>:</strong> <?php echo $symbol.$data['amount']; ?>
+                <strong><?php _e('Amount', 'acfe'); ?>:</strong> <?php echo $value['symbol'].$value['amount']; ?>
             </div>
     
-            <?php if($data['items'] && is_array($data['items'])): ?>
-            <div class="mode">
-                <strong><?php _e('Items', 'acfe'); ?>:</strong> <?php echo implode(', ', wp_list_pluck($data['items'], 'item')); ?>
+            <?php if($value['items'] && is_array($value['items']) && isset($value['items'][0]) && isset($value['items'][0]['item'])): ?>
+            <div class="items">
+                <strong><?php _e('Items', 'acfe'); ?>:</strong> <?php echo implode(', ', wp_list_pluck($value['items'], 'item')); ?>
             </div>
             <?php endif; ?>
             
             <div class="date">
-                <strong><?php _e('Date', 'acfe'); ?>:</strong> <?php echo $data['date']; ?>
+                <strong><?php _e('Date', 'acfe'); ?>:</strong> <?php echo $value['date']; ?>
             </div>
             
             <div class="ip">
-                <strong><?php _e('IP Address', 'acfe'); ?>:</strong> <a href="https://ipinfo.io/<?php echo $data['ip']; ?>" target="_blank"><?php echo $data['ip']; ?></a>
+                <strong><?php _e('IP Address', 'acfe'); ?>:</strong> <a href="https://ipinfo.io/<?php echo $value['ip']; ?>" target="_blank"><?php echo $value['ip']; ?></a>
             </div>
             
             <div class="transaction">
-                <strong><?php _e('Payment ID', 'acfe'); ?>:</strong> <a href="<?php echo esc_url($url); ?>" target="_blank"><?php echo $data['id']; ?></a>
+                <strong><?php _e('Payment ID', 'acfe'); ?>:</strong> <a href="<?php echo esc_url($value['url']); ?>" target="_blank"><?php echo $value['id']; ?></a>
             </div>
             
             <div class="object">
                 <strong><?php _e('Payment Object', 'acfe'); ?>:</strong> <a href="#" data-acfe-modal data-acfe-modal-title="<?php _e('Payment Object', 'acfe'); ?>" data-acfe-modal-size="large" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
                 <div class="acfe-modal">
                     <div class="acfe-modal-spacer">
-                        <pre><?php print_r($data['object']); ?></pre>
+                        <pre><?php print_r($value['object']); ?></pre>
                     </div>
                 </div>
             </div>
@@ -977,11 +947,6 @@ class acfe_payment extends acf_field{
     }
     
     function update_value($value, $post_id, $field){
-        
-        // do not save if empty
-        if(empty($value)){
-            return null;
-        }
     
         // do not save in admin
         if(is_admin()){
@@ -993,14 +958,12 @@ class acfe_payment extends acf_field{
             return $value;
         }
         
-        // decode response
+        // decode
         $value = @acf_decrypt(json_encode($value));
         $value = json_decode($value, true);
     
-        // validate response
-        if(!$this->validate_payment_object($value)){
-            return null;
-        }
+        // validate
+        $value = $this->validate_payment_object($value);
         
         // clone
         $sub_field = $field;
@@ -1040,7 +1003,7 @@ class acfe_payment extends acf_field{
             $sub_field['name'] = "{$field['name']}_{$name}";
             $sub_value = acf_get_value($post_id, $sub_field);
             
-            if($sub_value){
+            if($sub_value !== null){
                 $values[ $name ] = $sub_value;
             }
         
@@ -1053,6 +1016,115 @@ class acfe_payment extends acf_field{
         
         // return
         return $value;
+        
+    }
+    
+    function is_payment_object($value = array()){
+        
+        // failed decrypt
+        if(!$value || !is_array($value)){
+            return false;
+        }
+        
+        // loop sub fields
+        foreach($this->sub_fields as $sub_field){
+            
+            // sub field name found in array
+            if(isset($value[ $sub_field ])) continue;
+            
+            // sub field not found
+            return false;
+            
+        }
+        
+        // valid
+        return true;
+        
+    }
+    
+    function validate_payment_object($value){
+        
+        // force array
+        $value = acf_get_array($value);
+        
+        // defaults
+        $value = wp_parse_args($value, array(
+            'id'        => '',
+            'gateway'   => 'stripe',
+            'url'       => '',
+            'amount'    => 0.00,
+            'currency'  => 'USD',
+            'symbol'    => '$',
+            'items'     => array(),
+            'date'      => date_i18n('U'),
+            'ip'        => acfe_get_ip(),
+            'mode'      => 'test',
+            'object'    => array()
+        ));
+        
+        // currency symbol
+        $value['symbol'] = acfe_get_currency($value['currency'], 'symbol');
+        
+        // stripe url
+        if($value['gateway'] === 'stripe'){
+            
+            $value['url'] = "https://dashboard.stripe.com/payments/{$value['id']}";
+            
+            if($value['mode'] === 'test'){
+                $value['url'] = "https://dashboard.stripe.com/test/payments/{$value['id']}";
+            }
+            
+        // paypal url
+        }elseif($value['gateway'] === 'paypal'){
+            
+            $value['url'] = "https://www.paypal.com/activity/payment/{$value['id']}";
+            
+            if($value['mode'] === 'test'){
+                $value['url'] = "https://www.sandbox.paypal.com/activity/payment/{$value['id']}";
+            }
+            
+        }
+        
+        // items
+        $value['items'] = acf_get_array($value['items']);
+        
+        // force sequential array on associative array
+        if(acf_is_associative_array($value['items'])){
+            $value['items'] = array($value['items']);
+        }
+    
+        $items = array();
+    
+        $i = 0;
+        foreach($value['items'] as $row){
+        
+            $items[ $i ] = array();
+            $items[ $i ]['item'] = '';
+            
+            if(is_array($row)){
+                $items[ $i ] = $row;
+            }elseif(is_string($row)){
+                $items[ $i ]['item'] = $row;
+            }
+        
+            if(!isset($items[ $i ]['item'])){
+                $items[ $i ]['item'] = implode(' ', $row);
+            }
+        
+            $i++;
+        
+        }
+    
+        $value['items'] = $items;
+        
+        // return
+        return $value;
+        
+    }
+    
+    function format_payment_object($value, $field){
+        
+        return $this->format_value($value, false, $field);
         
     }
     
@@ -1114,54 +1186,31 @@ class acfe_payment extends acf_field{
         // decode response
         $value = @acf_decrypt(json_encode($value));
         $value = json_decode($value, true);
-    
-        // validate response
-        if(!$this->validate_payment_object($value)){
-            return false;
-        }
         
-        $data = $this->format_value($value, false, $field);
-    
-        // currency symbol
-        $symbol = acfe_get_currency($data['currency'], 'symbol');
-    
-        // gateway url
-        $url = '';
-    
-        if($value['gateway'] === 'stripe'){
+        // validate
+        $value = $this->validate_payment_object($value);
         
-            $url = "https://dashboard.stripe.com/payments/{$data['id']}";
-            if($value['mode'] === 'test') $url = "https://dashboard.stripe.com/test/payments/{$data['id']}";
-        
-        }elseif($value['gateway'] === 'paypal'){
-        
-            $url = "https://www.paypal.com/activity/payment/{$data['id']}";
-            if($value['mode'] === 'test') $url = "https://www.sandbox.paypal.com/activity/payment/{$data['id']}";
-        
-        }
+        // format
+        $value = $this->format_payment_object($value, $field);
         
         ob_start();
     
         ?>
         <br/>
         
-        <?php _e('Gateway', 'acfe'); ?>: <?php echo $data['gateway']; ?><br/>
+        <?php _e('Gateway', 'acfe'); ?>: <?php echo $value['gateway']; ?><?php echo $value['mode'] === __('Test', 'acfe') ? " ({$value['mode']})" : ''; ?><br/>
+    
+        <?php _e('Amount', 'acfe'); ?>: <?php echo $value['symbol'].$value['amount']; ?><br/>
         
-        <?php if($value['mode'] === 'test'): ?>
-            <?php _e('Mode', 'acfe'); ?>: <?php echo $data['mode']; ?><br/>
+        <?php if($value['items'] && is_array($value['items'])): ?>
+            <?php _e('Items', 'acfe'); ?>: <?php echo implode(', ', wp_list_pluck($value['items'], 'item')); ?><br/>
         <?php endif; ?>
     
-        <?php _e('Amount', 'acfe'); ?>: <?php echo $symbol.$data['amount']; ?><br/>
-        
-        <?php if($data['items'] && is_array($data['items'])): ?>
-            <?php _e('Items', 'acfe'); ?>: <?php echo implode(', ', wp_list_pluck($data['items'], 'item')); ?><br/>
-        <?php endif; ?>
+        <?php _e('Date', 'acfe'); ?>: <?php echo $value['date']; ?><br/>
     
-        <?php _e('Date', 'acfe'); ?>: <?php echo $data['date']; ?><br/>
+        <?php _e('IP Address', 'acfe'); ?>: <a href="https://ipinfo.io/<?php echo $value['ip']; ?>" target="_blank"><?php echo $value['ip']; ?></a><br/>
     
-        <?php _e('IP Address', 'acfe'); ?>: <a href="https://ipinfo.io/<?php echo $data['ip']; ?>" target="_blank"><?php echo $data['ip']; ?></a><br/>
-    
-        <?php _e('Payment ID', 'acfe'); ?>: <a href="<?php echo esc_url($url); ?>" target="_blank"><?php echo $data['id']; ?></a>
+        <?php _e('Payment ID', 'acfe'); ?>: <a href="<?php echo esc_url($value['url']); ?>" target="_blank"><?php echo $value['id']; ?></a>
         
         <?php
         
@@ -1275,29 +1324,6 @@ class acfe_payment extends acf_field{
     function is_zero_decimal($currency){
         
         return in_array($currency, array('BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'));
-        
-    }
-    
-    function validate_payment_object($value = array()){
-        
-        // failed decrypt
-        if(!$value || !is_array($value)){
-            return false;
-        }
-        
-        // loop sub fields
-        foreach($this->sub_fields as $sub_field){
-            
-            // sub field name found in array
-            if(isset($value[ $sub_field ])) continue;
-            
-            // sub field not found
-            return false;
-            
-        }
-        
-        // valid
-        return true;
         
     }
     

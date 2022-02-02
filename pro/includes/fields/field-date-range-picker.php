@@ -27,6 +27,7 @@ class acfe_field_date_range_picker extends acf_field{
             'min_date'          => '',
             'max_date'          => '',
             'custom_ranges'     => array(),
+            'show_dropdowns'    => false,
             'no_weekends'       => false,
             'auto_close'        => false,
             'allow_null'        => false,
@@ -97,7 +98,7 @@ class acfe_field_date_range_picker extends acf_field{
     
         // separator
         acf_render_field_setting($field, array(
-            'label'         => __('Separator','acf'),
+            'label'         => __('Separator','acfe'),
             'instructions'  => '',
             'name'          => 'separator',
             'type'          => 'text',
@@ -105,7 +106,7 @@ class acfe_field_date_range_picker extends acf_field{
         
         // Default Start
         acf_render_field_setting($field, array(
-            'label'         => __('Default Date'),
+            'label'         => __('Default Date', 'acfe'),
             'name'          => 'default_start',
             'key'           => 'default_start',
             'placeholder'   => $field['display_format'],
@@ -132,7 +133,7 @@ class acfe_field_date_range_picker extends acf_field{
         
         // Min Days
         acf_render_field_setting($field, array(
-            'label'         => __('Range Restriction'),
+            'label'         => __('Range Restriction', 'acfe'),
             'name'          => 'min_days',
             'key'           => 'min_days',
             'instructions'  => '',
@@ -159,7 +160,7 @@ class acfe_field_date_range_picker extends acf_field{
         
         // Min Date
         acf_render_field_setting($field, array(
-            'label'         => __('Date Restriction'),
+            'label'         => __('Date Restriction', 'acfe'),
             'name'          => 'min_date',
             'key'           => 'min_date',
             'placeholder'   => $field['display_format'],
@@ -188,7 +189,7 @@ class acfe_field_date_range_picker extends acf_field{
     
         // Custom Ranges
         acf_render_field_setting($field, array(
-            'label'         => __('Custom Ranges','acf'),
+            'label'         => __('Custom Ranges','acfe'),
             'instructions'  => '',
             'type'          => 'checkbox',
             'name'          => 'custom_ranges',
@@ -203,9 +204,19 @@ class acfe_field_date_range_picker extends acf_field{
             )
         ));
         
+        // Show dropdowns
+        acf_render_field_setting($field, array(
+            'label'         => __('Show Dropdowns', 'acfe'),
+            'name'          => 'show_dropdowns',
+            'key'           => 'show_dropdowns',
+            'instructions'  => '',
+            'type'          => 'true_false',
+            'ui'            => true,
+        ));
+        
         // No weekends
         acf_render_field_setting($field, array(
-            'label'         => __('No Weekends', 'acf'),
+            'label'         => __('No Weekends', 'acfe'),
             'name'          => 'no_weekends',
             'key'           => 'no_weekends',
             'instructions'  => '',
@@ -215,7 +226,7 @@ class acfe_field_date_range_picker extends acf_field{
         
         // Auto Close
         acf_render_field_setting($field, array(
-            'label'         => __('Auto Close on Selection', 'acf'),
+            'label'         => __('Auto Close on Selection', 'acfe'),
             'name'          => 'auto_close',
             'key'           => 'auto_close',
             'instructions'  => '',
@@ -254,49 +265,6 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
-    function prepare_field($field){
-        
-        // Value already exists or default not set
-        if($field['value'] !== null || empty($field['default_start']) || empty($field['default_end'])){
-            return $field;
-        }
-        
-        // vars
-        $default_start = $field['default_start'];
-        $default_end = $field['default_end'];
-        
-        if(!empty($field['default_start'])){
-            
-            $is_date = DateTime::createFromFormat($field['display_format'], $field['default_start']);
-        
-            if(!$is_date){
-            
-                $date = strtotime($field['default_start']);
-                $default_start = date_i18n('Ymd', $date);
-            
-            }
-        
-        }
-    
-        if(!empty($field['default_end'])){
-        
-            $is_date = DateTime::createFromFormat($field['display_format'], $field['default_end']);
-        
-            if(!$is_date){
-            
-                $date = strtotime($field['default_end']);
-                $default_end = date_i18n('Ymd', $date);
-            
-            }
-        
-        }
-        
-        $field['value'] = $default_start . '-' . $default_end;
-        
-        return $field;
-        
-    }
-    
     function render_field($field){
         
         // Enqueue
@@ -328,6 +296,7 @@ class acfe_field_date_range_picker extends acf_field{
             'data-min_days'         => $field['min_days'],
             'data-max_days'         => $field['max_days'],
             'data-custom_ranges'    => $field['custom_ranges'],
+            'data-show_dropdowns'   => $field['show_dropdowns'],
             'data-no_weekends'      => $field['no_weekends'],
             'data-auto_close'       => $field['auto_close'],
             'data-allow_null'       => $field['allow_null'],
@@ -340,10 +309,8 @@ class acfe_field_date_range_picker extends acf_field{
             $is_date = DateTime::createFromFormat($field['display_format'], $field['min_date']);
             
             if(!$is_date){
-    
                 $date = strtotime($field['min_date']);
                 $div['data-min_date'] = date_i18n($field['display_format'], $date);
-                
             }
             
         }
@@ -355,10 +322,8 @@ class acfe_field_date_range_picker extends acf_field{
             $is_date = DateTime::createFromFormat($field['display_format'], $field['max_date']);
     
             if(!$is_date){
-        
                 $date = strtotime($field['max_date']);
                 $div['data-max_date'] = date_i18n($field['display_format'], $date);
-        
             }
             
         }
@@ -443,8 +408,8 @@ class acfe_field_date_range_picker extends acf_field{
         
         // default values
         $values = array(
-            'start' => '',
-            'end'   => '',
+            'start' => null,
+            'end'   => null,
         );
     
         // loop sub fields
@@ -458,6 +423,38 @@ class acfe_field_date_range_picker extends acf_field{
                 $values[ $name ] = $sub_value;
             }
         
+        }
+        
+        if($values['start'] === null && $values['end'] === null){
+    
+            if(!empty($field['default_start'])){
+                
+                $date = DateTime::createFromFormat($field['display_format'], $field['default_start']);
+                
+                if(!$date){
+                    $default_start = date_i18n('Ymd', strtotime($field['default_start']));
+                }else{
+                    $default_start = $date->format('Ymd');
+                }
+    
+                $values['start'] = $default_start;
+        
+            }
+    
+            if(!empty($field['default_end'])){
+                
+                $date = DateTime::createFromFormat($field['display_format'], $field['default_end']);
+        
+                if(!$date){
+                    $default_end = date_i18n('Ymd', strtotime($field['default_end']));
+                }else{
+                    $default_end = $date->format('Ymd');
+                }
+                
+                $values['end'] = $default_end;
+                
+            }
+            
         }
         
         return $values;

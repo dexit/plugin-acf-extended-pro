@@ -85,7 +85,7 @@ class acfe_field_post_field extends acf_field{
                 
                 $selector = $taxonomy_obj->hierarchical ? "{$taxonomy}div" : "tagsdiv-{$taxonomy}";
                 
-                $wrapper['data-taxonomy'] = $field['taxonomy'];
+                $wrapper['data-taxonomy-hierarchical'] = $taxonomy_obj->hierarchical;
                 $wrapper['data-taxonomy-selector'] = $selector;
                 
             }

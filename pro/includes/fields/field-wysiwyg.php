@@ -32,6 +32,29 @@ class acfe_field_wysiwyg{
      * Field Settings
      */
     function field_settings($field){
+    
+        // Auto Init
+        acf_render_field_setting($field, array(
+            'label'             => __('Auto initialization', 'acfe'),
+            'instructions'      => __('Automatically initialize TinyMCE when shown', 'acfe'),
+            'name'              => 'acfe_wysiwyg_auto_init',
+            'type'              => 'true_false',
+            'message'           => '',
+            'default_value'     => false,
+            'ui'                => true,
+            'conditional_logic' => array(
+                array(
+                    array(
+                        'field'     => 'delay',
+                        'operator'  => '==',
+                        'value'     => '1',
+                    ),
+                ),
+            ),
+            'wrapper' => array(
+                'data-after' => 'delay'
+            )
+        ));
         
         // Height
         acf_render_field_setting($field, array(

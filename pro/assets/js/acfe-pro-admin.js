@@ -138,8 +138,9 @@
 
         initialize: function() {
 
-            if (acfe.currentFilename() !== 'post.php' && acfe.currentFilename() !== 'post-new.php' || !$('body').hasClass('acfe-screen-layouts'))
+            if (acfe.currentFilename() !== 'post.php' && acfe.currentFilename() !== 'post-new.php' || !$('body').hasClass('acfe-screen-layouts')) {
                 return;
+            }
 
             this.newScreen();
 
@@ -149,8 +150,9 @@
 
             var column = $('.columns-prefs input:checked').val();
 
-            if (!column || column === '1' || column === '2')
+            if (!column || column === '1' || column === '2') {
                 return;
+            }
 
             $('#post-body.metabox-holder').removeClass('columns-2').addClass('columns-' + column);
 

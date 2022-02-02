@@ -293,8 +293,11 @@ class acfe_field_color_picker{
             
         }
         
-        // vars
+        // text input
         $text_input = acf_get_sub_array($field, array('id', 'class', 'value'));
+        $text_input['autocomplete'] = 'off';
+        
+        // hidden input
         $hidden_input = acf_get_sub_array($field, array('name', 'value'));
     
         // Get Colors
@@ -348,16 +351,15 @@ class acfe_field_color_picker{
                             
                             // set border as first gradient color
                             if(isset($matches[0])){
-                                
                                 $border = $matches[0];
-                                
                             }
                             
                         }
                         
                         // Palette selected, remove value from color picker
-                        if($selected)
+                        if($selected){
                             $text_input['value'] = '';
+                        }
                         ?>
                     
                         <a href="#" class="color <?php echo $title ? 'acf-js-tooltip' : ''; ?> <?php echo $selected; ?>" data-color="<?php echo $color; ?>" title="<?php echo $title; ?>">

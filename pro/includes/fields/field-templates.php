@@ -47,12 +47,9 @@ class acfe_templates extends acf_field{
         
         foreach($templates as $template_id){
             
-            $template = get_post($template_id);
-            
-            if(!empty($allowed) && !in_array($template_id, $allowed))
-                continue;
+            if(!empty($allowed) && !in_array($template_id, $allowed)) continue;
     
-            $choices[$template_id] = get_the_title($template);
+            $choices[ $template_id ] = get_the_title($template_id);
             
         }
         

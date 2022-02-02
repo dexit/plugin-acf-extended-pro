@@ -43,10 +43,9 @@ class acfe_block_types extends acf_field{
             
             $name = str_replace('acf/', '', $block_type['name']);
             
-            if(!empty($allowed) && !in_array($name, $allowed))
-                continue;
+            if(!empty($allowed) && !in_array($name, $allowed)) continue;
     
-            $choices[$name] = $block_type['title'];
+            $choices[ $name ] = $block_type['title'];
             
         }
         

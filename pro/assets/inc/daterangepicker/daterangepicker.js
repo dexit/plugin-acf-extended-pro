@@ -544,7 +544,7 @@
 
             this.container.find('.drp-selected').html(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
 
-            // Fix: Alwaus updateElement
+            // Fix: Always updateElement
             // Even when clicked on date
 
             //if (!this.isShowing)

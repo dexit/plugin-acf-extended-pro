@@ -200,7 +200,7 @@ class acfe_payment_hooks{
             if(acf_maybe_get($field, 'sub_fields')){
                 
                 // recursive call
-                return $this->ajax_get_payment_field_choices($choices, $field['sub_fields'], $field_group);
+                $choices = $this->ajax_get_payment_field_choices($choices, $field['sub_fields'], $field_group);
                 
             }
             

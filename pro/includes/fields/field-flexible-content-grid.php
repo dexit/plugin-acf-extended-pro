@@ -155,7 +155,7 @@ class acfe_pro_field_fc_grid{
                     ),
                     'default_value'     => false,
                     'ui'                => false,
-                    'message'           => 'Wrap',
+                    'message'           => 'No Wrap',
                     'conditional_logic' => array(
                         array(
                             array(

@@ -1481,6 +1481,14 @@ body .daterangepicker td.disabled {
     text-decoration: none
 }
 
+body .daterangepicker select.monthselect,
+body .daterangepicker select.yearselect {
+    padding: 3px 8px;
+    line-height: 1.4;
+    min-height: auto;
+    cursor: pointer
+}
+
 body .daterangepicker .calendar-table td,
 body .daterangepicker .calendar-table th {
     border-radius: 0
@@ -2554,7 +2562,11 @@ body .daterangepicker.daterangepicker-allow-null .drp-buttons .cancelBtn {
 }
 
 .acf-field-acfe-post-field[data-field-type=taxonomy] .acf-input>.inside .tagsdiv {
-    max-width: 300px
+    max-width: 280px
+}
+
+.acf-field-acfe-post-field[data-field-type=taxonomy] .acf-input>.inside .tagsdiv .ajaxtag {
+    margin-top: 0 !important
 }
 
 .acf-field-acfe-post-field[data-field-type=taxonomy] .acf-input>.inside .tagsdiv input[type=text] {
@@ -2571,9 +2583,7 @@ body .daterangepicker.daterangepicker-allow-null .drp-buttons .cancelBtn {
 }
 
 .acf-field-acfe-post-field[data-field-type=taxonomy] .acf-input>.inside .categorydiv div.tabs-panel ul.categorychecklist {
-    -webkit-column-width: 200px;
-    -moz-column-width: 200px;
-    column-width: 200px
+    max-width: 280px
 }
 
 .acf-field-acfe-post-field[data-field-type=trackbacks] .acf-input>.inside {

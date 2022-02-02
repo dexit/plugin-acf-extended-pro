@@ -41,6 +41,8 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         add_filter('acf/location/rule_types',                   array($this, 'location_types'));
         add_filter('acf/location/rule_operators/acfe_template', array($this, 'location_operators'), 10, 2);
         add_filter('acf/location/rule_values/acfe_template',    array($this, 'location_values'));
+        
+        // Location match
         add_filter('acf/location/rule_match/acfe_template',     array($this, 'location_match_target'), 10, 4);
         add_filter('acf/location/rule_match',                   array($this, 'location_match_template'), 99, 4);
     
@@ -111,8 +113,10 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         
         $post_id = acfe_get_post_id();
         
-        if(!$post_id || get_post_type($post_id) !== $this->post_type)
+        // always validate on template screen
+        if(!$post_id || get_post_type($post_id) !== $this->post_type){
             return $valid;
+        }
         
         return true;
         
@@ -177,8 +181,7 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         // Bypass Sidebar Settings
         foreach($field_groups as $k => $field_group){
             
-            if($field_group['key'] !== 'group_acfe_dynamic_template_side')
-                continue;
+            if($field_group['key'] !== 'group_acfe_dynamic_template_side') continue;
             
             unset($field_groups[$k]);
             break;
@@ -350,10 +353,22 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
                     $html = array();
         
                     foreach($field_groups as $field_group){
-                        $html[] = '<a href="' . admin_url('post.php?post=' . $field_group['ID'] . '&action=edit') . '">' . $field_group['title'] . '</a>';
+                        
+                        if($field_group['key'] === 'group_acfe_dynamic_template_side') continue;
+                        
+                        $append = $field_group['title'];
+                        
+                        if($field_group['ID']){
+                            $append = '<a href="' . admin_url('post.php?post=' . $field_group['ID'] . '&action=edit') . '">' . $field_group['title'] . '</a>';
+                        }
+                        
+                        $html[] = $append;
+                        
                     }
-    
-                    $return = implode(', ', $html);
+                    
+                    if($html){
+                        $return = implode(', ', $html);
+                    }
     
                 }
                 
@@ -373,9 +388,8 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
     
                 if($field_groups){
     
-                    $groups = $this->get_target_locations($field_groups, $post_id);
-                    
                     $html = array();
+                    $groups = $this->get_target_locations($field_groups, $post_id);
                     
                     foreach($groups as $group){
     
@@ -386,8 +400,10 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
                         }
                         
                     }
-                    
-                    $return = implode('', $html);
+    
+                    if($html){
+                        $return = implode('', $html);
+                    }
                     
                 }
     
@@ -409,10 +425,16 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
     
                     $count = 0;
                     foreach($field_groups as $field_group){
+                        
+                        if($field_group['key'] === 'group_acfe_dynamic_template_side') continue;
+                        
                         $count += acf_get_field_count($field_group);
+                        
                     }
-    
-                    $return = $count;
+                    
+                    if($count){
+                        $return = $count;
+                    }
                     
                 }
                 
@@ -499,8 +521,9 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         $args = apply_filters("acfe/template/import_args/name={$name}",     $args, $name, $post_id);
         $args = apply_filters("acfe/template/import_args/id={$post_id}",    $args, $name, $post_id);
         
-        if($args === false)
+        if($args === false){
             return $post_id;
+        }
         
         // Import Fields
         acf_enable_filter('local');
@@ -539,14 +562,15 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         $choices = array();
         
         $get_posts = get_posts(array(
-            'post_type'         => 'acfe-template',
+            'post_type'         => $this->post_type,
             'posts_per_page'    => -1,
             'fields'            => 'ids',
             'post_status'       => 'any'
         ));
         
-        if(!$get_posts)
+        if(!$get_posts){
             return $choices;
+        }
         
         foreach($get_posts as $post_id){
             
@@ -564,8 +588,9 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
      */
     function export_data($name){
         
-        if(!$template = get_page_by_path($name, OBJECT, $this->post_type))
+        if(!$template = get_page_by_path($name, OBJECT, $this->post_type)){
             return false;
+        }
         
         acf_enable_filter('local');
         
@@ -582,8 +607,8 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         }
         
         // Values
-        $values = acfe_get_fields($template->ID);
-        acfe_unset($values, 'field_acfe_template_active');
+        $values = get_fields($template->ID, false);
+        acfe_unset($values, 'acfe_template_active');
         
         // Args
         $args = array(
@@ -686,24 +711,18 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
             'posts_per_page'    => -1,
             'fields'            => 'ids',
             'post_status'       => 'any',
-            'suppress_filters'  => true, // WPML: All langs
-            'lang'              => '', // Polylang: All langs
+            'suppress_filters'  => true, // WPML: all langs
+            'lang'              => '',   // Polylang: all langs
         ));
         
+        if(empty($get_posts)){
+            return array('' => __('No templates found', 'acfe'));
+        }
+    
         $choices = array();
         
-        if(!empty($get_posts)){
-            
-            foreach($get_posts as $pid){
-                
-                $choices[$pid] = get_the_title($pid);
-                
-            }
-            
-        }else{
-            
-            $choices[''] = __('No template pages found', 'acfe');
-            
+        foreach($get_posts as $pid){
+            $choices[ $pid ] = get_the_title($pid);
         }
         
         return $choices;
@@ -718,15 +737,17 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         $post_type = acf_maybe_get($screen, 'post_type');
         
         // Do not match Template Post Type
-        if($post_type === $this->post_type)
+        if($post_type === $this->post_type){
             return $match;
+        }
         
         // Vars
         global $pagenow;
         
         // Check screen
-        if(!in_array($pagenow, array('post.php', 'post-new.php', 'profile.php', 'user-edit.php', 'user-new.php', 'edit-tags.php', 'term.php')))
+        if(!in_array($pagenow, array('post.php', 'post-new.php', 'profile.php', 'user-edit.php', 'user-new.php', 'edit-tags.php', 'term.php'))){
             return true;
+        }
         
         // Retrieve template
         $template_id = $rule['value'];
@@ -734,11 +755,12 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         $template_id = acfe_get_post_translated($template_id);
         
         // Check template status
-        if(get_post_status($template_id) !== 'publish')
+        if(get_post_status($template_id) !== 'publish'){
             return true;
+        }
 
         // Get values
-        $values = acfe_get_fields($template_id);
+        $values = get_fields($template_id, false);
 
         // Apply values
         $this->apply_values($values);
@@ -756,12 +778,14 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         $template_id = acf_maybe_get($screen, 'post_id');
         $template_id = $this->validate_post_id($template_id);
         
-        if(!$template_id || $post_type !== $this->post_type || !$field_group || $field_group['key'] === 'group_acfe_dynamic_template_side')
+        if(!$template_id || $post_type !== $this->post_type || !$field_group || $field_group['key'] === 'group_acfe_dynamic_template_side'){
             return $match;
+        }
         
         // Check if active.
-        if(!$field_group['active'])
+        if(!$field_group['active']){
             return false;
+        }
         
         if($field_group['location']){
             
@@ -769,8 +793,7 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
             foreach($field_group['location'] as $group){
                 
                 // ignore group if no rules.
-                if(empty($group))
-                    continue;
+                if(empty($group)) continue;
                 
                 // Loop over rules and determine if all rules match.
                 $match_group = false;
@@ -786,8 +809,9 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
                     
                 }
                 
-                if($match_group)
+                if($match_group){
                     return true;
+                }
                 
             }
             
@@ -819,7 +843,9 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         // Get local templates
         $templates = acfe_get_local_templates();
         
-        if(!$templates) return;
+        if(!$templates){
+            return;
+        }
     
         // get screen
         $screen = acf_get_form_data('location');
@@ -849,34 +875,56 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
     function apply_values($template){
         
         // Empty template values
-        if(empty($template))
-            return;
+        if(empty($template)) return;
         
         // Pre load value
         add_filter('acf/pre_load_value', function($null, $post_id, $field) use($template){
             
+            // vars
             $field_key = $field['key'];
             $field_name = $field['name'];
             
-            // Check if key is in the template
-            if(!isset($template[ $field_key ]))
+            // Check if name is in the template (also check field key for back compatibility)
+            if(!isset($template[ $field_name ]) && !isset($template[ $field_key ])){
                 return $null;
-    
+            }
+            
             // Get store
             $store = acf_get_store('values');
     
             // Check store
-            if($store->has("$post_id:$field_name"))
+            if($store->has("$post_id:$field_name")){
                 return $null;
-    
+            }
+            
             // Load value from database.
             $value = acf_get_metadata($post_id, $field_name);
     
-            // Value already exists
-            if($value !== null)
-                return $null;
+            // Value exists
+            if($value !== null){
+                
+                // apply filters
+                $value = apply_filters('acf/load_value', $value, $post_id, $field);
     
-            return $template[ $field_key ];
+                // Update store.
+                $store->set( "$post_id:$field_name", $value );
+                
+                // return
+                return $null;
+                
+            }
+            
+            // return by name
+            if(isset($template[ $field_name ])){
+                return $template[ $field_name ];
+                
+            // return by key
+            }elseif(isset($template[ $field_key ])){
+                return $template[ $field_key ];
+            }
+            
+            // return null
+            return $null;
     
         }, 10, 3);
         
@@ -891,15 +939,13 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         
         foreach($field_groups as $field_group){
             
-            if(!$field_group['location'])
-                continue;
-                
+            if(!$field_group['location']) continue;
+            
             // Loop through location groups.
             foreach($field_group['location'] as $group){
                 
                 // ignore group if no rules.
-                if(empty($group))
-                    continue;
+                if(empty($group)) continue;
                 
                 $found = false;
                 
@@ -912,9 +958,7 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
                 }
                 
                 if($found){
-                    
                     $groups[] = $group;
-                    
                 }
                 
             }
@@ -925,8 +969,7 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
             
             foreach($group as $i => $rule){
                 
-                if($rule['param'] !== 'acfe_template')
-                    continue;
+                if($rule['param'] !== 'acfe_template') continue;
                 
                 unset($group[$i]);
                 
@@ -956,24 +999,22 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
      */
     function validate_field_group($field_group){
         
-        if(!$field_group['location'])
+        if(!$field_group['location']){
             return $field_group;
+        }
         
         // Loop through location groups.
         foreach($field_group['location'] as $k => $group){
             
             // ignore group if no rules.
-            if(empty($group))
-                continue;
+            if(empty($group)) continue;
             
             // Do not allow Template as single location (only use in combination with another rule)
-            if(count($group) !== 1)
-                continue;
+            if(count($group) !== 1) continue;
             
             foreach($group as $_k => $rule){
                 
-                if($rule['param'] !== 'acfe_template')
-                    continue;
+                if($rule['param'] !== 'acfe_template') continue;
                 
                 unset($field_group['location'][$k]);
                 

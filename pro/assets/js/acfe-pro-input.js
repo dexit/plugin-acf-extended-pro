@@ -646,6 +646,10 @@
 
             };
 
+            if (this.get('show_dropdowns')) {
+                args.showDropdowns = Boolean(this.get('show_dropdowns'));
+            }
+
             if (this.get('auto_close')) {
                 args.autoApply = Boolean(this.get('auto_close'));
             }
@@ -2676,6 +2680,7 @@
             // set field
             this.field = acf.getFields({
                 type: 'acfe_payment',
+                visible: true,
                 limit: 1
             }).shift();
 
@@ -3381,8 +3386,9 @@
             // Function name: moveTitle
             var fn = acf.strCamelCase('move_' + this.get('fieldType'));
 
-            if (typeof this[fn] === 'undefined')
+            if (typeof this[fn] === 'undefined') {
                 return;
+            }
 
             this[fn]();
 
@@ -3393,8 +3399,9 @@
             var $minorPublishing = $('#minor-publishing');
             var minorPublishingContent = $minorPublishing.text().trim();
 
-            if (minorPublishingContent.length)
+            if (minorPublishingContent.length) {
                 return;
+            }
 
             $minorPublishing.hide();
 
@@ -3407,14 +3414,13 @@
             var $field = $selector;
             var parent_exists = $field.parent().hasClass('acf-input');
 
-            if (parent === 2)
+            if (parent === 2) {
                 parent_exists = $field.parent().parent().hasClass('acf-input');
+            }
 
             if (!$field.length || parent_exists) {
-
                 this.$el.remove();
                 return false;
-
             }
 
             return $field.appendTo(this.$inputWrap());
@@ -3425,8 +3431,9 @@
 
             var $field = this.checkField($('#pageparentdiv > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $('#pageparentdiv').remove();
             $('.metabox-prefs > label[for="pageparentdiv-hide"]').remove();
@@ -3439,16 +3446,15 @@
             var $selector = $('#acfe-author > .inside');
 
             if (!$selector.length) {
-
                 type = 'wp';
                 $selector = $('#authordiv > .inside');
-
             }
 
             var $field = this.checkField($selector);
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             if (type === 'acfe') {
 
@@ -3468,8 +3474,9 @@
 
             var $field = this.checkField($('#commentsdiv > .inside'), 2);
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $field.wrapAll('<div id="commentsdiv" />');
 
@@ -3482,8 +3489,9 @@
 
             var $field = this.checkField($('#postdivrich'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             this.addEvents({
                 'showField': 'reinitContent'
@@ -3493,15 +3501,21 @@
 
         reinitContent: function() {
 
-            if (!window.tinymce)
+            if (!window.tinymce) {
                 return;
+            }
 
             var editor = window.tinymce.get('content');
 
-            if (!editor)
+            if (!$field) {
                 return;
+            }
 
             editor.fire('show');
+
+            this.setTimeout(function() {
+                editor.fire('show');
+            }, 400)
 
         },
 
@@ -3509,8 +3523,9 @@
 
             var $field = this.checkField($('.misc-pub-curtime'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             this.checkMiscActions();
 
@@ -3520,8 +3535,9 @@
 
             var $field = this.checkField($('#commentstatusdiv > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $('#commentstatusdiv').remove();
             $('.metabox-prefs > label[for="commentstatusdiv-hide"]').remove();
@@ -3532,8 +3548,9 @@
 
             var $field = this.checkField($('#postexcerpt > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $('#postexcerpt').remove();
             $('.metabox-prefs > label[for="postexcerpt-hide"]').remove();
@@ -3544,8 +3561,9 @@
 
             var $field = this.checkField($('#postimagediv > .inside'), 2);
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $field.wrapAll('<div id="postimagediv" />');
 
@@ -3558,8 +3576,9 @@
 
             var $field = this.checkField($('#slugdiv > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $('#slugdiv').remove();
             $('.metabox-prefs > label[for="slugdiv-hide"]').remove();
@@ -3570,8 +3589,9 @@
 
             var $field = this.checkField($('#edit-slug-box'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $field.find('> strong').remove();
 
@@ -3692,8 +3712,9 @@
 
             var $field = this.checkField($('#preview-action'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             this.checkMiscActions();
 
@@ -3703,8 +3724,9 @@
 
             var $field = this.checkField($('.misc-pub-revisions'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             this.checkMiscActions();
 
@@ -3714,8 +3736,9 @@
 
             var $field = this.checkField($('#revisionsdiv > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $('#revisionsdiv').remove();
             $('.metabox-prefs > label[for="revisionsdiv-hide"]').remove();
@@ -3726,8 +3749,9 @@
 
             var $field = this.checkField($('.misc-pub-post-status'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             this.checkMiscActions();
 
@@ -3735,12 +3759,22 @@
 
         moveTaxonomy: function() {
 
-            var taxonomy = this.get('taxonomy');
+            if (this.get('taxonomyHierarchical')) {
+                this.loadMoveTaxonomy();
+            } else {
+                this.addAction('load', this.loadMoveTaxonomy);
+            }
+
+        },
+
+        loadMoveTaxonomy: function() {
+
             var selector = this.get('taxonomySelector');
             var $field = this.checkField($('#' + selector + ' > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $field.attr('id', selector);
 
@@ -3759,8 +3793,9 @@
 
             var $field = this.checkField($('#trackbacksdiv > .inside'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             $('#trackbacksdiv').remove();
             $('.metabox-prefs > label[for="trackbacksdiv-hide"]').remove();
@@ -3771,8 +3806,9 @@
 
             var $field = this.checkField($('.misc-pub-visibility'));
 
-            if (!$field)
+            if (!$field) {
                 return;
+            }
 
             this.checkMiscActions();
 
@@ -4180,7 +4216,7 @@
                 id: pid,
                 text: title,
                 selected: true,
-            });
+            }).trigger('change');
 
             acfe.closePopup();
 
