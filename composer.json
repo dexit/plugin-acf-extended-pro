@@ -1,5 +1,5 @@
 {
-  "name": "not-a-robot-agency/acf-extended-pro",
+  "name": "landesberg-design/acf-extended-pro",
   "type": "wordpress-plugin",
   "description": "",
   "require": {
@@ -7,8 +7,7 @@
   },
   "authors": [
     {
-      "name": "Chris Jezowicz",
-      "email": "me@chrisjezowicz.com"
+      "name": "ACF Extended"
     }
   ]
 }
