@@ -1,20 +1,32 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_tab')):
 
-class acfe_field_tab{
+class acfe_field_tab extends acfe_field_extend{
     
-    function __construct(){
-    
-        add_action('acf/render_field_settings/type=tab',        array($this, 'field_settings'));
-        add_filter('acfe/field_wrapper_attributes/type=tab',    array($this, 'field_wrapper'), 10, 2);
+    /**
+     * initialize
+     */
+    function initialize(){
+        
+        $this->name = 'tab';
+        $this->defaults = array(
+            'no_preference' => 0
+        );
         
     }
     
-    function field_settings($field){
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
+    function render_field_settings($field){
     
         acf_render_field_setting($field, array(
             'label'         => __('No Preference','acf'),
@@ -26,12 +38,19 @@ class acfe_field_tab{
         
     }
     
-    function field_wrapper($wrapper, $field){
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
+     */
+    function field_wrapper_attributes($wrapper, $field){
         
-        if(acf_maybe_get($field, 'no_preference')){
-            
+        if($field['no_preference']){
             $wrapper['data-no-preference'] = 1;
-            
         }
         
         return $wrapper;
@@ -40,6 +59,6 @@ class acfe_field_tab{
     
 }
 
-new acfe_field_tab();
+acf_new_instance('acfe_field_tab');
 
 endif;

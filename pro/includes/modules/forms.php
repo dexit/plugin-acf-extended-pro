@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_dynamic_forms')):
 
@@ -77,6 +78,7 @@ class acfe_pro_dynamic_forms{
     
         // get instance for ajax
         $instance = acf_get_instance('acfe_form_front');
+        $shortcode = acf_get_instance('acfe_form_shortcode');
     
         // vars
         $args = acf_maybe_get_POST('args', array());
@@ -101,7 +103,7 @@ class acfe_pro_dynamic_forms{
         $is_preview = true;
     
         // display form
-        echo $instance->render_shortcode($form);
+        echo $shortcode->render_shortcode($form);
     
         die;
     

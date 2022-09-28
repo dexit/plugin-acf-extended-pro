@@ -1,9 +1,10 @@
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Checkbox
      */
     var Checkbox = acf.models.CheckboxField;
@@ -45,10 +46,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Radio
      */
     var Radio = acf.models.RadioField;
@@ -117,31 +119,32 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Color Picker
      */
     var ColorPicker = acf.models.ColorPickerField;
 
     acf.models.ColorPickerField = ColorPicker.extend({
 
-        /*
+        /**
          * Get Palette
          */
         $palette: function() {
             return this.$('.acf-color-picker-palette');
         },
 
-        /*
+        /**
          * Get Color Picker
          */
         $picker: function() {
             return this.$('button.wp-color-result');
         },
 
-        /*
+        /**
          * Set Value
          */
         setValue: function(val) {
@@ -152,7 +155,7 @@
 
         },
 
-        /*
+        /**
          * Update Value
          */
         updateValue: function(val) {
@@ -166,7 +169,7 @@
 
         },
 
-        /*
+        /**
          * Initialize
          */
         initialize: function() {
@@ -189,7 +192,7 @@
 
             }
 
-            /*
+            /**
              * acf-input.js:1364
              * -----------------------------------------------------------
              */
@@ -236,7 +239,7 @@
             // Initialize
             $inputText.wpColorPicker(args);
 
-            /*
+            /**
              * -----------------------------------------------------------
              */
 
@@ -248,7 +251,7 @@
 
         },
 
-        /*
+        /**
          * Unscoped Events
          */
         addUnscopedEvents: function(self) {
@@ -262,7 +265,7 @@
 
         },
 
-        /*
+        /**
          * Render
          */
         render: function() {
@@ -309,7 +312,7 @@
 
         },
 
-        /*
+        /**
          * Change Color Picker
          */
         onChangeColorPicker: function(e) {
@@ -335,7 +338,7 @@
 
         },
 
-        /*
+        /**
          * Clear Color Picker
          */
         onClearColorPicker: function(e) {
@@ -363,7 +366,7 @@
 
         },
 
-        /*
+        /**
          * Click Color Picker
          */
         onClickColorPicker: function(e, $el) {
@@ -379,7 +382,7 @@
 
         },
 
-        /*
+        /**
          * Click Color
          */
         onClickColor: function(e, $el) {
@@ -415,10 +418,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Date/Time Picker
      */
     new acf.Model({
@@ -567,10 +571,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Date Range Picker
      */
     var DateRangePicker = acf.Field.extend({
@@ -593,6 +598,27 @@
             return this.get('separator') ? ' ' + this.get('separator') + ' ' : ' ';
         },
 
+        getValue: function() {
+
+            var val = this.$input().val();
+            var obj = {
+                start: false,
+                end: false,
+            }
+
+            if (val) {
+
+                var explode = val.split('-');
+
+                obj.start = moment(explode[0], 'YYYYMMDD');
+                obj.end = moment(explode[1], 'YYYYMMDD');
+
+            }
+
+            return obj;
+
+        },
+
         setValue: function(val) {
 
             // vars
@@ -600,13 +626,27 @@
             var $inputText = this.$inputText();
             var daterangepicker = $inputText.data('daterangepicker');
 
+            // update hidden input
             acf.val($input, val);
 
             if (val) {
-                acf.val($inputText, daterangepicker.startDate.format(this.get('display_format')) + this.getSeparator() + daterangepicker.endDate.format(this.get('display_format')));
-            } else {
-                acf.val($inputText, val);
+
+                // readable date range
+                val = daterangepicker.startDate.format(this.get('display_format')) + this.getSeparator() + daterangepicker.endDate.format(this.get('display_format'));
+
+                // check start/end dates
+                var startDate = daterangepicker.startDate.format('YYYYMMDD');
+                var endDate = daterangepicker.endDate.format('YYYYMMDD');
+
+                // single date
+                if (startDate === endDate) {
+                    val = daterangepicker.startDate.format(this.get('display_format'));
+                }
+
             }
+
+            // update date range picker
+            acf.val($inputText, val, true);
 
         },
 
@@ -645,6 +685,15 @@
                 cancelClass: ''
 
             };
+
+            var val = this.val();
+
+            if (val) {
+
+                args.startDate = val.start;
+                args.endDate = val.end;
+
+            }
 
             if (this.get('show_dropdowns')) {
                 args.showDropdowns = Boolean(this.get('show_dropdowns'));
@@ -781,10 +830,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: File
      */
     var Field = acf.Field.extend({
@@ -859,6 +909,10 @@
 
             return found;
 
+        },
+
+        getValue: function() {
+            return this.$files().length;
         },
 
         allowAdd: function() {
@@ -1126,7 +1180,7 @@
             // Render
             this.render();
 
-            // Trigger change to pass empty value for Gutenberg
+            // Trigger change
             this.$input().trigger('change');
 
         },
@@ -1350,6 +1404,9 @@
             // Update val
             acf.val($el.find('input[type="hidden"]'), val);
 
+            // Trigger change
+            this.$input().trigger('change');
+
             // Update Preview
             this.updatePreview($el, attachment);
 
@@ -1380,7 +1437,7 @@
 
         },
 
-        /*
+        /**
          * Based on acf.getFileInputData() in acf.js:1927
          */
         getFileData: function($input) {
@@ -1436,14 +1493,15 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
     var FlexibleContent = acf.models.FlexibleContentField;
 
     acf.models.FlexibleContentField = FlexibleContent.extend({
 
-        /*
+        /**
          * Override initialize
          */
         initialize: function() {
@@ -1460,7 +1518,7 @@
 
         },
 
-        /*
+        /**
          * Override allowAdd
          */
         allowAdd: function() {
@@ -1473,7 +1531,7 @@
 
         },
 
-        /*
+        /**
          * Override isFull
          */
         isFull: function() {
@@ -1485,7 +1543,7 @@
 
         },
 
-        /*
+        /**
          * Override getPopupHTML
          */
         getPopupHTML: function() {
@@ -1528,7 +1586,7 @@
 
         },
 
-        /*
+        /**
          * Override onClickDuplicate
          */
         onClickDuplicate: function(e, $el) {
@@ -1714,7 +1772,7 @@
 
                 to--;
 
-                if (!acfe.inArray(acfe.parseString(to), found))
+                if (!acfe.inArray(to, found))
                     return acfeReduce(to, found, orig);
 
                 return to;
@@ -1728,7 +1786,7 @@
 
                 to++;
 
-                if (!acfe.inArray(acfe.parseString(to), found))
+                if (!acfe.inArray(to, found))
                     return acfeIncrease(to, found, orig);
 
                 return to;
@@ -1969,7 +2027,7 @@
         }
     });
 
-    /*
+    /**
      * Enable Resize on Added Layout
      */
     acf.addAction('append', function($el) {
@@ -1990,7 +2048,7 @@
 
     });
 
-    /*
+    /**
      * Use Minimum allowed size if not enough space
      */
     acf.addAction('after_duplicate', function($el, $el2) {
@@ -2032,10 +2090,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Google Map
      */
     new acf.Model({
@@ -2052,17 +2111,16 @@
         mapInit: function(map, marker, field) {
 
             google.maps.event.addListener(marker, 'click', function(e) {
-
                 field.onClickClear();
-
             });
 
         },
 
         markerArgs: function(args, field) {
 
-            if (!field.get('acfeMarker'))
+            if (!field.get('acfeMarker')) {
                 return args;
+            }
 
             var marker = field.get('acfeMarker');
 
@@ -2084,64 +2142,44 @@
             args.scrollwheel = true;
 
             if (field.get('acfeZoom')) {
-
                 args.zoom = field.get('acfeZoom');
-
             }
 
             if (field.get('acfeMinZoom')) {
-
                 args.minZoom = field.get('acfeMinZoom');
-
             }
 
             if (field.get('acfeMaxZoom')) {
-
                 args.maxZoom = field.get('acfeMaxZoom');
-
             }
 
             if (field.get('acfeMapType')) {
-
                 args.mapTypeId = field.get('acfeMapType');
-
             }
 
             if (field.get('acfeDisableUi')) {
-
                 args.disableDefaultUI = true;
-
             }
 
             if (field.get('acfeDisableZoomControl')) {
-
                 args.zoomControl = false;
                 args.scrollwheel = false;
-
             }
 
             if (field.get('acfeDisableMapType')) {
-
                 args.mapTypeControl = false;
-
             }
 
             if (field.get('acfeDisableFullscreen')) {
-
                 args.fullscreenControl = false;
-
             }
 
             if (field.get('acfeDisableStreetview')) {
-
                 args.streetViewControl = false;
-
             }
 
             if (field.get('acfeStyle')) {
-
                 args.styles = field.get('acfeStyle');
-
             }
 
             return args;
@@ -2153,10 +2191,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Image Selector
      */
     var ImageSelector = acf.Field.extend({
@@ -2247,117 +2286,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    var Select = acf.models.SelectField;
-
-    var PaymentSelectorSelect = Select.extend({
-
-        wait: false,
-
-        type: 'acfe_payment_selector_select',
-
-        paymentField: false,
-
-        onChange: function(e, $el) {
-            this.paymentField.switchGateway(this.val());
-        },
-
-        initialize: function() {
-
-            Select.prototype.initialize.apply(this, arguments);
-
-            // get payment field
-            this.paymentField = acf.getField(this.get('paymentField'));
-
-            // no gateway set in attr
-            if (!this.paymentField.has('gateway')) {
-                return;
-            }
-
-            // add events
-            this.addEvents({
-                'change': 'onChange',
-            });
-
-        },
-
-    });
-
-    acf.registerFieldType(PaymentSelectorSelect);
-
-    var Radio = acf.models.RadioField;
-
-    var PaymentSelectorRadio = Radio.extend({
-
-        wait: false,
-
-        type: 'acfe_payment_selector_radio',
-
-        paymentField: false,
-
-        onChange: function(e, $el) {
-            this.paymentField.switchGateway(this.val());
-        },
-
-        initialize: function() {
-
-            Radio.prototype.initialize.apply(this, arguments);
-
-            // add class to radio <li> for customization
-            this.$(':radio').each(function() {
-
-                var $input = $(this);
-                $input.closest('li').addClass('-' + $input.val());
-
-            });
-
-            // get payment field
-            this.paymentField = acf.getField(this.get('paymentField'));
-
-            // no gateway set in attr
-            if (!this.paymentField.has('gateway')) {
-                return;
-            }
-
-            // add events
-            this.addEvents({
-                'change': 'onChange',
-            });
-
-        },
-
-    });
-
-    acf.registerFieldType(PaymentSelectorRadio);
-
-    /*
-     * Payment Selector Select2
-     */
-    new acf.Model({
-
-        filters: {
-            'select2_args/type=acfe_payment_selector_select': 'selectArgs',
-        },
-
-        selectArgs: function(options, $select, data, field, instance) {
-
-            options.minimumResultsForSearch = -1;
-
-            return options;
-
-        },
-
-    });
-
-})(jQuery);
-(function($) {
-
-    if (typeof acf === 'undefined')
-        return;
-
-    /*
+    /**
      * Field: Payment
      */
     var PaymentField = acf.Field.extend({
@@ -2398,9 +2331,7 @@
             e.preventDefault();
         },
 
-        hasGateway: function(gateway, only) {
-
-            only = only || false;
+        hasGateway: function(gateway, only = false) {
 
             var condition = !only || this.get('gateways').length === 1;
 
@@ -2504,7 +2435,7 @@
 
     acf.registerFieldType(PaymentField);
 
-    /*
+    /**
      * Stripe Gateway
      */
     var StripeGateway = acf.Model.extend({
@@ -2563,10 +2494,12 @@
             // show
             $wrap.removeClass('acf-hidden');
 
+            // instantiate
             this.stripe = Stripe(this.field.get('publicKey'));
 
-            // card: create
-            this.card = this.stripe.elements().create('card', {
+            // args
+            var args = {
+                hidePostalCode: Boolean(this.field.get('hide_zip')),
                 style: {
                     base: {
                         fontFamily: $wrap.css('font-family'),
@@ -2584,7 +2517,15 @@
                         iconColor: "#b32d2e"
                     }
                 }
-            });
+            };
+
+            // filters
+            args = acf.applyFilters('acfe/fields/payment/stripe_args', args, this.field);
+            args = acf.applyFilters('acfe/fields/payment/stripe_args/name=' + this.field.get('name'), args, this.field);
+            args = acf.applyFilters('acfe/fields/payment/stripe_args/key=' + this.field.get('key'), args, this.field);
+
+            // card: create
+            this.card = this.stripe.elements().create('card', args);
 
             // card: mount
             this.card.mount($wrap[0]);
@@ -2598,7 +2539,7 @@
 
     });
 
-    /*
+    /**
      * Form Submit
      */
     new acf.Model({
@@ -2678,9 +2619,10 @@
         onValidationBegin: function($form) {
 
             // set field
+            // todo: check visibility for conditional logic
             this.field = acf.getFields({
                 type: 'acfe_payment',
-                visible: true,
+                //visible: true,
                 limit: 1
             }).shift();
 
@@ -2857,8 +2799,8 @@
                         // hide paypal wrap
                         $paypalWrap.addClass('acf-hidden');
 
-                        // firefox
-                        if (acf.get('browser') === 'firefox') {
+                        // other browsers
+                        if (acf.get('browser') !== 'chrome') {
 
                             // show button
                             field.$buttonWrap().show();
@@ -2891,11 +2833,11 @@
                             window.addEventListener('hashchange', function() {
 
                                 // split url with #
-                                var url = acfe.currentURL().split('#'); // https://www.domain.com/page
+                                var url = acfe.getCurrentUrl().split('#'); // https://www.domain.com/page
                                 var parts = '/' + url[1]; // /?token=EC-013494918W570690J&PayerID=ATAADCVJVFY7G
 
                                 // parse url
-                                var data = acfe.parseURL(parts);
+                                var data = acfe.getQueryArgs(parts);
 
                                 // payment done
                                 if (data.token && data.PayerID) {
@@ -2980,13 +2922,13 @@
 
                 });
 
-                // all browsers
-                if (acf.get('browser') !== 'firefox') {
+                // chrome
+                if (acf.get('browser') === 'chrome') {
 
                     // auto click
                     $paypalButton[0].click();
 
-                    // firefox trigger
+                    // other browsers
                 } else {
 
                     // hide button
@@ -3000,7 +2942,12 @@
 
                     // hide spinner
                     this.setTimeout(function() {
+
                         acf.hideSpinner(acfe.findSpinner(this.$form));
+
+                        // remove disabled class added by form lock
+                        $paypalButton.removeClass('disabled');
+
                     }, 300);
 
                     // if field is hidden, temporarily show it
@@ -3019,10 +2966,119 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    var Select = acf.models.SelectField;
+
+    var PaymentSelectorSelect = Select.extend({
+
+        wait: false,
+
+        type: 'acfe_payment_selector_select',
+
+        paymentField: false,
+
+        onChange: function(e, $el) {
+            this.paymentField.switchGateway(this.val());
+        },
+
+        initialize: function() {
+
+            Select.prototype.initialize.apply(this, arguments);
+
+            // get payment field
+            this.paymentField = acf.getField(this.get('paymentField'));
+
+            // no gateway set in attr
+            if (!this.paymentField.has('gateway')) {
+                return;
+            }
+
+            // add events
+            this.addEvents({
+                'change': 'onChange',
+            });
+
+        },
+
+    });
+
+    acf.registerFieldType(PaymentSelectorSelect);
+
+    var Radio = acf.models.RadioField;
+
+    var PaymentSelectorRadio = Radio.extend({
+
+        wait: false,
+
+        type: 'acfe_payment_selector_radio',
+
+        paymentField: false,
+
+        onChange: function(e, $el) {
+            this.paymentField.switchGateway(this.val());
+        },
+
+        initialize: function() {
+
+            Radio.prototype.initialize.apply(this, arguments);
+
+            // add class to radio <li> for customization
+            this.$(':radio').each(function() {
+
+                var $input = $(this);
+                $input.closest('li').addClass('-' + $input.val());
+
+            });
+
+            // get payment field
+            this.paymentField = acf.getField(this.get('paymentField'));
+
+            // no gateway set in attr
+            if (!this.paymentField.has('gateway')) {
+                return;
+            }
+
+            // add events
+            this.addEvents({
+                'change': 'onChange',
+            });
+
+        },
+
+    });
+
+    acf.registerFieldType(PaymentSelectorRadio);
+
+    /**
+     * Payment Selector Select2
+     */
+    new acf.Model({
+
+        filters: {
+            'select2_args/type=acfe_payment_selector_select': 'selectArgs',
+        },
+
+        selectArgs: function(options, $select, data, field, instance) {
+
+            options.minimumResultsForSearch = -1;
+
+            return options;
+
+        },
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
      * Field: Phone Number
      */
     var PhoneNumber = acf.Field.extend({
@@ -3049,22 +3105,15 @@
             return this.$('input[type="tel"]');
         },
 
-        getValue: function() {
-
-            // Get value
-            var val = this.$input().val();
-
-            return val ? JSON.parse(val) : false;
-
-        },
-
         setValue: function(val, silent) {
 
             // Update value
-            acf.val(this.$input(), (val ? JSON.stringify(val) : ''), silent);
+            acf.val(this.$input(), val, silent);
 
             // Bail early if silent
-            if (silent) return;
+            if (silent) {
+                return;
+            }
 
             this.busy = true;
 
@@ -3078,17 +3127,20 @@
         renderValue: function(val) {
 
             // Input value
-            acf.val(this.$tel(), (val ? val.number : ''), true);
+            acf.val(this.$tel(), val, true);
 
             // Bail early
-            if (typeof intlTelInputUtils === 'undefined') return;
+            if (typeof intlTelInputUtils === 'undefined') {
+                return;
+            }
 
             // Iti value
             var iti = this.get('iti');
             var itiVal = iti.getNumber(intlTelInputUtils.numberFormat.E164);
 
-            if (typeof itiVal !== 'string')
+            if (typeof itiVal !== 'string') {
                 return;
+            }
 
             iti.setNumber(itiVal);
 
@@ -3096,7 +3148,9 @@
 
         onChange: function() {
 
-            if (this.busy) return;
+            if (this.busy) {
+                return;
+            }
 
             this.setValue(this.getItiData());
 
@@ -3104,29 +3158,22 @@
 
         getItiData: function() {
 
-            if (typeof intlTelInputUtils === 'undefined') return;
+            if (typeof intlTelInputUtils === 'undefined') {
+                return;
+            }
 
             var iti = this.get('iti');
 
             // retrieve data using iti utils
-            var number = iti.getNumber(intlTelInputUtils.numberFormat.E164);
-            var country = iti.getSelectedCountryData().iso2 || '';
-
-            // format json if number found
-            var val = number ? {
-                number: number,
-                country: country
-            } : '';
-
-            return val;
+            return iti.getNumber(intlTelInputUtils.numberFormat.E164);
 
         },
 
         initialize: function() {
 
             // classic editor init
-            if (acf.get('editor') !== 'block') {
-                this.render();
+            if (acf.get('editor') === 'classic') {
+                this.render(this);
             }
 
         },
@@ -3136,15 +3183,14 @@
             // gutenberg init
             // fix field padding calculation
             if (acf.get('editor') === 'block') {
-                this.render();
+                this.render(this);
             }
 
         },
 
-        render: function() {
+        render: function(self) {
 
             // Vars
-            var self = this;
             var onlyCountries = this.get('countries') || [];
             var preferredCountries = this.get('preferred_countries') || [];
             var defaultCountry = this.get('default_country') || '';
@@ -3155,7 +3201,9 @@
 
                 preferredCountries.map(function(country) {
 
-                    if (acfe.inArray(country, onlyCountries)) return;
+                    if (acfe.inArray(country, onlyCountries)) {
+                        return;
+                    }
 
                     onlyCountries.push(country);
 
@@ -3210,12 +3258,23 @@
             // Geolocation
             if (this.get('geolocation')) {
 
+                // default country to auto
                 args.initialCountry = 'auto';
 
+                // geoIPLookup
                 args.geoIpLookup = function(success, failure) {
 
+                    // url
+                    var url = 'https://ipinfo.io/';
+
+                    // append token
+                    if (self.get('geolocation_token')) {
+                        url = url + '?token=' + self.get('geolocation_token');
+                    }
+
+                    // ajax query
                     $.ajax({
-                        url: 'https://ipinfo.io/',
+                        url: url,
                         data: false,
                         method: 'get',
                         dataType: 'json'
@@ -3284,7 +3343,9 @@
         itiInitialize: function() {
 
             // Bail early if no value
-            if (!this.$tel().val()) return;
+            if (!this.$tel().val()) {
+                return;
+            }
 
             // Default Value
             this.setValue(this.getItiData(), true);
@@ -3322,8 +3383,9 @@
                 parent: $form
             });
 
-            if (!fields.length)
+            if (!fields.length) {
                 return data;
+            }
 
             var errorMap = [
                 acf.get('phoneNumberL10n').invalidPhoneNumber,
@@ -3340,8 +3402,9 @@
                 var country = iti.getSelectedCountryData();
 
                 // Bail early if empty value of valid number
-                if (!this.val() || (iti.isValidNumber() && country.iso2))
+                if (!this.val() || (iti.isValidNumber() && country.iso2)) {
                     return;
+                }
 
                 // Vars
                 var errorCode = iti.getValidationError();
@@ -3369,10 +3432,11 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Field: Post Field
      */
     var Post_Field = acf.Field.extend({
@@ -3407,9 +3471,7 @@
 
         },
 
-        checkField: function($selector, parent) {
-
-            parent = parent || 1;
+        checkField: function($selector, parent = 1) {
 
             var $field = $selector;
             var parent_exists = $field.parent().hasClass('acf-input');
@@ -3507,7 +3569,7 @@
 
             var editor = window.tinymce.get('content');
 
-            if (!$field) {
+            if (!editor) {
                 return;
             }
 
@@ -3606,7 +3668,7 @@
 
         onClickPermalink: function() {
 
-            /*
+            /**
              * Source: /wp-admin/js/post.js:947
              */
             var i, slug_value,
@@ -3821,74 +3883,243 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
-     * Field: Relationship
+    /**
+     * Post Object
      */
-    var Relationship = acf.models.RelationshipField;
+    var Field = acfe.FieldExtend.extend({
 
-    acf.models.RelationshipField = Relationship.extend({
+        wait: 'load',
 
-        setup: function() {
+        type: 'post_object',
 
-            // Setup
-            Relationship.prototype.setup.apply(this, arguments);
+        conditions: function() {
+            return this.has('acfeAddPost') || this.has('acfeEditPost');
+        },
 
-            this.prepareWrap();
-
+        events: {
+            'click a.add-post': 'onAddPost',
+            'click a.edit-post': 'onEditPost',
         },
 
         initialize: function() {
 
-            // Initialize
-            Relationship.prototype.initialize.apply(this, arguments);
-
-            // Events
-            this.addEvents({
-                'click a.add-post': 'onClickAddPost',
-                'click a.edit-post': 'onClickEditPost',
-            });
-
-            // Actions
-            this.addActions({
-                'acfe/relationship/add_post': 'doAddPost',
-                'acfe/relationship/edit_post': 'doEditPost',
-            });
+            // add action on select2
+            this.field.select2.on('select2:selecting', this.proxy(this.onSelecting));
 
         },
 
-        prepareWrap: function() {
+        onSelecting: function(e) {
 
-            // Add Post
+            var $el = $(e.params.args.originalEvent.target);
+
+            if ($el.hasClass('edit-post')) {
+                this.onEditPost(e, $el);
+            }
+
+        },
+
+        onAddPost: function(e, $el) {
+
+            // prevent default
+            e.preventDefault();
+
+            // single post types
+            if ($el.attr('href') !== '#') {
+
+                this.newModal($el.attr('href'));
+
+                // multiple post type
+            } else {
+
+                // confirm tooltip
+                new acfe.RelationshipConfirm({
+                    target: $el,
+                    targetConfirm: false,
+                    text: this.$('.acfe-relationship-popup:last').html(),
+                    context: this,
+                    confirm: function(e, $el) {
+                        this.newModal($el.attr('href'));
+                    }
+                });
+
+            }
+
+
+
+        },
+
+        onEditPost: function(e, $el) {
+
+            // close selection
+            this.field.select2.$el.select2('close');
+
+            // prevent default
+            e.preventDefault();
+            e.stopPropagation();
+
+            // check id
+            if ($el.data('id')) {
+
+                // construct url
+                var url = acfe.addQueryArgs(acf.get('admin_url') + 'post.php', {
+                    post: $el.data('id'),
+                    action: 'edit'
+                });
+
+                // modal
+                this.newModal(url, 'edit');
+
+            }
+
+        },
+
+        newModal: function(url, relation = 'add') {
+
+            new acfe.RelationshipModal({
+                field: this.field,
+                url: url,
+                relation: relation
+            });
+
+        }
+
+    });
+
+    acfe.registerFieldExtend(Field);
+
+    var templateSelection = new acf.Model({
+
+        filters: {
+            'select2_template_selection/type=post_object': 'select2TemplateSelection',
+            'select2_template_result/type=post_object': 'select2TemplateSelection',
+        },
+
+        select2TemplateSelection: function(text, selection, $select, fieldData, field, instance) {
+
+            // check setting
+            // check selection.id is numeric (due to post object 'post creation' being post names)
+            if (field.has('acfeEditPost') && acf.isNumeric(selection.id)) {
+                return text + ' <a href="#" class="acf-icon -pencil small grey edit-post" data-id="' + selection.id + '"></a>';
+            }
+
+            return text;
+
+        },
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
+     * Relationship
+     */
+    var Field = acfe.FieldExtend.extend({
+
+        type: 'relationship',
+
+        conditions: function() {
+            return this.has('acfeAddPost') || this.has('acfeEditPost');
+        },
+
+        replace: ['newValue', 'walkChoices'],
+
+        events: {
+            'click a.add-post': 'onAddPost',
+            'click a.edit-post': 'onEditPost',
+        },
+
+        initialize: function() {
+
+            // add post
             if (this.has('acfeAddPost')) {
-
-                this.$el.find('.filters').addClass('-add-post');
-                this.$el.find('.filters').append(this.$el.find('.filter.-add-post'));
-
+                this.$('.filters').addClass('-add-post');
+                this.$('.filters').append(this.$('.filter.-add-post'));
             }
 
-            // Edit Post
+            // edit post
             if (this.has('acfeEditPost')) {
+                this.field.$listItems('values').append('<a href="#" class="acf-icon -pencil small dark edit-post"></a>');
+            }
 
-                this.$listItems('values').append('<a href="#" class="acf-icon -pencil small dark edit-post"></a>');
+        },
+
+        onAddPost: function(e, $el) {
+
+            // prevent dault
+            e.preventDefault();
+
+            // multiple post types
+            if ($el.attr('href') !== '#') {
+
+                this.newModal($el.attr('href'));
+
+                // multiple post type
+            } else {
+
+                // confirm tooltip
+                new acfe.RelationshipConfirm({
+                    target: $el,
+                    targetConfirm: false,
+                    text: this.$('.acfe-relationship-popup:last').html(),
+                    context: this,
+                    confirm: function(e, $el) {
+                        this.newModal($el.attr('href'));
+                    }
+                });
 
             }
+
+        },
+
+        onEditPost: function(e, $el) {
+
+            // prevent default
+            e.preventDefault();
+            e.stopPropagation();
+
+            // vars
+            var id = $el.closest('span').attr('data-id');
+            var url = acfe.addQueryArgs(acf.get('admin_url') + 'post.php', {
+                post: id,
+                action: 'edit'
+            });
+
+            // modal
+            this.newModal(url, 'edit');
+
+        },
+
+        newModal: function(url, relation = 'add') {
+
+            new acfe.RelationshipModal({
+                field: this.field,
+                url: url,
+                relation: relation
+            });
 
         },
 
         newValue: function(props) {
 
-            var value = Relationship.prototype.newValue.apply(this, arguments);
+            // parent call
+            var value = this.apply('newValue', arguments);
 
-            if (!this.has('acfeEditPost'))
+            if (!this.has('acfeEditPost')) {
                 return value;
+            }
 
             var $html = $('<div>' + value + '</div>');
 
             $html.find('.-pencil').remove();
-
             $html.find('span').append('<a href="#" class="acf-icon -pencil small dark edit-post"></a>');
 
             return $html.html();
@@ -3897,10 +4128,12 @@
 
         walkChoices: function(data) {
 
-            var choices = Relationship.prototype.walkChoices.apply(this, arguments);
+            // parent call
+            var choices = this.apply('walkChoices', arguments);
 
-            if (!this.has('acfeEditPost'))
+            if (!this.has('acfeEditPost')) {
                 return choices;
+            }
 
             var $html = $('<div>' + choices + '</div>');
 
@@ -3910,348 +4143,224 @@
 
         },
 
-        onClickAddPost: function(e, $el) {
+    });
 
-            e.preventDefault();
+    acfe.registerFieldExtend(Field);
 
-            var self = this;
+})(jQuery);
+(function($) {
 
-            if ($el.attr('href') !== '#') {
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
 
-                return new relationshipModal({
-                    field: self,
-                    url: $el.attr('href')
-                });
+    new acf.Model({
+
+        actions: {
+            'acfe/relationship/add_post': 'addPost',
+            'acfe/relationship/edit_post': 'editPost',
+        },
+
+        getFieldByCid: function(cid) {
+
+            // post object
+            return acf.getFields({
+                    type: 'post_object'
+                })
+
+                // relationship
+                .concat(acf.getFields({
+                    type: 'relationship'
+                }))
+
+                // filter
+                .filter(function(field) {
+                    return field.cid === cid;
+                })
+
+                // shift
+                .shift();
+
+        },
+
+        addPost: function(cid, pid, title) {
+
+            // validate
+            var field = this.getFieldByCid(cid);
+            if (!field) {
+                return;
+            }
+
+            // switch field type
+            switch (field.get('type')) {
+
+                // post object
+                case 'post_object': {
+
+                    // add option
+                    field.select2.addOption({
+                        id: pid,
+                        text: title,
+                        selected: true,
+                    }).trigger('change');
+
+                    // close popup
+                    acfe.closePopup();
+
+                    break;
+                }
+
+                // relationship
+                case 'relationship': {
+
+                    // success: add item
+                    var onSuccess = function(html) {
+                        if (html) {
+                            this.onClickAdd('', $(html));
+                        }
+                    };
+
+                    // complete: refresh list
+                    var onComplete = function(html) {
+                        this.fetch();
+                    };
+
+                    // ajax request
+                    $.ajax({
+                        url: acf.get('ajaxurl'),
+                        dataType: 'html',
+                        type: 'post',
+                        data: acf.prepareForAjax({
+                            action: 'acfe/relationship/add_post',
+                            pid: pid,
+                            field_key: field.get('key'),
+                        }),
+                        context: field,
+                        success: onSuccess,
+                        complete: onComplete,
+                    });
+
+                    // close popup
+                    acfe.closePopup();
+
+                    break;
+                }
 
             }
 
-            new relationshipConfirm({
-                target: $el,
-                targetConfirm: false,
-                text: this.$('.acfe-relationship-popup:last').html(),
-                context: this,
-                confirm: function(e, $el) {
-
-                    new relationshipModal({
-                        field: self,
-                        url: $el.attr('href')
-                    });
-
-                }
-            });
-
         },
 
-        onClickEditPost: function(e, $el) {
+        editPost: function(cid, pid, title) {
 
-            e.preventDefault();
-            e.stopPropagation();
-
-            var id = $el.closest('span').attr('data-id');
-            var url = acf.get('admin_url') + 'post.php?post=' + id + '&action=edit';
-
-            new relationshipModal({
-                field: this,
-                url: url,
-                relation: 'edit'
-            });
-
-        },
-
-        doAddPost: function(cid, pid, title) {
-
-            if (!this.has('acfeAddPost') || this.cid !== cid)
+            // validate
+            var field = this.getFieldByCid(cid);
+            if (!field) {
                 return;
+            }
 
-            var field = this;
+            // switch field type
+            switch (field.get('type')) {
 
-            // Ajax: Data
-            var ajaxData = {
-                action: 'acfe/relationship/add_post',
-                pid: pid,
-                field_key: field.get('key'),
-            };
+                // post object
+                case 'post_object': {
 
-            // Ajax: Success
-            var onSuccess = function(html) {
+                    // get values
+                    var values = field.select2.$el.select2('data');
 
-                // no results
-                if (!html)
-                    return;
+                    // loop
+                    for (var [k, row] of values.entries()) {
+                        if (row.id === pid) {
 
-                // Add item
-                field.onClickAdd('', $(html));
+                            // replace text
+                            values[k]['text'] = title;
+                            break;
 
-            };
-
-            // Ajax: Complete
-            var onComplete = function(html) {
-
-                // Reload list
-                field.fetch();
-
-            };
-
-            // Ajax: Request
-            $.ajax({
-                url: acf.get('ajaxurl'),
-                dataType: 'html',
-                type: 'post',
-                data: acf.prepareForAjax(ajaxData),
-                context: this,
-                success: onSuccess,
-                complete: onComplete,
-            });
-
-            acfe.closePopup();
-
-        },
-
-        doEditPost: function(cid, pid, title) {
-
-            if (!this.has('acfeEditPost') || this.cid !== cid)
-                return;
-
-            var field = this;
-
-            // Find in selected values
-            var $value = this.$listItem('values', pid);
-
-            if (!$value.length) {
-
-                // Reload list
-                field.fetch();
-
-            } else {
-
-                // Ajax: Data
-                var ajaxData = {
-                    action: 'acfe/relationship/add_post',
-                    pid: pid,
-                    field_key: field.get('key'),
-                };
-
-                // Ajax: Success
-                var onSuccess = function(html) {
-
-                    // no results
-                    if (!html)
-                        return;
-
-                    // Replace item
-                    var newItem = this.newValue({
-                        id: pid,
-                        text: html
-                    });
-
-                    $value.parent().replaceWith(newItem);
+                        }
+                    }
 
                     // trigger change
-                    this.$input().trigger('change');
+                    field.select2.$el.trigger('change');
 
-                };
+                    // close popup
+                    acfe.closePopup();
 
-                // Ajax: Complete
-                var onComplete = function(html) {
+                    break;
+                }
 
-                    // Reload list
-                    field.fetch();
+                // relationship
+                case 'relationship': {
 
-                };
+                    // find pid in values
+                    var $values = field.$listItem('values', pid);
 
-                // Ajax: Request
-                $.ajax({
-                    url: acf.get('ajaxurl'),
-                    dataType: 'html',
-                    type: 'post',
-                    data: acf.prepareForAjax(ajaxData),
-                    context: this,
-                    success: onSuccess,
-                    complete: onComplete,
-                });
+                    // no values, just refresh the list
+                    if (!$values.length) {
 
-            }
+                        // refresh list
+                        field.fetch();
 
-            acfe.closePopup();
+                    } else {
 
-        }
+                        // success: replace item
+                        var onSuccess = function(html) {
 
-    });
+                            if (html) {
 
-    /*
-     * Post Object
-     */
-    var PostObject = acf.models.PostObjectField;
+                                // create item
+                                var newItem = this.newValue({
+                                    id: pid,
+                                    text: html
+                                });
 
-    acf.models.PostObjectField = PostObject.extend({
+                                // replace
+                                $values.parent().replaceWith(newItem);
 
-        setup: function() {
+                                // trigger change
+                                this.$input().trigger('change');
 
-            // Setup
-            PostObject.prototype.setup.apply(this, arguments);
+                            }
 
-            // Edit Post
-            this.addFilter('select2_args', 'selectArgs');
+                        };
 
-        },
+                        // complete: refresh list
+                        var onComplete = function(html) {
+                            this.fetch();
+                        };
 
-        initialize: function() {
+                        // Ajax: Request
+                        $.ajax({
+                            url: acf.get('ajaxurl'),
+                            dataType: 'html',
+                            type: 'post',
+                            data: acf.prepareForAjax({
+                                action: 'acfe/relationship/add_post',
+                                pid: pid,
+                                field_key: field.get('key'),
+                            }),
+                            context: field,
+                            success: onSuccess,
+                            complete: onComplete,
+                        });
 
-            // Initialize
-            PostObject.prototype.initialize.apply(this, arguments);
+                    }
 
-            // Events
-            this.addEvents({
-                'click a.add-post': 'onClickAddPost',
-                'click a.edit-post': 'onClickEditPost',
-            });
+                    // close popup
+                    acfe.closePopup();
 
-            // Actions
-            this.addActions({
-                'acfe/relationship/add_post': 'doAddPost',
-                'acfe/relationship/edit_post': 'doEditPost',
-            });
-
-            // Unscoped Events
-            this.addUnscopedEvents(this);
-
-        },
-
-        addUnscopedEvents: function(self) {
-
-            this.select2.on('select2:selecting', function(e) {
-
-                var el = e.params.args.originalEvent.target;
-                var $el = $(el);
-
-                if (!$el.hasClass('edit-post'))
-                    return;
-
-                self.onClickEditPost(e, $el);
-
-            });
-
-        },
-
-        onClickAddPost: function(e, $el) {
-
-            e.preventDefault();
-
-            var self = this;
-
-            if ($el.attr('href') !== '#') {
-
-                return new relationshipModal({
-                    field: self,
-                    url: $el.attr('href')
-                });
-
-            }
-
-            new relationshipConfirm({
-                target: $el,
-                targetConfirm: false,
-                text: this.$('.acfe-relationship-popup:last').html(),
-                context: this,
-                confirm: function(e, $el) {
-
-                    new relationshipModal({
-                        field: self,
-                        url: $el.attr('href')
-                    });
+                    break;
 
                 }
-            });
+
+            }
 
         },
-
-        onClickEditPost: function(e, $el) {
-
-            // Close selection
-            this.select2.$el.select2('close');
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (!$el.data('id'))
-                return;
-
-            var url = acf.get('admin_url') + 'post.php?post=' + $el.data('id') + '&action=edit';
-
-            new relationshipModal({
-                field: this,
-                url: url,
-                relation: 'edit'
-            });
-
-        },
-
-        selectArgs: function(options, $select, data, field, instance) {
-
-            if (!this.has('acfeEditPost') || this.cid !== field.cid)
-                return options;
-
-            var selectionText = function(data) {
-
-                if (!data.id)
-                    return data.text;
-
-                return data.text + ' <a href="#" class="acf-icon -pencil small grey edit-post" data-id="' + data.id + '"></a>';
-
-            };
-
-            options.templateSelection = selectionText;
-            options.templateResult = selectionText;
-
-            return options;
-
-        },
-
-        doAddPost: function(cid, pid, title) {
-
-            if (!this.has('acfeAddPost') || this.cid !== cid)
-                return;
-
-            this.select2.addOption({
-                id: pid,
-                text: title,
-                selected: true,
-            }).trigger('change');
-
-            acfe.closePopup();
-
-        },
-
-        doEditPost: function(cid, pid, title) {
-
-            if (!this.has('acfeEditPost') || this.cid !== cid)
-                return;
-
-            var values = this.select2.$el.select2('data');
-
-            $.each(values, function(k, val) {
-
-                if (val.id !== pid)
-                    return true;
-
-                values[k]['text'] = title;
-
-                return false;
-
-            });
-
-            this.select2.$el.trigger('change');
-
-            acfe.closePopup();
-
-        }
 
     });
 
-    /*
+    /**
      * Relationship Modal
      */
-    var relationshipModal = acf.Model.extend({
+    acfe.RelationshipModal = acf.Model.extend({
 
         data: {
             field: false,
@@ -4267,23 +4376,27 @@
 
         initialize: function() {
 
-            var url = new URL(this.get('url'));
+            var relation = this.get('relation');
+            var field = this.get('field');
+            var isAdmin = acfe.get('is_admin') ? 1 : 0;
+            var postid = acf.get('post_id');
 
-            url.searchParams.append('relation', this.get('relation'));
-            url.searchParams.append('cid', this.get('field').cid);
-
-            // Create
-            var $modal = $('' +
-                '<div class="acfe-modal -iframe">' +
-                '<iframe src="' + url + '" style="width:100%;max-height: 100%;height: 850px;border:0;" />' +
-                '</div>'
-            ).appendTo('body');
+            var url = acfe.addQueryArgs(this.get('url'), {
+                acfe_relation_type: relation,
+                acfe_relation_field_cid: field.cid,
+                acfe_relation_field_key: field.get('key'),
+                acfe_relation_field_name: field.get('name'),
+                acfe_relation_post_id: postid,
+                acfe_relation_is_admin: isAdmin,
+            });
 
             var title = this.get('field').$labelWrap().find('>label').text() || this.get('relation');
 
             // Open
-            new acfe.Popup($modal, {
+            new acfe.Popup({
                 title: title,
+                class: '-iframe',
+                content: '<iframe src="' + url + '" style="width:100%;max-height: 100%;height: 850px;border:0;" />',
                 size: 'xlarge',
                 destroy: true
             });
@@ -4292,10 +4405,10 @@
 
     });
 
-    /*
+    /**
      * Relationship Confirm
      */
-    var relationshipConfirm = acf.models.TooltipConfirm.extend({
+    acfe.RelationshipConfirm = acf.models.TooltipConfirm.extend({
 
         events: {
             'click a': 'onConfirm',
@@ -4313,22 +4426,29 @@
 
     });
 
-    /*
+    /**
      * Relationship Iframe
      */
-    var relationshipIframe = acf.Model.extend({
+    var RelationshipIframe = acf.Model.extend({
+
+        wait: 'prepare',
 
         data: {
-            cid: false,
-            relation: false
+            acfe_relation_type: false,
+            acfe_relation_field_cid: false,
+            acfe_relation_field_key: false,
+            acfe_relation_field_name: false,
+            acfe_relation_post_id: false,
+            acfe_relation_is_admin: false,
         },
 
         getPostID: function() {
 
             var $input = $('form#post input[name="post_ID"]');
 
-            if ($input.length !== 1 || $input.val() === '')
+            if ($input.length !== 1 || $input.val() === '') {
                 return false;
+            }
 
             return $input.val();
 
@@ -4338,8 +4458,9 @@
 
             var $input = $('form#post input[name="post_title"]');
 
-            if ($input.length !== 1 || $input.val() === '')
+            if ($input.length !== 1 || $input.val() === '') {
                 return false;
+            }
 
             return $input.val();
 
@@ -4349,31 +4470,23 @@
             return $('body').hasClass('block-editor-page') && typeof wp !== 'undefined' && typeof wp.blocks !== 'undefined';
         },
 
-        setup: function() {
+        setup: function(props) {
 
-            var data = acfe.parseURL(window.parent.window.jQuery('body .acfe-modal iframe').attr('src'));
+            var data = acfe.getQueryArgs(window.parent.window.jQuery('body .acfe-modal.-iframe iframe').attr('src'));
 
             // data
             $.extend(this.data, data);
 
-        },
-
-        actions: {
-            'prepare': 'onPrepare'
-        },
-
-        initialize: function() {
-
-            // Hide WP
+            // hide wp navbar
             $('html').addClass('acfe-hide-wp');
 
         },
 
-        onPrepare: function() {
+        initialize: function() {
 
             var self = this;
 
-            // Gutenberg
+            // gutenberg
             if (this.isGutenberg()) {
 
                 var unsubscribe = wp.data.subscribe(function() {
@@ -4395,17 +4508,18 @@
                 });
 
 
-                // Classic: Post
-            } else if (acfe.currentFilename() === 'post.php') {
+                // classic editor: Post
+            } else if (acfe.getCurrentFilename() === 'post.php') {
 
                 // Validate edit
-                if (this.get('relation') === 'edit' && !$('.updated.notice.notice-success').length)
+                if (this.get('acfe_relation_type') === 'edit' && !$('.updated.notice.notice-success').length) {
                     return;
+                }
 
-                window.parent.acf.doAction('acfe/relationship/' + this.get('relation') + '_post', this.get('cid'), this.getPostID(), this.getPostTitle());
+                window.parent.acf.doAction('acfe/relationship/' + this.get('acfe_relation_type') + '_post', this.get('acfe_relation_field_cid'), this.getPostID(), this.getPostTitle());
 
-                // Classic: Media New
-            } else if (acfe.currentFilename() === 'media-new.php') {
+                // classic: Media New
+            } else if (acfe.getCurrentFilename() === 'media-new.php') {
 
                 $('body').on('DOMSubtreeModified', '#media-items', function() {
 
@@ -4415,12 +4529,10 @@
 
                         var attachmentTitle = $attachment.parent().find('> .filename > .title').text();
                         var attachmentURL = $attachment.attr('href');
-                        var attachmentData = acfe.parseURL(attachmentURL);
+                        var attachmentData = acfe.getQueryArgs(attachmentURL);
 
                         if (attachmentData.post) {
-
-                            window.parent.acf.doAction('acfe/relationship/' + self.get('relation') + '_post', self.get('cid'), attachmentData.post, attachmentTitle);
-
+                            window.parent.acf.doAction('acfe/relationship/' + self.get('acfe_relation_type') + '_post', self.get('acfe_relation_field_cid'), attachmentData.post, attachmentTitle);
                         }
 
                     }
@@ -4435,31 +4547,442 @@
 
             var self = this;
 
-            // Dirty but didn't find an another solution
+            // dirty but didn't find another solution
             setInterval(function() {
-
-                window.parent.acf.doAction('acfe/relationship/' + self.get('relation') + '_post', self.get('cid'), postID, postTitle);
-
+                window.parent.acf.doAction('acfe/relationship/' + self.get('acfe_relation_type') + '_post', self.get('acfe_relation_field_cid'), postID, postTitle);
             }, 1500);
 
         }
 
     });
 
-    // Spawn
-    if (typeof window.parent !== 'undefined' && window.parent.window !== window && typeof window.parent.window.jQuery !== 'undefined' && parent.window.jQuery('body .acfe-modal iframe').length === 1) {
-
-        new relationshipIframe();
-
+    // check if inside an iframe
+    if (typeof window.parent !== 'undefined' && window.parent.window !== window && typeof window.parent.window.jQuery !== 'undefined' && parent.window.jQuery('body .acfe-modal iframe').length) {
+        new RelationshipIframe();
     }
 
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
+     * Block Types
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_block_types');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_block_types');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_block_types');
+    acf.registerConditionForFieldType('contains', 'acfe_block_types');
+    acf.registerConditionForFieldType('hasValue', 'acfe_block_types');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_block_types');
+
+    /**
+     * Color Picker
+     */
+    acf.registerConditionForFieldType('equalTo', 'color_picker');
+    acf.registerConditionForFieldType('notEqualTo', 'color_picker');
+    acf.registerConditionForFieldType('patternMatch', 'color_picker');
+    acf.registerConditionForFieldType('contains', 'color_picker');
+
+    /**
+     * Countries
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_countries');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_countries');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_countries');
+    acf.registerConditionForFieldType('contains', 'acfe_countries');
+    acf.registerConditionForFieldType('hasValue', 'acfe_countries');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_countries');
+
+    /**
+     * Currencies
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_currencies');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_currencies');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_currencies');
+    acf.registerConditionForFieldType('contains', 'acfe_currencies');
+    acf.registerConditionForFieldType('hasValue', 'acfe_currencies');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_currencies');
+
+    /**
+     * Date Range Picker
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_date_range_picker');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_date_range_picker');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_date_range_picker');
+    acf.registerConditionForFieldType('contains', 'acfe_date_range_picker');
+    acf.registerConditionForFieldType('hasValue', 'acfe_date_range_picker');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_date_range_picker');
+
+    /**
+     * Field Groups
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_field_groups');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_field_groups');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_field_groups');
+    acf.registerConditionForFieldType('contains', 'acfe_field_groups');
+    acf.registerConditionForFieldType('hasValue', 'acfe_field_groups');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_field_groups');
+
+    /**
+     * Field Types
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_field_types');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_field_types');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_field_types');
+    acf.registerConditionForFieldType('contains', 'acfe_field_types');
+    acf.registerConditionForFieldType('hasValue', 'acfe_field_types');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_field_types');
+
+    /**
+     * Fields
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_fields');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_fields');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_fields');
+    acf.registerConditionForFieldType('contains', 'acfe_fields');
+    acf.registerConditionForFieldType('hasValue', 'acfe_fields');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_fields');
+
+    /**
+     * Image Selector
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_image_selector');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_image_selector');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_image_selector');
+    acf.registerConditionForFieldType('contains', 'acfe_image_selector');
+    acf.registerConditionForFieldType('hasValue', 'acfe_image_selector');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_image_selector');
+
+    /**
+     * Image Sizes
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_image_sizes');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_image_sizes');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_image_sizes');
+    acf.registerConditionForFieldType('contains', 'acfe_image_sizes');
+    acf.registerConditionForFieldType('hasValue', 'acfe_image_sizes');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_image_sizes');
+
+    /**
+     * Languages
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_languages');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_languages');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_languages');
+    acf.registerConditionForFieldType('contains', 'acfe_languages');
+    acf.registerConditionForFieldType('hasValue', 'acfe_languages');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_languages');
+
+    /**
+     * Menu Locations
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_menu_locations');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_menu_locations');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_menu_locations');
+    acf.registerConditionForFieldType('contains', 'acfe_menu_locations');
+    acf.registerConditionForFieldType('hasValue', 'acfe_menu_locations');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_menu_locations');
+
+    /**
+     * Menus
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_menus');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_menus');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_menus');
+    acf.registerConditionForFieldType('contains', 'acfe_menus');
+    acf.registerConditionForFieldType('hasValue', 'acfe_menus');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_menus');
+
+    /**
+     * Options Pages
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_options_pages');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_options_pages');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_options_pages');
+    acf.registerConditionForFieldType('contains', 'acfe_options_pages');
+    acf.registerConditionForFieldType('hasValue', 'acfe_options_pages');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_options_pages');
+
+    /**
+     * Payment Cart
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_payment_cart');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_cart');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_cart');
+    acf.registerConditionForFieldType('contains', 'acfe_payment_cart');
+    acf.registerConditionForFieldType('hasValue', 'acfe_payment_cart');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_cart');
+
+    /**
+     * Payment Selector
+     */
+
+    acf.registerConditionForFieldType('equalTo', 'acfe_payment_selector');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_selector');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_selector');
+    acf.registerConditionForFieldType('contains', 'acfe_payment_selector');
+    acf.registerConditionForFieldType('hasValue', 'acfe_payment_selector');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_selector');
+
+    acf.registerConditionForFieldType('equalTo', 'acfe_payment_selector_radio');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_selector_radio');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_selector_radio');
+    acf.registerConditionForFieldType('contains', 'acfe_payment_selector_radio');
+    acf.registerConditionForFieldType('hasValue', 'acfe_payment_selector_radio');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_selector_radio');
+
+    acf.registerConditionForFieldType('equalTo', 'acfe_payment_selector_select');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_selector_select');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_selector_select');
+    acf.registerConditionForFieldType('contains', 'acfe_payment_selector_select');
+    acf.registerConditionForFieldType('hasValue', 'acfe_payment_selector_select');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_selector_select');
+
+    /**
+     * Templates
+     */
+    acf.registerConditionForFieldType('equalTo', 'acfe_templates');
+    acf.registerConditionForFieldType('notEqualTo', 'acfe_templates');
+    acf.registerConditionForFieldType('patternMatch', 'acfe_templates');
+    acf.registerConditionForFieldType('contains', 'acfe_templates');
+    acf.registerConditionForFieldType('hasValue', 'acfe_templates');
+    acf.registerConditionForFieldType('hasNoValue', 'acfe_templates');
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
+     * Field Group Field Value Condition
+     */
+    new acf.Model({
+
+        actions: {
+            'new_field/type=acfe_field_group_condition': 'newPostbox',
+            'show_field/type=acfe_field_group_condition': 'showPostbox',
+            'hide_field/type=acfe_field_group_condition': 'hidePostbox',
+        },
+
+        getFieldPostbox: function(field) {
+            return acf.getPostbox(field.$el.closest('.acf-postbox'));
+        },
+
+        newPostbox: function(field) {
+
+            var postbox = this.getFieldPostbox(field);
+
+            // if postbox hidden by screen options but should be displayed by global condition
+            if (postbox && postbox.$el.hasClass('hide-if-js') && field.getConditions().calculate()) {
+
+                // force show & enable
+                postbox.$el.removeClass('hide-if-js');
+                postbox.showEnable();
+
+            }
+
+
+        },
+
+        showPostbox: function(field) {
+
+            var postbox = this.getFieldPostbox(field);
+
+            // postbox
+            if (postbox) {
+
+                // if postbox hidden by screen options force show enable
+                postbox.$el.removeClass('hide-if-js');
+                postbox.showEnable();
+
+                // term & user table
+            } else {
+
+                var $formTable = field.$el.closest('.form-table');
+
+                $formTable.show();
+                $formTable.prev('h2').show();
+
+                acf.enable($formTable, 'postbox');
+
+            }
+
+        },
+
+        hidePostbox: function(field) {
+
+            var postbox = this.getFieldPostbox(field);
+
+            // postbox
+            if (postbox) {
+
+                postbox.hideDisable();
+
+                // term & user table
+            } else {
+
+                var $formTable = field.$el.closest('.form-table');
+
+                $formTable.hide();
+                $formTable.prev('h2').hide();
+
+                acf.disable($formTable, 'postbox');
+
+            }
+
+        },
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
+     * Field: Instructions
+     */
+    new acf.Model({
+
+        priority: 15,
+
+        field: false,
+
+        placement: false,
+
+        actions: {
+            'new_field': 'newField',
+        },
+
+        newField: function(field) {
+
+            this.field = field;
+
+            if (field.has('instructionMore')) {
+                this.readMore();
+            }
+
+        },
+
+        readMore: function() {
+
+            var $instruction = this.$getInstruction();
+
+            if (!$instruction) {
+                return;
+            }
+
+            // Special rule for tooltip
+            if (this.placement === 'tooltip') {
+
+                var text = $instruction.attr('title');
+
+                text = text.replaceAll(/---(.*)---/g, '');
+                text = text.replaceAll('---', '');
+
+                $instruction.attr('title', text);
+                return;
+
+            }
+
+            var text = $instruction.html();
+            var more = acf.__('Read more');
+            var rule = /---(.*)---/g;
+
+            // Custom Link Text
+            if (rule.test(text)) {
+
+                more = text.match(rule)[0];
+                more = more.replaceAll('---', '');
+
+                text = text.replaceAll(rule, '---');
+
+            }
+
+            // Instructions Text
+            if (text.indexOf('---') > -1) {
+
+                var split = text.split('---');
+                var first = split.shift();
+                var rest = split.join('');
+
+                $instruction.html(first + ' <a href="#" data-name="read-more">' + more + '</a>' + '<span class="more">' + rest + '</span>');
+
+                $instruction.on('click', '[data-name="read-more"]', function(e) {
+                    e.preventDefault();
+                    this.remove();
+                    $instruction.find('>.more').show();
+                });
+
+            }
+
+        },
+
+        getPlacement: function() {
+
+            var placement = false;
+
+            if (this.field.$labelWrap().find('>.description').length)
+                placement = 'label';
+
+            else if (this.field.$inputWrap().find('>.description:first-child').length)
+                placement = 'above_field';
+
+            else if (this.field.$inputWrap().find('>.description:last-child').length)
+                placement = 'field';
+
+            else if (this.field.$labelWrap().find('>.acfe-field-tooltip').length)
+                placement = 'tooltip';
+
+            this.placement = placement;
+
+            return this.placement;
+
+        },
+
+        $getInstruction: function() {
+
+            switch (this.getPlacement()) {
+
+                case 'label': {
+                    return this.field.$labelWrap().find('>.description');
+                }
+
+                case 'above_field': {
+                    return this.field.$inputWrap().find('>.description:first-child');
+                }
+
+                case 'field': {
+                    return this.field.$inputWrap().find('>.description:last-child');
+                }
+
+                case 'tooltip': {
+                    return this.field.$labelWrap().find('>.acfe-field-tooltip');
+                }
+
+            }
+
+            return false;
+
+        },
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
      * Field: WYSIWYG
      */
     new acf.Model({
@@ -4677,391 +5200,6 @@
             }
 
         }
-
-    });
-
-})(jQuery);
-(function($) {
-
-    if (typeof acf === 'undefined')
-        return;
-
-    /*
-     * Block Types
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_block_types');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_block_types');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_block_types');
-    acf.registerConditionForFieldType('contains', 'acfe_block_types');
-    acf.registerConditionForFieldType('hasValue', 'acfe_block_types');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_block_types');
-
-    /*
-     * Color Picker
-     */
-    acf.registerConditionForFieldType('equalTo', 'color_picker');
-    acf.registerConditionForFieldType('notEqualTo', 'color_picker');
-    acf.registerConditionForFieldType('patternMatch', 'color_picker');
-    acf.registerConditionForFieldType('contains', 'color_picker');
-
-    /*
-     * Countries
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_countries');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_countries');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_countries');
-    acf.registerConditionForFieldType('contains', 'acfe_countries');
-    acf.registerConditionForFieldType('hasValue', 'acfe_countries');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_countries');
-
-    /*
-     * Currencies
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_currencies');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_currencies');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_currencies');
-    acf.registerConditionForFieldType('contains', 'acfe_currencies');
-    acf.registerConditionForFieldType('hasValue', 'acfe_currencies');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_currencies');
-
-    /*
-     * Date Range Picker
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_date_range_picker');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_date_range_picker');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_date_range_picker');
-    acf.registerConditionForFieldType('contains', 'acfe_date_range_picker');
-    acf.registerConditionForFieldType('hasValue', 'acfe_date_range_picker');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_date_range_picker');
-
-    /*
-     * Field Groups
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_field_groups');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_field_groups');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_field_groups');
-    acf.registerConditionForFieldType('contains', 'acfe_field_groups');
-    acf.registerConditionForFieldType('hasValue', 'acfe_field_groups');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_field_groups');
-
-    /*
-     * Field Types
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_field_types');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_field_types');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_field_types');
-    acf.registerConditionForFieldType('contains', 'acfe_field_types');
-    acf.registerConditionForFieldType('hasValue', 'acfe_field_types');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_field_types');
-
-    /*
-     * Fields
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_fields');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_fields');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_fields');
-    acf.registerConditionForFieldType('contains', 'acfe_fields');
-    acf.registerConditionForFieldType('hasValue', 'acfe_fields');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_fields');
-
-    /*
-     * Image Selector
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_image_selector');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_image_selector');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_image_selector');
-    acf.registerConditionForFieldType('contains', 'acfe_image_selector');
-    acf.registerConditionForFieldType('hasValue', 'acfe_image_selector');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_image_selector');
-
-    /*
-     * Image Sizes
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_image_sizes');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_image_sizes');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_image_sizes');
-    acf.registerConditionForFieldType('contains', 'acfe_image_sizes');
-    acf.registerConditionForFieldType('hasValue', 'acfe_image_sizes');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_image_sizes');
-
-    /*
-     * Languages
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_languages');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_languages');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_languages');
-    acf.registerConditionForFieldType('contains', 'acfe_languages');
-    acf.registerConditionForFieldType('hasValue', 'acfe_languages');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_languages');
-
-    /*
-     * Menu Locations
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_menu_locations');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_menu_locations');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_menu_locations');
-    acf.registerConditionForFieldType('contains', 'acfe_menu_locations');
-    acf.registerConditionForFieldType('hasValue', 'acfe_menu_locations');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_menu_locations');
-
-    /*
-     * Menus
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_menus');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_menus');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_menus');
-    acf.registerConditionForFieldType('contains', 'acfe_menus');
-    acf.registerConditionForFieldType('hasValue', 'acfe_menus');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_menus');
-
-    /*
-     * Options Pages
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_options_pages');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_options_pages');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_options_pages');
-    acf.registerConditionForFieldType('contains', 'acfe_options_pages');
-    acf.registerConditionForFieldType('hasValue', 'acfe_options_pages');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_options_pages');
-
-    /*
-     * Payment Cart
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_payment_cart');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_cart');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_cart');
-    acf.registerConditionForFieldType('contains', 'acfe_payment_cart');
-    acf.registerConditionForFieldType('hasValue', 'acfe_payment_cart');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_cart');
-
-    /*
-     * Payment Selector
-     */
-
-    acf.registerConditionForFieldType('equalTo', 'acfe_payment_selector');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_selector');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_selector');
-    acf.registerConditionForFieldType('contains', 'acfe_payment_selector');
-    acf.registerConditionForFieldType('hasValue', 'acfe_payment_selector');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_selector');
-
-    acf.registerConditionForFieldType('equalTo', 'acfe_payment_selector_radio');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_selector_radio');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_selector_radio');
-    acf.registerConditionForFieldType('contains', 'acfe_payment_selector_radio');
-    acf.registerConditionForFieldType('hasValue', 'acfe_payment_selector_radio');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_selector_radio');
-
-    acf.registerConditionForFieldType('equalTo', 'acfe_payment_selector_select');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_payment_selector_select');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_payment_selector_select');
-    acf.registerConditionForFieldType('contains', 'acfe_payment_selector_select');
-    acf.registerConditionForFieldType('hasValue', 'acfe_payment_selector_select');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_payment_selector_select');
-
-    /*
-     * Templates
-     */
-    acf.registerConditionForFieldType('equalTo', 'acfe_templates');
-    acf.registerConditionForFieldType('notEqualTo', 'acfe_templates');
-    acf.registerConditionForFieldType('patternMatch', 'acfe_templates');
-    acf.registerConditionForFieldType('contains', 'acfe_templates');
-    acf.registerConditionForFieldType('hasValue', 'acfe_templates');
-    acf.registerConditionForFieldType('hasNoValue', 'acfe_templates');
-
-})(jQuery);
-(function($) {
-
-    if (typeof acf === 'undefined')
-        return;
-
-    /*
-     * Field Group Field Value Condition
-     */
-    new acf.Model({
-
-        actions: {
-            'show_field/type=acfe_field_group_condition': 'showPostbox',
-            'hide_field/type=acfe_field_group_condition': 'hidePostbox',
-        },
-
-        showPostbox: function(field) {
-
-            var $postbox = field.$el.closest('.acf-postbox');
-            var postbox = acf.getPostbox($postbox);
-
-            if (postbox) {
-
-                postbox.showEnable();
-
-            } else {
-
-                var $formTable = field.$el.closest('.form-table');
-
-                $formTable.show();
-                $formTable.prev('h2').show();
-
-                acf.enable($formTable, 'postbox');
-
-            }
-
-        },
-
-        hidePostbox: function(field) {
-
-            var $postbox = field.$el.closest('.acf-postbox');
-            var postbox = acf.getPostbox($postbox);
-
-            if (postbox) {
-
-                postbox.hideDisable();
-
-            } else {
-
-                var $formTable = field.$el.closest('.form-table');
-
-                $formTable.hide();
-                $formTable.prev('h2').hide();
-
-                acf.disable($formTable, 'postbox');
-
-            }
-
-        },
-
-    });
-
-})(jQuery);
-(function($) {
-
-    if (typeof acf === 'undefined')
-        return;
-
-    /*
-     * Field: Instructions
-     */
-    new acf.Model({
-
-        priority: 15,
-
-        field: false,
-
-        placement: false,
-
-        actions: {
-            'new_field': 'newField',
-        },
-
-        newField: function(field) {
-
-            this.field = field;
-
-            if (field.has('instructionMore')) {
-                this.readMore();
-            }
-
-        },
-
-        readMore: function() {
-
-            var $instruction = this.$getInstruction();
-
-            if (!$instruction)
-                return;
-
-            // Special rule for tooltip
-            if (this.placement === 'tooltip') {
-
-                var text = $instruction.attr('title');
-
-                text = text.replaceAll(/---(.*)---/g, '');
-                text = text.replaceAll('---', '');
-
-                $instruction.attr('title', text);
-                return;
-
-            }
-
-            var text = $instruction.html();
-            var more = acf.__('Read more');
-            var rule = /---(.*)---/g;
-
-            // Custom Link Text
-            if (rule.test(text)) {
-
-                more = text.match(rule)[0];
-                more = more.replaceAll('---', '');
-
-                text = text.replaceAll(rule, '---');
-
-            }
-
-            // Instructions Text
-            if (text.indexOf('---') > -1) {
-
-                var split = text.split('---');
-                var first = split.shift();
-                var rest = split.join('');
-
-                $instruction.html(first + ' <a href="#" data-name="read-more">' + more + '</a>' + '<span class="more">' + rest + '</span>');
-
-                $instruction.on('click', '[data-name="read-more"]', function(e) {
-                    e.preventDefault();
-                    this.remove();
-                    $instruction.find('>.more').show();
-                });
-
-            }
-
-        },
-
-        getPlacement: function() {
-
-            var placement = false;
-
-            if (this.field.$labelWrap().find('>.description').length)
-                placement = 'label';
-
-            else if (this.field.$inputWrap().find('>.description:first-child').length)
-                placement = 'above_field';
-
-            else if (this.field.$inputWrap().find('>.description:last-child').length)
-                placement = 'field';
-
-            else if (this.field.$labelWrap().find('>.acfe-field-tooltip').length)
-                placement = 'tooltip';
-
-            this.placement = placement;
-
-            return this.placement;
-
-        },
-
-        $getInstruction: function() {
-
-            var placement = this.getPlacement();
-
-            if (placement === 'label') {
-
-                return this.field.$labelWrap().find('>.description');
-
-            } else if (placement === 'above_field') {
-
-                return this.field.$inputWrap().find('>.description:first-child');
-
-            } else if (placement === 'field') {
-
-                return this.field.$inputWrap().find('>.description:last-child');
-
-            } else if (placement === 'tooltip') {
-
-                return this.field.$labelWrap().find('>.acfe-field-tooltip');
-
-            }
-
-            return false;
-
-        },
 
     });
 

@@ -1,14 +1,15 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_admin_menu')):
 
 class acfe_pro_admin_menu{
     
-    /*
-     * Construct
+    /**
+     * construct
      */
     function __construct(){
         
@@ -16,22 +17,31 @@ class acfe_pro_admin_menu{
         
     }
     
+    
+    /**
+     * admin_menu
+     */
     function admin_menu(){
         
         global $submenu;
+        $parent = 'edit.php?post_type=acf-field-group';
         
-        if(!acf_maybe_get($submenu, 'edit.php?post_type=acf-field-group')){
-            return;
-        }
-        
-        $array = $submenu['edit.php?post_type=acf-field-group'];
-        
-        foreach($array as $k => $item){
+        if(isset($submenu[ $parent ])){
             
-            // Forms
-            if($item[2] === 'edit.php?post_type=acfe-template'){
+            foreach($submenu[ $parent ] as $key => $item){
                 
-                acfe_array_move($submenu['edit.php?post_type=acf-field-group'], $k, 7);
+                /**
+                 * $item = array(
+                 *     0 => Templates
+                 *     1 => manage_options
+                 *     2 => edit.php?post_type=acfe-template
+                 *     3 => Templates
+                 * )
+                 */
+                
+                if($item[2] === 'edit.php?post_type=acfe-template'){
+                    acfe_array_move($submenu['edit.php?post_type=acf-field-group'], $key, 7);
+                }
                 
             }
             

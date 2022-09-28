@@ -1,7 +1,8 @@
 <?php 
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_settings_export')):
 
@@ -34,18 +35,33 @@ class acfe_rewrite_rules_export extends ACF_Admin_Tool{
     function html_archive(){
         
         ?>
-        <p>Export Rewrite Rules</p>
+        
+        <?php if(acfe_is_acf_6()): ?>
+        
+            <div class="acf-postbox-header">
+                <h2 class="acf-postbox-title"><?php _e('Export Rewrite Rules', 'acfe'); ?></h2>
+            </div>
+            <div class="acf-postbox-inner">
+            
+        <?php else: ?>
+        
+            <p><?php _e('Export Rewrite Rules', 'acfe'); ?></p>
+        
+        <?php endif; ?>
         
         <?php
     
         $rewrite_rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
         $disabled = !$rewrite_rules ? 'disabled="disabled"' : ''; ?>
         
-        <p class="acf-submit">
-            
+        <p class="acf-submit" style="margin-top:0;">
             <button type="submit" name="action" class="button" value="php" <?php echo $disabled; ?>><?php _e('Generate PHP'); ?></button>
-            
         </p>
+    
+        <?php if(acfe_is_acf_6()): ?>
+            </div>
+        <?php endif; ?>
+        
         <?php
         
     }

@@ -1,141 +1,104 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_compatibility')):
 
 class acfe_pro_compatibility{
     
+    /**
+     * construct
+     */
     function __construct(){
         
+        // global
         add_action('acf/init',                              array($this, 'init'), 98);
         add_filter('acfe/form_field_type_category',         array($this, 'form_field_type_category'));
-        add_filter('wpgraphql_acf_supported_fields',        array($this, 'wpgraphql_supported_fields'));
-        add_filter('wpgraphql_acf_register_graphql_field',  array($this, 'wpgraphql_register_field'), 10, 4);
+    
+        // fields compatibility
+        add_filter('acf/validate_field/type=acfe_image_selector', array($this, 'field_image_selector'), 20);
         
     }
     
+    
+    /**
+     * init
+     *
+     * Renamed modules
+     *
+     * acf/init:98
+     *
+     * @since 0.8.8 (20/03/2021)
+     */
     function init(){
     
-        $this->update_settings();
-        
-    }
+        // settings list
+        $settings = array(
+            'acfe/modules/dynamic_templates' => 'acfe/modules/templates',
+        );
     
-    /*
-     * ACF Extended: Settings
-     */
-    function update_settings(){
+        // loop settings
+        foreach($settings as $old => $new){
         
-        // ACF Extended: 0.8.8 - renamed modules
-        if(acf_get_setting('acfe/modules/dynamic_templates') !== null){
-            acf_update_setting('acfe/modules/templates', acf_get_setting('acfe/modules/dynamic_templates'));
+            if(acf_get_setting($old) !== null){
+                acf_update_setting($new, acf_get_setting($old));
+            }
+        
         }
         
     }
     
-    /*
-     * ACF Extended: 0.8.8.1 - Change Forms Field category to 'ACF'
+    
+    /**
+     * form_field_type_category
+     *
+     * acfe/form_field_type_category
+     *
+     * Change Forms field category to 'ACF'
+     *
+     * @param $category
+     *
+     * @since 0.8.8.1 (25/03/2021)
+     *
+     * @return string
      */
     function form_field_type_category($category){
         return 'ACF';
     }
     
-    /*
-     * ACF Extended: 0.8.8.2
-     * WP GraphQL ACF Supported Fields
+    
+    /**
+     * field_image_selector
+     *
+     * acf/validate_field/type=acfe_image_selector:20
+     *
+     * Removed images and use choices only
+     *
+     * @since 0.8.8.4 (14/06/2021)
      */
-    function wpgraphql_supported_fields($fields){
-        
-        $acfe_fields = array(
-            'acfe_block_types',
-            'acfe_countries',
-            'acfe_currencies',
-            'acfe_date_range_picker',
-            'acfe_field_groups',
-            'acfe_field_types',
-            'acfe_fields',
-            'acfe_languages',
-            'acfe_menu_locations',
-            'acfe_menus',
-            'acfe_options_pages',
-            'acfe_phone_number',
-            'acfe_post_formats',
-            'acfe_templates',
-        );
-        
-        return array_merge($fields, $acfe_fields);
-        
-    }
+    function field_image_selector($field){
     
-    /*
-     * ACF Extended: 0.8.8.4
-     * WP GraphQL ACF Register Field
-     */
-    function wpgraphql_register_field($field_config, $type_name, $field_name, $config){
-    
-        $acf_field = isset( $config['acf_field'] ) ? $config['acf_field'] : null;
-        $acf_type  = isset( $acf_field['type'] ) ? $acf_field['type'] : null;
-    
-        if($acf_type === 'acfe_block_types'){
+        // compatibility: removed 'images' setting, use choices instead
+        if(isset($field['images'])){
         
-            $field_config['type'] = array('list_of' => 'String');
+            // vars
+            $choices = $field['choices'];
+            $images = acf_maybe_get($field, 'images');
+            $images = acf_get_array($images);
         
-        }elseif($acf_type === 'acfe_countries'){
-    
-            $field_config['type'] = array('list_of' => 'String');
+            // merge & combine images
+            $choices = array_merge($images, $choices);
+            $choices = array_combine($choices, $choices);
         
-        }elseif($acf_type === 'acfe_currencies'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_date_range_picker'){
-    
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_field_groups'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_field_types'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_fields'){
-    
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_languages'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_menu_locations'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_menus'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_options_pages'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_phone_number'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_post_formats'){
-        
-            $field_config['type'] = array('list_of' => 'String');
-        
-        }elseif($acf_type === 'acfe_templates'){
-        
-            $field_config['type'] = array('list_of' => 'String');
+            // assign choices
+            $field['choices'] = $choices;
         
         }
-        
-        return $field_config;
+    
+        // return
+        return $field;
         
     }
     

@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_payment')):
 
@@ -9,6 +10,9 @@ class acfe_payment extends acf_field{
     
     var $sub_fields;
     
+    /**
+     * initialize
+     */
     function initialize(){
         
         $this->name = 'acfe_payment';
@@ -25,6 +29,7 @@ class acfe_payment extends acf_field{
             'button_id'                 => '',
             'button_before'             => '',
             'button_after'              => '',
+            'stripe_hide_zip'           => 0,
             'stripe_test_secret_key'    => '',
             'stripe_test_public_key'    => '',
             'stripe_secret_key'         => '',
@@ -58,6 +63,12 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
     
         // Gateways
@@ -193,6 +204,22 @@ class acfe_payment extends acf_field{
             ),
         ));
     
+        // Stripe: Hide Postal Code
+        acf_render_field_setting($field, array(
+            'label'         => __('Stripe Hide Postal Code', 'acfe'),
+            'instructions'  => __('Hide Stripe\'s postal code field validation which can be displayed in specific cases', 'acfe'),
+            'name'          => 'stripe_hide_zip',
+            'type'          => 'true_false',
+            'ui'            => true,
+            'conditions'    => array(
+                array(
+                    'field'     => 'gateways',
+                    'operator'  => '==contains',
+                    'value'     => 'stripe'
+                ),
+            ),
+        ));
+    
         // Stripe Test: Secret Key
         acf_render_field_setting($field, array(
             'label'         => __('Stripe Test API', 'acfe'),
@@ -324,6 +351,14 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function update_field($field){
     
         // default to stripe
@@ -335,6 +370,10 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * input_admin_enqueue_scripts
+     */
     function input_admin_enqueue_scripts(){
     
         // register
@@ -344,13 +383,20 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function prepare_field($field){
         
         // value render
         if($field['value']){
             
             $field['required'] = false;
-            
             return $field;
             
         }
@@ -364,6 +410,12 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * render_field
+     *
+     * @param $field
+     */
     function render_field($field){
         
         if($field['value']){
@@ -374,6 +426,12 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * render_value
+     *
+     * @param $field
+     */
     function render_value($field){
     
         // validate
@@ -423,6 +481,12 @@ class acfe_payment extends acf_field{
     
     }
     
+    
+    /**
+     * render_input
+     *
+     * @param $field
+     */
     function render_input($field){
     
         // stripe enqueue
@@ -446,6 +510,7 @@ class acfe_payment extends acf_field{
         // stripe
         if($this->has_gateway($field, 'stripe')){
             $div['data-public-key'] = $this->get_gateway_api($field, 'stripe', 'public_key');
+            $div['data-hide_zip'] = $field['stripe_hide_zip'];
             $div['class'] .= ' -stripe';
         }
     
@@ -484,6 +549,12 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * render_gateways
+     *
+     * @param $field
+     */
     function render_gateways($field){
         
         if($this->has_gateway($field, 'stripe')){
@@ -506,6 +577,12 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * render_button
+     *
+     * @param $field
+     */
     function render_button($field){
         
         // bail early
@@ -532,10 +609,16 @@ class acfe_payment extends acf_field{
     
     }
     
+    
+    /**
+     * payment_create
+     */
     function payment_create(){
     
         // validate
-        if(!acf_verify_ajax()) die();
+        if(!acf_verify_ajax()){
+            die();
+        }
     
         // retrieve vars
         $gateway = acf_maybe_get_POST('gateway', '');
@@ -566,18 +649,26 @@ class acfe_payment extends acf_field{
         
         // stripe
         if($gateway === 'stripe'){
-            
             $this->stripe_create($args, $field, $post_id, $acf);
             
         // paypal
         }elseif($gateway === 'paypal'){
-    
             $this->paypal_create($args, $field, $post_id, $acf);
-            
         }
         
     }
     
+    
+    /**
+     * stripe_create
+     *
+     * @param $args
+     * @param $field
+     * @param $post_id
+     * @param $acf
+     *
+     * @throws \Stripe\Exception\ApiErrorException
+     */
     function stripe_create($args, $field, $post_id, $acf){
         
         // include
@@ -631,10 +722,17 @@ class acfe_payment extends acf_field{
         }
         
     }
+    
+    
+    /**
+     * stripe_confirm
+     */
     function stripe_confirm(){
     
         // validate
-        if(!acf_verify_ajax()) die();
+        if(!acf_verify_ajax()){
+            die();
+        }
     
         // retrieve vars
         $field_key = acf_maybe_get_POST('field_key', '');
@@ -699,6 +797,15 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * paypal_create
+     *
+     * @param $args
+     * @param $field
+     * @param $post_id
+     * @param $acf
+     */
     function paypal_create($args, $field, $post_id, $acf){
         
         // include
@@ -779,10 +886,16 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * paypal_confirm
+     */
     function paypal_confirm(){
     
         // validate
-        if(!acf_verify_ajax()) die();
+        if(!acf_verify_ajax()){
+            die();
+        }
     
         // retrieve vars
         $field_key = acf_maybe_get_POST('field_key', '');
@@ -850,6 +963,17 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * payment_confirm
+     *
+     * @param $response
+     * @param $field
+     * @param $post_id
+     * @param $acf
+     *
+     * @return mixed|null
+     */
     function payment_confirm($response, $field, $post_id, $acf){
     
         // unset front-end honeypot
@@ -917,6 +1041,17 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * validate_value
+     *
+     * @param $valid
+     * @param $value
+     * @param $field
+     * @param $input
+     *
+     * @return string|null
+     */
     function validate_value($valid, $value, $field, $input){
         
         // ajax request
@@ -946,6 +1081,16 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * update_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return false|null
+     */
     function update_value($value, $post_id, $field){
     
         // do not save in admin
@@ -985,6 +1130,16 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * load_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array
+     */
     function load_value($value, $post_id, $field){
         
         // load sub field value
@@ -1019,6 +1174,14 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * is_payment_object
+     *
+     * @param $value
+     *
+     * @return bool
+     */
     function is_payment_object($value = array()){
         
         // failed decrypt
@@ -1042,6 +1205,14 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * validate_payment_object
+     *
+     * @param $value
+     *
+     * @return array
+     */
     function validate_payment_object($value){
         
         // force array
@@ -1122,12 +1293,31 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * format_payment_object
+     *
+     * @param $value
+     * @param $field
+     *
+     * @return mixed|string|null
+     */
     function format_payment_object($value, $field){
         
         return $this->format_value($value, false, $field);
         
     }
     
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return mixed|string|null
+     */
     function format_value($value, $post_id, $field){
         
         // empty
@@ -1156,6 +1346,17 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * format_single_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     * @param $sub_field
+     *
+     * @return mixed|string|null
+     */
     function format_single_value($value, $post_id, $field, $sub_field){
         
         // gateway
@@ -1181,6 +1382,17 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * form_format_value
+     *
+     * @param $value
+     * @param $_value
+     * @param $post_id
+     * @param $field
+     *
+     * @return false|string
+     */
     function form_format_value($value, $_value, $post_id, $field){
     
         // decode response
@@ -1218,6 +1430,14 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * delete_value
+     *
+     * @param $post_id
+     * @param $field_name
+     * @param $field
+     */
     function delete_value($post_id, $field_name, $field){
     
         // sub field
@@ -1241,6 +1461,12 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * include_stripe
+     *
+     * @param $field
+     */
     function include_stripe($field){
         
         // Lib
@@ -1251,6 +1477,10 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * include_paypal
+     */
     function include_paypal(){
         
         // Lib
@@ -1258,6 +1488,16 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * has_gateway
+     *
+     * @param $field
+     * @param $gateway
+     * @param $only
+     *
+     * @return bool
+     */
     function has_gateway($field, $gateway, $only = false){
         
         // check if only have that gateway
@@ -1268,6 +1508,16 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * get_gateway_api
+     *
+     * @param $field
+     * @param $gateway
+     * @param $name
+     *
+     * @return mixed|string|null
+     */
     function get_gateway_api($field, $gateway, $name){
         
         // paypal endpoint
@@ -1290,6 +1540,16 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * get_gateway_amount
+     *
+     * @param $amount
+     * @param $currency
+     * @param $gateway
+     *
+     * @return float|mixed|string
+     */
     function get_gateway_amount($amount, $currency, $gateway){
         
         // stripe
@@ -1311,22 +1571,48 @@ class acfe_payment extends acf_field{
         
     }
     
+    
+    /**
+     * get_pretty_amount
+     *
+     * @param $amount
+     * @param $currency
+     * @param $gateway
+     *
+     * @return string
+     */
     function get_pretty_amount($amount, $currency, $gateway){
         
         if($gateway === 'stripe' && !$this->is_zero_decimal($currency)){
-            $amount = round($amount / 100);
+            $amount = $amount / 100;
         }
         
         return number_format((float) $amount, 2, '.', '');
         
     }
     
+    
+    /**
+     * is_zero_decimal
+     *
+     * @param $currency
+     *
+     * @return bool
+     */
     function is_zero_decimal($currency){
         
         return in_array($currency, array('BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'));
         
     }
     
+    
+    /**
+     * is_sub_field
+     *
+     * @param $field
+     *
+     * @return false|mixed
+     */
     function is_sub_field($field){
         
         // try to retrieve real field name

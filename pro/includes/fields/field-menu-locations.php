@@ -1,13 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_menu_locations')):
 
 class acfe_field_menu_locations extends acf_field{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
         $this->name = 'acfe_menu_locations';
         $this->label = __('Menu Locations', 'acfe');
@@ -26,33 +30,50 @@ class acfe_field_menu_locations extends acf_field{
             'layout'                => '',
             'toggle'                => 0,
             'allow_custom'          => 0,
+            'other_choice'          => 0,
         );
-        
-        parent::__construct();
         
     }
     
-    function get_pretty_locations($allowed = array()){
     
-        $locations = get_registered_nav_menus();
-        $choices = array();
+    /**
+     * get_pretty_locations
+     *
+     * @param $allowed
+     *
+     * @return array
+     */
+    function get_pretty_locations($allowed = array()){
         
+        // vars
+        $choices = array();
+        $locations = get_registered_nav_menus();
+        
+        // loop
         foreach($locations as $slug => $location){
             
-            if(!empty($allowed) && !in_array($slug, $allowed))
-                continue;
-    
-            $choices[$slug] = $location;
+            if(empty($allowed) || in_array($slug, $allowed)){
+                $choices[ $slug ] = $location;
+            }
             
         }
         
+        // return
         return $choices;
     
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
-        
-        $field['default_value'] = acf_encode_choices($field['default_value'], false);
+    
+        if(isset($field['default_value'])){
+            $field['default_value'] = acf_encode_choices($field['default_value'], false);
+        }
         
         // Allow Menus
         acf_render_field_setting($field, array(
@@ -368,45 +389,63 @@ class acfe_field_menu_locations extends acf_field{
         
     }
     
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function update_field($field){
         
         $field['default_value'] = acf_decode_choices($field['default_value'], true);
         
-        if($field['field_type'] === 'radio')
+        if($field['field_type'] === 'radio'){
             $field['default_value'] = acfe_unarray($field['default_value']);
+        }
         
         return $field;
         
     }
     
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function prepare_field($field){
-        
-        // Set Field Type
-        $field['type'] = $field['field_type'];
-        
-        // Choices
+    
+        // field type
+        $type = $field['type'];
+        $field_type = $field['field_type'];
+    
+        $field['type'] = $field_type;
+        $field['wrapper']['data-ftype'] = $type;
+    
+        // choices
         $field['choices'] = $this->get_pretty_locations($field['locations']);
+    
+        // allow custom
+        if($field['allow_custom']){
         
-        // Allow Custom
-        if(acf_maybe_get($field, 'allow_custom')){
+            $value = acf_maybe_get($field, 'value');
+            $value = acf_get_array($value);
+        
+            foreach($value as $v){
             
-            if($value = acf_maybe_get($field, 'value')){
-                
-                $value = acf_get_array($value);
-                
-                foreach($value as $v){
-                    
-                    if(isset($field['choices'][$v]))
-                        continue;
-                    
-                    $field['choices'][$v] = $v;
-                    
+                // append custom value to choices
+                if(!isset($field['choices'][ $v ])){
+                    $field['choices'][ $v ] = $v;
+                    $field['custom_choices'][ $v ] = $v;
                 }
-                
             }
-            
-        }
         
+        }
+    
         // return
         return $field;
         

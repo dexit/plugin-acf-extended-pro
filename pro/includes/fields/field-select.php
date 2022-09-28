@@ -1,20 +1,32 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_field_select')):
 
-class acfe_pro_field_select{
+class acfe_pro_field_select extends acfe_field_extend{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
-        // Actions
-        add_action('acf/render_field_settings/type=select',         array($this, 'render_field_settings'));
-        add_filter('acfe/field_wrapper_attributes/type=select',     array($this, 'field_wrapper_attributes'), 10, 2);
+        $this->name = 'select';
+        $this->defaults = array(
+            'prepend' => '',
+            'append'  => '',
+        );
         
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
 
         // prepend
@@ -37,20 +49,25 @@ class acfe_pro_field_select{
 
     }
     
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
+     */
     function field_wrapper_attributes($wrapper, $field){
         
         // Prepend
         if(acf_maybe_get($field, 'prepend')){
-            
             $wrapper['data-acfe-prepend'] = $field['prepend'];
-            
         }
         
         // Append
         if(acf_maybe_get($field, 'append')){
-            
             $wrapper['data-acfe-append'] = $field['append'];
-            
         }
         
         return $wrapper;
@@ -59,6 +76,6 @@ class acfe_pro_field_select{
     
 }
 
-new acfe_pro_field_select();
+acf_new_instance('acfe_pro_field_select');
 
 endif;

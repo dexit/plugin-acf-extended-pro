@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 // Check setting
 if(!acf_get_setting('acfe/modules/scripts'))
@@ -208,6 +209,12 @@ class acfe_pro_scripts{
             'postboxes' => $postboxes
         ));
         
+        // Add data
+        acf_localize_data(array(
+            'script'     => $this->script->name,
+            'script_run' => acfe_maybe_get_REQUEST('action') === 'run'
+        ));
+        
         // Execute script admin_head()
         $this->script->admin_head();
         
@@ -303,19 +310,8 @@ class acfe_pro_scripts{
     }
     
     function post_html(){
-    
-        $atts = array(
-            'id'            => 'acfe-scripts',
-            'class'         => 'wrap',
-            'data-script'   => $this->script->name,
-        );
-    
-        if(!empty($_REQUEST['action']) && $_REQUEST['action'] === 'run'){
-            $atts['data-run'] = 1;
-        }
-        
         ?>
-        <div <?php echo acf_esc_attrs($atts); ?>>
+        <div class="wrap">
 
             <h1><?php echo $this->script->title; ?></h1>
     

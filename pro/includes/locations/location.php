@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_location')):
 
@@ -15,22 +16,22 @@ class acfe_location extends acf_location{
     
     function location_rules_types($groups){
         
-        foreach($groups as $group => &$sub_group){
+        foreach($groups as &$sub_group){
             
             if(isset($sub_group['taxonomy_list'])){
     
-                $sub_group = acfe_array_insert_after('taxonomy_list', $sub_group, 'taxonomy_term_type', '');
-                $sub_group = acfe_array_insert_after('taxonomy_list', $sub_group, 'taxonomy_term_slug', '');
-                $sub_group = acfe_array_insert_after('taxonomy_list', $sub_group, 'taxonomy_term_parent', '');
-                $sub_group = acfe_array_insert_after('taxonomy_list', $sub_group, 'taxonomy_term_name', '');
-                $sub_group = acfe_array_insert_after('taxonomy_list', $sub_group, 'taxonomy_term', '');
+                $sub_group = acfe_array_insert_after($sub_group, 'taxonomy_list', 'taxonomy_term_type');
+                $sub_group = acfe_array_insert_after($sub_group, 'taxonomy_list', 'taxonomy_term_slug');
+                $sub_group = acfe_array_insert_after($sub_group, 'taxonomy_list', 'taxonomy_term_parent');
+                $sub_group = acfe_array_insert_after($sub_group, 'taxonomy_list', 'taxonomy_term_name');
+                $sub_group = acfe_array_insert_after($sub_group, 'taxonomy_list', 'taxonomy_term');
                 
             }
             
             if(isset($sub_group['nav_menu_item'])){
     
-                $sub_group = acfe_array_insert_after('nav_menu_item', $sub_group, 'nav_menu_item_type', '');
-                $sub_group = acfe_array_insert_after('nav_menu_item', $sub_group, 'nav_menu_item_depth', '');
+                $sub_group = acfe_array_insert_after($sub_group, 'nav_menu_item', 'nav_menu_item_type');
+                $sub_group = acfe_array_insert_after($sub_group, 'nav_menu_item', 'nav_menu_item_depth');
             
             }
             

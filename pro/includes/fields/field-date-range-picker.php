@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_date_range_picker')):
 
@@ -9,6 +10,9 @@ class acfe_field_date_range_picker extends acf_field{
     
     var $sub_fields;
     
+    /**
+     * initialize
+     */
     function initialize(){
         
         $this->name = 'acfe_date_range_picker';
@@ -37,6 +41,12 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
     
         // global
@@ -246,6 +256,10 @@ class acfe_field_date_range_picker extends acf_field{
     
     }
     
+    
+    /**
+     * input_admin_enqueue_scripts
+     */
     function input_admin_enqueue_scripts(){
         
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
@@ -265,6 +279,12 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
+    
+    /**
+     * render_field
+     *
+     * @param $field
+     */
     function render_field($field){
         
         // Enqueue
@@ -284,6 +304,10 @@ class acfe_field_date_range_picker extends acf_field{
     
             $hidden_value = acf_format_date($value['start'], 'Ymd') . '-' . acf_format_date($value['end'], 'Ymd');
             $display_value = acf_format_date($value['start'], $field['display_format']) . $separator . acf_format_date($value['end'], $field['display_format']);
+            
+            if($value['start'] === $value['end']){
+                $display_value = acf_format_date($value['start'], $field['display_format']);
+            }
         
         }
         
@@ -353,6 +377,16 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
+    
+    /**
+     * update_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return false
+     */
     function update_value($value, $post_id, $field){
     
         // update sub field value
@@ -367,8 +401,8 @@ class acfe_field_date_range_picker extends acf_field{
     
             // re-create value array
             $value = array(
-                'start' => acf_maybe_get($values, 0), // first
-                'end'   => acf_maybe_get($values, 1), // second
+                'start' => acf_maybe_get($values, 0, ''), // first
+                'end'   => acf_maybe_get($values, 1, ''), // second
             );
             
         }
@@ -376,18 +410,20 @@ class acfe_field_date_range_picker extends acf_field{
         // clone
         $sub_field = $field;
     
-        // loop sub fields
+        // loop subfields
         foreach($this->sub_fields as $name){
     
-            // allow partial array update
-            if(!isset($value[ $name ])) continue;
-        
-            // assign new name "{group_date_picker}_{start}"
-            $sub_field['name'] = "{$field['name']}_{$name}";
-            $sub_value = acf_maybe_get($value, $name);
-        
-            // update sub field
-            acf_update_value($sub_value, $post_id, $sub_field);
+            // check if subfield value
+            if(isset($value[ $name ])){
+    
+                // assign new name "{group_date_picker}_{start}"
+                $sub_field['name'] = "{$field['name']}_{$name}";
+                $sub_value = acf_maybe_get($value, $name);
+    
+                // update sub field
+                acf_update_value($sub_value, $post_id, $sub_field);
+                
+            }
         
         }
         
@@ -396,6 +432,16 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
+    
+    /**
+     * load_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return null[]
+     */
     function load_value($value, $post_id, $field){
     
         // load sub field value
@@ -412,7 +458,7 @@ class acfe_field_date_range_picker extends acf_field{
             'end'   => null,
         );
     
-        // loop sub fields
+        // loop subfields
         foreach($this->sub_fields as $name){
         
             // assign new name "{group_date_picker}_{start}"
@@ -461,6 +507,16 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return mixed|string
+     */
     function format_value($value, $post_id, $field){
     
         // empty
@@ -484,6 +540,14 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
+    
+    /**
+     * delete_value
+     *
+     * @param $post_id
+     * @param $field_name
+     * @param $field
+     */
     function delete_value($post_id, $field_name, $field){
         
         // sub field
@@ -494,7 +558,7 @@ class acfe_field_date_range_picker extends acf_field{
         // clone
         $sub_field = $field;
         
-        // loop sub fields
+        // loop subfields
         foreach($this->sub_fields as $name){
             
             // assign new name "{group_date_picker}_{start}"
@@ -513,6 +577,7 @@ class acfe_field_date_range_picker extends acf_field{
      */
     function convert_php_to_momentjs_format($php_date){
         
+        // replacements list
         $replacements = array(
             'A' => 'A',      // for the sake of escaping below
             'a' => 'a',      // for the sake of escaping below
@@ -554,17 +619,24 @@ class acfe_field_date_range_picker extends acf_field{
             'z' => 'DDD',
         );
         
-        // Converts escaped characters.
+        // converts escaped characters
         foreach($replacements as $from => $to){
-            
             $replacements['\\' . $from] = '[' . $from . ']';
-            
         }
         
+        // return
         return strtr($php_date, $replacements);
         
     }
     
+    
+    /**
+     * is_sub_field
+     *
+     * @param $field
+     *
+     * @return false|mixed
+     */
     function is_sub_field($field){
         
         // try to retrieve real field name

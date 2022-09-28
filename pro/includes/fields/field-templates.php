@@ -1,13 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_templates')):
 
 class acfe_templates extends acf_field{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
         $this->name = 'acfe_templates';
         $this->label = __('Templates', 'acfe');
@@ -26,15 +30,26 @@ class acfe_templates extends acf_field{
             'layout'                => '',
             'toggle'                => 0,
             'allow_custom'          => 0,
+            'other_choice'          => 0,
             'return_format'         => 'name',
         );
         
-        parent::__construct();
-        
     }
     
-    function get_pretty_templates($allowed = array()){
     
+    /**
+     * get_pretty_templates
+     *
+     * @param $allowed
+     *
+     * @return array
+     */
+    function get_pretty_templates($allowed = array()){
+        
+        // vars
+        $choices = array();
+        
+        // query
         $templates = get_posts(array(
             'post_type'         => 'acfe-template',
             'posts_per_page'    => -1,
@@ -43,23 +58,30 @@ class acfe_templates extends acf_field{
             'order'             => 'ASC',
         ));
         
-        $choices = array();
-        
+        // loop
         foreach($templates as $template_id){
             
-            if(!empty($allowed) && !in_array($template_id, $allowed)) continue;
-    
-            $choices[ $template_id ] = get_the_title($template_id);
+            if(empty($allowed) || in_array($template_id, $allowed)){
+                $choices[ $template_id ] = get_the_title($template_id);
+            }
             
         }
         
+        // return
         return $choices;
     
     }
     
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
-        
-        $field['default_value'] = acf_encode_choices($field['default_value'], false);
+    
+        if(isset($field['default_value'])){
+            $field['default_value'] = acf_encode_choices($field['default_value'], false);
+        }
         
         // Allow Templates
         acf_render_field_setting($field, array(
@@ -388,84 +410,110 @@ class acfe_templates extends acf_field{
         
     }
     
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function update_field($field){
         
         $field['default_value'] = acf_decode_choices($field['default_value'], true);
         
-        if($field['field_type'] === 'radio')
+        if($field['field_type'] === 'radio'){
             $field['default_value'] = acfe_unarray($field['default_value']);
+        }
         
         return $field;
         
     }
     
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function prepare_field($field){
-        
-        // Set Field Type
-        $field['type'] = $field['field_type'];
-        
-        // Choices
+    
+        // field type
+        $type = $field['type'];
+        $field_type = $field['field_type'];
+    
+        $field['type'] = $field_type;
+        $field['wrapper']['data-ftype'] = $type;
+    
+        // choices
         $field['choices'] = $this->get_pretty_templates($field['templates']);
+    
+        // allow custom
+        if($field['allow_custom']){
         
-        // Allow Custom
-        if(acf_maybe_get($field, 'allow_custom')){
+            $value = acf_maybe_get($field, 'value');
+            $value = acf_get_array($value);
+        
+            foreach($value as $v){
             
-            if($value = acf_maybe_get($field, 'value')){
-                
-                $value = acf_get_array($value);
-                
-                foreach($value as $v){
-                    
-                    if(isset($field['choices'][$v]))
-                        continue;
-                    
-                    $field['choices'][$v] = $v;
-                    
+                // append custom value to choices
+                if(!isset($field['choices'][ $v ])){
+                    $field['choices'][ $v ] = $v;
+                    $field['custom_choices'][ $v ] = $v;
                 }
-                
             }
-            
-        }
         
+        }
+    
         // return
         return $field;
         
     }
     
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|string[]
+     */
     function format_value($value, $post_id, $field){
     
-        // Bail early
-        if(empty($value))
+        // bail early
+        if(empty($value)){
             return $value;
+        }
     
-        // Vars
+        // vars
         $is_array = is_array($value);
         $value = acf_get_array($value);
     
-        // Loop
+        // loop
         foreach($value as &$v){
         
-            // Retrieve Object
+            // get object
             $object = get_post($v);
         
-            if(!$object || is_wp_error($object))
-                continue;
+            if(!$object || is_wp_error($object)) continue;
         
-            // Return: Name
+            // return: name
             if($field['return_format'] === 'name'){
-    
                 $v = $object->post_name;
-            
             }
         
         }
     
-        // Do not return array
+        // check array
         if(!$is_array){
             $value = acfe_unarray($value);
         }
     
-        // Return
+        // return
         return $value;
         
     }

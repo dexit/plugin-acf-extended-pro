@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_flexible_content_layout_locations')):
 
@@ -283,7 +284,7 @@ class acfe_field_flexible_content_layout_locations{
         echo '</li>';
     
         ?>
-        <div class="acf-field">
+        <div class="acf-field acfe-flexible-layout-location-rules">
             <div class="acf-input">
                 <div class="acfe-layout-locations rule-groups">
                 

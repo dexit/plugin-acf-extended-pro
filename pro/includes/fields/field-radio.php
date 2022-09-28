@@ -1,28 +1,29 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_field_radio')):
 
-class acfe_pro_field_radio{
+class acfe_pro_field_radio extends acfe_field_extend{
     
-    /*
-     * Construct
+    /**
+     * initialize
      */
-    function __construct(){
-        
-        // instance
-        $instance = acf_get_field_type('radio');
-        
-        // render field
-        remove_action('acf/render_field/type=radio',    array($instance, 'render_field'), 9);
-        add_action('acf/render_field/type=radio',       array($this, 'render_field'), 9);
+    function initialize(){
+    
+        $this->name = 'radio';
+        $this->replace = array(
+            'render_field'
+        );
         
     }
     
-    /*
-     * Render Field
+    /**
+     * render_field
+     *
+     * @param $field
      */
     function render_field($field){
         
@@ -103,7 +104,7 @@ class acfe_pro_field_radio{
             
             
             // append other choice
-            $field['choices']['other'] .= '</label> <input type="text" ' . acf_esc_attr($input) . ' /><label>';
+            $field['choices']['other'] .= '</label> <input type="text" ' . acf_esc_attrs($input) . ' /><label>';
             
         }
         
@@ -117,7 +118,7 @@ class acfe_pro_field_radio{
         
         
         // open
-        $e .= '<ul ' . acf_esc_attr($ul) . '>';
+        $e .= '<ul ' . acf_esc_attrs($ul) . '>';
         
         
         // foreach choices

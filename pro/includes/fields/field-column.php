@@ -1,36 +1,48 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_field_column')):
 
-class acfe_pro_field_column{
+class acfe_pro_field_column extends acfe_field_extend{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
     
-        // Instance
-        $instance = acf_get_field_type('acfe_column');
+        $this->name = 'acfe_column';
     
-        // Defaults
-        $instance->defaults['border'] = '';
-        $instance->defaults['border_endpoint'] = array('endpoint');
+        $this->defaults = array(
+            'border'          => '',
+            'border_endpoint' => array('endpoint'),
+        );
     
-        add_filter('acf/prepare_field/name=columns',                    array($this, 'prepare_columns'), 5);
-        add_action('acf/render_field_settings/type=acfe_column',        array($this, 'render_field_settings'));
-        add_filter('acfe/field_wrapper_attributes/type=acfe_column',    array($this, 'field_wrapper_attributes'), 10, 2);
+        add_filter('acf/prepare_field/name=columns', array($this, 'prepare_columns'), 5);
         
     }
     
+    
+    /**
+     * prepare_columns
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function prepare_columns($field){
         
         $wrapper = acf_maybe_get($field, 'wrapper');
         
-        if(!$wrapper)
+        if(!$wrapper){
             return $field;
+        }
         
-        if(acf_maybe_get($wrapper, 'data-setting') !== 'acfe_column')
+        if(acf_maybe_get($wrapper, 'data-setting') !== 'acfe_column'){
             return $field;
+        }
         
         $field['choices'] = array_merge(array(
             'auto' => 'Auto',
@@ -41,6 +53,12 @@ class acfe_pro_field_column{
         
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
     
         // border
@@ -88,24 +106,27 @@ class acfe_pro_field_column{
         
     }
     
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
+     */
     function field_wrapper_attributes($wrapper, $field){
     
         if(is_array($field['border']) && in_array('column', $field['border'])){
-        
             $wrapper['data-column-border'] = true;
-        
         }
         
         if($field['endpoint'] && is_array($field['border_endpoint']) && in_array('endpoint', $field['border_endpoint'])){
-        
             $wrapper['data-column-border'] = true;
-        
         }
     
         if(is_array($field['border']) && in_array('fields', $field['border'])){
-        
             $wrapper['data-fields-border'] = true;
-        
         }
         
         return $wrapper;
@@ -114,6 +135,6 @@ class acfe_pro_field_column{
     
 }
 
-new acfe_pro_field_column();
+acf_new_instance('acfe_pro_field_column');
 
 endif;

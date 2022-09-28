@@ -1,16 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_image_sizes')):
 
 class acfe_field_image_sizes extends acf_field{
     
-    /*
-     * Construct
+    /**
+     * initialize
      */
-    function __construct(){
+    function initialize(){
         
         $this->name = 'acfe_image_sizes';
         $this->label = __('Image Sizes', 'acfe');
@@ -29,52 +30,62 @@ class acfe_field_image_sizes extends acf_field{
             'layout'                => '',
             'toggle'                => 0,
             'allow_custom'          => 0,
+            'other_choice'          => 0,
             'display_format'        => 'name',
             'return_format'         => 'object',
         );
         
-        parent::__construct();
-        
     }
     
-    /*
-     * Get Pretty Image Sizes
+    
+    /**
+     * get_pretty_image_sizes
+     *
+     * @param $allowed
+     *
+     * @return mixed|null
      */
     function get_pretty_image_sizes($allowed = array()){
-    
+        
+        // vars
+        $choices = array();
         $sizes = get_intermediate_image_sizes();
         $sizes[] = 'full';
         
-        $choices = array();
-        
+        // loop
         foreach($sizes as $size){
             
-            if(!empty($allowed) && !in_array($size, $allowed))
-                continue;
-            
-            $label = str_replace(array('_', '-'), ' ', $size);
-            $label = ucfirst($label);
-            
-            if($size === 'full')
-                $label = __('Full Size', 'acf');
+            if(empty($allowed) || in_array($size, $allowed)){
     
-            $choices[$size] = $label;
+                $label = str_replace(array('_', '-'), ' ', $size);
+                $label = ucfirst($label);
+                $label = $size === 'full' ? __('Full Size', 'acf') : $label;
+    
+                $choices[ $size ] = $label;
+                
+            }
             
         }
         
         // filter for 3rd party customization
         $choices = apply_filters('acf/get_image_sizes', $choices);
         
+        // return
         return $choices;
     
     }
     
-    /*
-     * Render Field Settings
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
      */
     function render_field_settings($field){
-        
-        $field['default_value'] = acf_encode_choices($field['default_value'], false);
+    
+        if(isset($field['default_value'])){
+            $field['default_value'] = acf_encode_choices($field['default_value'], false);
+        }
         
         // Allow Image Sizes
         acf_render_field_setting($field, array(
@@ -417,126 +428,128 @@ class acfe_field_image_sizes extends acf_field{
         
     }
     
-    /*
-     * Update Field
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
      */
     function update_field($field){
         
         $field['default_value'] = acf_decode_choices($field['default_value'], true);
         
-        if($field['field_type'] === 'radio')
+        if($field['field_type'] === 'radio'){
             $field['default_value'] = acfe_unarray($field['default_value']);
+        }
         
         return $field;
         
     }
     
-    /*
-     * Prepare Field
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return mixed
      */
     function prepare_field($field){
-        
-        // Set Field Type
-        $field['type'] = $field['field_type'];
-        
-        // Choices
+    
+        // field type
+        $type = $field['type'];
+        $field_type = $field['field_type'];
+    
+        $field['type'] = $field_type;
+        $field['wrapper']['data-ftype'] = $type;
+    
+        // choices
         $field['choices'] = $this->get_pretty_image_sizes($field['image_sizes']);
         
-        if($field['display_format'] === 'size'){
-            
-            foreach($field['choices'] as $size => &$choice){
-                
-                $data = acfe_get_registered_image_sizes($size);
-                $width = $data['width'];
-                $height = $data['height'] ? $data['height'] : 'auto';
-                
-                $choice = "{$width} x {$height}";
-                
-                if($size === 'full')
-                    $choice = __("Full Size",'acf');
-                
-            }
-            
-        }elseif($field['display_format'] === 'name_size'){
+        
+        if($field['display_format'] === 'size' || $field['display_format'] === 'name_size'){
     
-            foreach($field['choices'] as $size => &$choice){
+            foreach(array_keys($field['choices']) as $size){
         
                 $data = acfe_get_registered_image_sizes($size);
-                
+        
                 $width = $data['width'];
                 $height = $data['height'] ? $data['height'] : 'auto';
-        
-                $choice = "{$choice} ({$width} x {$height})";
+                $name = $field['choices'][ $size ];
     
-                if($size === 'full')
-                    $choice = __("Full Size",'acf');
+                $field['choices'][ $size ] = $field['display_format'] === 'name_size' ? "{$name} ({$width} x {$height})" : "{$width} x {$height}";
+                $field['choices'][ $size ] = $size === 'full' ? __("Full Size",'acf') : $name;
         
             }
             
         }
+    
+        // allow custom
+        if($field['allow_custom']){
         
-        // Allow Custom
-        if(acf_maybe_get($field, 'allow_custom')){
+            $value = acf_maybe_get($field, 'value');
+            $value = acf_get_array($value);
+        
+            foreach($value as $v){
             
-            if($value = acf_maybe_get($field, 'value')){
-                
-                $value = acf_get_array($value);
-                
-                foreach($value as $v){
-                    
-                    if(isset($field['choices'][$v]))
-                        continue;
-                    
-                    $field['choices'][$v] = $v;
-                    
+                // append custom value to choices
+                if(!isset($field['choices'][ $v ])){
+                    $field['choices'][ $v ] = $v;
+                    $field['custom_choices'][ $v ] = $v;
                 }
-                
             }
-            
-        }
         
+        }
+    
         // return
         return $field;
         
     }
     
-    /*
-     * Format Value
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|string[]
      */
     function format_value($value, $post_id, $field){
     
-        // Bail early
-        if(empty($value))
+        // bail early
+        if(empty($value)){
             return $value;
+        }
     
-        // Vars
+        // vars
         $is_array = is_array($value);
         $value = acf_get_array($value);
     
-        // Loop
+        // loop
         foreach($value as &$v){
         
-            // Retrieve Object
+            // get object
             $object = acfe_get_registered_image_sizes($v);
         
-            if(!$object || is_wp_error($object))
-                continue;
+            if(!$object || is_wp_error($object)) continue;
         
-            // Return: Object
+            // return: object
             if($field['return_format'] === 'object'){
-    
                 $v = $object;
-                
             }
         
         }
     
-        // Do not return array
+        // check array
         if(!$is_array){
             $value = acfe_unarray($value);
         }
     
-        // Return
+        // return
         return $value;
         
     }

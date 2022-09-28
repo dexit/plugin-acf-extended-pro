@@ -1,37 +1,73 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
-if(!class_exists('acfe_field_wysiwyg')):
+if(!class_exists('acfe_pro_field_wysiwyg')):
 
-class acfe_field_wysiwyg{
+class acfe_pro_field_wysiwyg extends acfe_field_extend{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
-        // Actions
-        add_action('acf/field_group/admin_head',                        array($this, 'prepare_toolbars'));
+        $this->name = 'wysiwyg';
+        $this->defaults = array(
+            'acfe_wysiwyg_auto_init'        => 0,
+            'acfe_wysiwyg_height'           => 300,
+            'acfe_wysiwyg_min_height'       => 300,
+            'acfe_wysiwyg_max_height'       => '',
+            'acfe_wysiwyg_valid_elements'   => '',
+            'acfe_wysiwyg_custom_style'     => '',
+            'acfe_wysiwyg_disable_wp_style' => 0,
+            'acfe_wysiwyg_autoresize'       => 0,
+            'acfe_wysiwyg_disable_resize'   => 0,
+            'acfe_wysiwyg_remove_path'      => 0,
+            'acfe_wysiwyg_menubar'          => 0,
+            'acfe_wysiwyg_transparent'      => 0,
+            'acfe_wysiwyg_merge_toolbar'    => 0,
+            'acfe_wysiwyg_custom_toolbar'   => 0,
+            'acfe_wysiwyg_toolbar_buttons'  => array(),
+        );
         
-        // Field
-        add_action('acf/render_field_settings/type=wysiwyg',            array($this, 'field_settings'));
-        add_filter('acfe/field_wrapper_attributes/type=wysiwyg',        array($this, 'field_wrapper'), 10, 2);
-        add_filter('acf/fields/wysiwyg/toolbars',                       array($this, 'toolbars'));
-        
-        // ACF Editor
-        add_filter('mce_external_plugins',                              array($this, 'mce_plugins'));
-        add_action('template_redirect',                                 array($this, 'source_code_iframe'));
+        // hooks
+        $this->add_filter('acf/fields/wysiwyg/toolbars', array($this, 'wysiwyg_toolbars'));
+        $this->add_filter('mce_external_plugins',        array($this, 'mce_external_plugins'));
+        $this->add_action('template_redirect',           array($this, 'template_redirect'));
         
         // WP TinyMCE
-        //add_filter('mce_buttons',                                       array($this, 'mce_buttons'));
-        //add_filter('tiny_mce_before_init',                              array($this, 'mce_init'), 10, 2);
-        //add_filter('wp_editor_settings',                                array($this, 'mce_settings'));
+        //$this->add_filter('mce_buttons',               array($this, 'mce_buttons'));
+        //$this->add_filter('tiny_mce_before_init',      array($this, 'mce_init'), 10, 2);
+        //$this->add_filter('wp_editor_settings',        array($this, 'mce_settings'));
         
     }
     
-    /*
-     * Field Settings
+    
+    /**
+     * field_group_admin_head
      */
-    function field_settings($field){
+    function field_group_admin_head(){
+        
+        add_filter('acf/prepare_field/name=acfe_wysiwyg_toolbar_row', function($field){
+            
+            $field['prefix'] = str_replace('row-', '', $field['prefix']);
+            $field['name'] = str_replace('row-', '', $field['name']);
+            
+            return $field;
+            
+        });
+        
+    }
+    
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
+    function render_field_settings($field){
     
         // Auto Init
         acf_render_field_setting($field, array(
@@ -426,51 +462,49 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * Field Wrapper
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
      */
-    function field_wrapper($wrapper, $field){
+    function field_wrapper_attributes($wrapper, $field){
     
         // Autoresize
-        if(acf_maybe_get($field, 'acfe_wysiwyg_autoresize')){
+        if($field['acfe_wysiwyg_autoresize']){
         
             $wrapper['data-acfe-wysiwyg-autoresize'] = 1;
     
             // Min Height
-            if(is_numeric(acf_maybe_get($field, 'acfe_wysiwyg_min_height'))){
-        
+            if(is_numeric($field['acfe_wysiwyg_min_height'])){
                 $wrapper['data-acfe-wysiwyg-min-height'] = $field['acfe_wysiwyg_min_height'];
-        
             }
     
             // Max Height
-            if(is_numeric(acf_maybe_get($field, 'acfe_wysiwyg_max_height'))){
-        
+            if(is_numeric($field['acfe_wysiwyg_max_height'])){
                 $wrapper['data-acfe-wysiwyg-max-height'] = $field['acfe_wysiwyg_max_height'];
-        
             }
         
-        }elseif(is_numeric(acf_maybe_get($field, 'acfe_wysiwyg_height'))){
-    
+        }elseif(is_numeric($field['acfe_wysiwyg_height'])){
             $wrapper['data-acfe-wysiwyg-height'] = $field['acfe_wysiwyg_height'];
-            
         }
         
         // Custom Style
-        if(acf_maybe_get($field, 'acfe_wysiwyg_custom_style')){
+        if($field['acfe_wysiwyg_custom_style']){
             
             $custom_styles = array();
             
-            $styles = acf_maybe_get($field, 'acfe_wysiwyg_custom_style');
+            $styles = $field['acfe_wysiwyg_custom_style'];
             $styles = explode(',', $styles);
             
             foreach($styles as $style){
                 
                 // URL starting with current domain
                 if(stripos($style, home_url()) === 0){
-                    
                     $style = str_replace(home_url(), '', $style);
-                    
                 }
                 
                 // Locate
@@ -480,9 +514,7 @@ class acfe_field_wysiwyg{
     
                     // URL starting with current domain
                     if(stripos($located, home_url()) === 0){
-    
                         $located = str_replace(home_url(), '', $located);
-        
                     }
     
                     $custom_styles[] = $located;
@@ -496,58 +528,44 @@ class acfe_field_wysiwyg{
         }
     
         // Valid Elements
-        if(acf_maybe_get($field, 'acfe_wysiwyg_valid_elements')){
-        
+        if($field['acfe_wysiwyg_valid_elements']){
             $wrapper['data-acfe-wysiwyg-valid-elements'] = $field['acfe_wysiwyg_valid_elements'];
-        
         }
         
         // Disable WP Style
-        if(acf_maybe_get($field, 'acfe_wysiwyg_disable_wp_style')){
-        
+        if($field['acfe_wysiwyg_disable_wp_style']){
             $wrapper['data-acfe-wysiwyg-disable-wp-style'] = 1;
-        
         }
         
         // Disable Resize
-        if(acf_maybe_get($field, 'acfe_wysiwyg_disable_resize')){
-            
+        if($field['acfe_wysiwyg_disable_resize']){
             $wrapper['data-acfe-wysiwyg-disable-resize'] = 1;
-            
         }
     
         // Disable Path
-        if(acf_maybe_get($field, 'acfe_wysiwyg_remove_path')){
-        
+        if($field['acfe_wysiwyg_remove_path']){
             $wrapper['data-acfe-wysiwyg-remove-path'] = 1;
-        
         }
         
         // Menu Bar
-        if(acf_maybe_get($field, 'acfe_wysiwyg_menubar')){
-            
+        if($field['acfe_wysiwyg_menubar']){
             $wrapper['data-acfe-wysiwyg-menubar'] = 1;
-            
         }
         
         // Transparent Editor
-        if(acf_maybe_get($field, 'acfe_wysiwyg_transparent')){
-            
+        if($field['acfe_wysiwyg_transparent']){
             $wrapper['data-acfe-wysiwyg-transparent'] = 1;
-            
         }
         
         // Merge Toolbar
-        if(acf_maybe_get($field, 'acfe_wysiwyg_merge_toolbar')){
-            
+        if($field['acfe_wysiwyg_merge_toolbar']){
             $wrapper['data-acfe-wysiwyg-merge-toolbar'] = 1;
-            
         }
         
         // Custom Toolbar
-        if(acf_maybe_get($field, 'acfe_wysiwyg_custom_toolbar')){
+        if($field['acfe_wysiwyg_custom_toolbar']){
         
-            $buttons = acf_maybe_get($field, 'acfe_wysiwyg_toolbar_buttons');
+            $buttons = $field['acfe_wysiwyg_toolbar_buttons'];
             
             if($buttons){
                 
@@ -562,9 +580,7 @@ class acfe_field_wysiwyg{
                     if(acf_maybe_get($buttons, 'acfe_wysiwyg_toolbar_' . $i)){
                         
                         foreach($buttons['acfe_wysiwyg_toolbar_' . $i] as $row => $value){
-                            
                             $values[] = $value['acfe_wysiwyg_toolbar_row'];
-                            
                         }
                         
                     }
@@ -583,10 +599,15 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * Add Basic Enhanced Toolbar
+    
+    /**
+     * wysiwyg_toolbars
+     *
+     * @param $toolbars
+     *
+     * @return mixed
      */
-    function toolbars($toolbars){
+    function wysiwyg_toolbars($toolbars){
     
         $toolbars['Basic Enhanced'] = array(
             1 => array('formatselect', 'link', 'bold', 'italic', 'underline', 'blockquote', '|', 'bullist', 'numlist', 'alignleft', 'aligncenter', 'alignright', 'alignjustify', '|', 'source_code', 'wp_add_media')
@@ -596,10 +617,15 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * WP Editor: Load Source Code plugin
+    
+    /**
+     * mce_external_plugins
+     *
+     * @param $plugins
+     *
+     * @return mixed
      */
-    function mce_plugins($plugins){
+    function mce_external_plugins($plugins){
         
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
         
@@ -609,14 +635,18 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * Source Code iFrame
-     */
-    function source_code_iframe(){
-        
-        if(!acf_maybe_get_GET('acfe_wysiwyg_source_code'))
-            return;
     
+    /**
+     * template_redirect
+     */
+    function template_redirect(){
+        
+        // validate screen
+        if(!acf_maybe_get_GET('acfe_wysiwyg_source_code')){
+            return;
+        }
+        
+        // enqueue codemirror
         wp_enqueue_script('code-editor');
         wp_enqueue_style('code-editor');
         
@@ -628,8 +658,10 @@ class acfe_field_wysiwyg{
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
             <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
             <?php wp_head(); ?>
-            <style type="text/css" media="print">#wpadminbar{display:none;}</style>
-            <style type="text/css" media="screen">
+            <style type="text/css">
+                #wpadminbar{
+                    display:none;
+                }
                 html,
                 * html body{
                     margin-top:0 !important;
@@ -643,89 +675,7 @@ class acfe_field_wysiwyg{
                     }
                     
                 }
-            </style>
-        
-            <script>
-                var pjQuery = parent.jQuery;
-                var tinymce = parent.tinymce;
-                var editor = tinymce.activeEditor;
 
-                var $source = pjQuery(editor.container).closest('.wp-editor-container').find('.wp-editor-area');
-                var source = $source[0];
-                var codemirror;
-
-                (function($){
-
-                    window.onload = function(){
-
-                        // Textarea
-                        var textarea = document.body.querySelector('textarea');
-
-                        // Value
-                        textarea.value = source.value;
-
-                        // Settings
-                        var Settings = {};
-
-                        Settings.codemirror = $.extend(wp.codeEditor.defaultSettings.codemirror, {
-                            autofocus: true,
-                            lineNumbers: true,
-                            lineWrapping: true,
-                            styleActiveLine: true,
-                            continueComments: true,
-                            indentUnit: 4,
-                            tabSize: 1,
-                            indentWithTabs: true,
-                            mode: 'text/html',
-                            extraKeys: {
-                                Tab: function(cm){
-                                    cm.execCommand("indentMore")
-                                },
-                                "Shift-Tab": function(cm){
-                                    cm.execCommand("indentLess")
-                                },
-                            },
-                        });
-
-                        // Init
-                        codemirror = wp.codeEditor.initialize(textarea, Settings);
-
-                    };
-
-                    document.onkeydown = function(e){
-
-                        e = e || window.event;
-                        var isEscape = false;
-
-                        isEscape = (e.keyCode === 27);
-
-                        if("key" in e){
-                            isEscape = (e.key === "Escape" || e.key === "Esc");
-                        }
-
-                        if(isEscape){
-                            tinymce.activeEditor.windowManager.close();
-                        }
-
-                    };
-
-                })(jQuery);
-
-                function submit(){
-
-                    var code = codemirror.codemirror.getValue();
-
-                    parent.window.switchEditors.go(editor.id);
-
-                    source.value = code;
-
-                    parent.window.switchEditors.go(editor.id);
-
-                }
-        
-            </script>
-        
-            <style type="text/css">
                 html,
                 body{
                     height:100%;
@@ -752,11 +702,125 @@ class acfe_field_wysiwyg{
                     background:#f9f9f9;
                 }
             </style>
+        
+            <script>
+                var codemirror;
+                var editor = parent.tinymce.activeEditor;
+                var source = parent.document.getElementById(editor.id);
+
+                window.onload = function(){
+
+                    // Textarea
+                    var textarea = document.body.querySelector('textarea');
+
+                    // Value
+                    textarea.value = source.value;
+
+                    // Settings
+                    var Settings = {};
+
+                    Settings.codemirror = extend(true, wp.codeEditor.defaultSettings.codemirror, {
+                        autofocus: true,
+                        lineNumbers: true,
+                        lineWrapping: true,
+                        styleActiveLine: true,
+                        continueComments: true,
+                        indentUnit: 4,
+                        tabSize: 1,
+                        indentWithTabs: true,
+                        mode: 'text/html',
+                        extraKeys: {
+                            Tab: function(cm){
+                                cm.execCommand("indentMore")
+                            },
+                            "Shift-Tab": function(cm){
+                                cm.execCommand("indentLess")
+                            },
+                        },
+                    });
+
+                    // Init
+                    codemirror = wp.codeEditor.initialize(textarea, Settings);
+
+                };
+
+                document.onkeydown = function(e){
+
+                    e = e || window.event;
+                    var isEscape = false;
+
+                    isEscape = (e.keyCode === 27);
+
+                    if("key" in e){
+                        isEscape = (e.key === "Escape" || e.key === "Esc");
+                    }
+
+                    if(isEscape){
+                        editor.windowManager.close();
+                    }
+
+                };
+
+                function submit(){
+
+                    var code = codemirror.codemirror.getValue();
+
+                    parent.window.switchEditors.go(editor.id);
+
+                    source.value = code;
+
+                    parent.window.switchEditors.go(editor.id);
+
+                }
+                
+                // https://gomakethings.com/vanilla-javascript-version-of-jquery-extend/
+                // Pass in the objects to merge as arguments.
+                // For a deep extend, set the first argument to `true`.
+                var extend = function (){
+
+                    // Variables
+                    var extended = {};
+                    var deep = false;
+                    var i = 0;
+                    var length = arguments.length;
+
+                    // Check if a deep merge
+                    if ( Object.prototype.toString.call( arguments[0] ) === '[object Boolean]' ) {
+                        deep = arguments[0];
+                        i++;
+                    }
+
+                    // Merge the object into the extended object
+                    var merge = function (obj) {
+                        for ( var prop in obj ) {
+                            if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
+                                // If deep merge and property is an object, merge properties
+                                if ( deep && Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
+                                    extended[prop] = extend( true, extended[prop], obj[prop] );
+                                } else {
+                                    extended[prop] = obj[prop];
+                                }
+                            }
+                        }
+                    };
+
+                    // Loop through each object and conduct a merge
+                    for ( ; i < length; i++ ) {
+                        var obj = arguments[i];
+                        merge(obj);
+                    }
+
+                    return extended;
+
+                };
+
+
+            </script>
     
         </head>
     
         <body>
-        <textarea style="border:0; visibility:hidden;"></textarea>
+            <textarea style="border:0; visibility:hidden;"></textarea>
         </body>
     
         </html>
@@ -765,8 +829,15 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * WP TinyMCE: Force Buttons
+    
+    /**
+     * mce_buttons
+     *
+     * Add source code + wp_media buttons
+     *
+     * @param $buttons
+     *
+     * @return mixed
      */
     function mce_buttons($buttons){
         
@@ -776,13 +847,22 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * WP TinyMCE: Force Save onChange
-     * This allow the source code button to correctly get latest value
+    
+    /**
+     * mce_init
+     *
+     * This allows source code button to correctly get latest value
+     *
+     * @param $init
+     * @param $editor_id
+     *
+     * @return mixed
      */
     function mce_init($init, $editor_id){
         
-        if($editor_id !== 'content') return $init;
+        if($editor_id !== 'content'){
+            return $init;
+        }
         
         $init['setup'] = ''
                          . 'function(editor){'
@@ -795,8 +875,15 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * WP TinyMCE: Disable Tab / Add Media
+    
+    /**
+     * mce_settings
+     *
+     * Disable Tab / Add Media
+     *
+     * @param $settings
+     *
+     * @return mixed
      */
     function mce_settings($settings){
         
@@ -810,24 +897,8 @@ class acfe_field_wysiwyg{
         
     }
     
-    /*
-     * Prepare Toolsbars
-     */
-    function prepare_toolbars(){
-        
-        add_filter('acf/prepare_field/name=acfe_wysiwyg_toolbar_row', function($field){
-    
-            $field['prefix'] = str_replace('row-', '', $field['prefix']);
-            $field['name'] = str_replace('row-', '', $field['name']);
-    
-            return $field;
-    
-        });
-        
-    }
-    
 }
 
-new acfe_field_wysiwyg();
+acf_new_instance('acfe_pro_field_wysiwyg');
 
 endif;

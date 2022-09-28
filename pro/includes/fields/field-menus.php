@@ -1,13 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_menus')):
 
 class acfe_field_menus extends acf_field{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
         $this->name = 'acfe_menus';
         $this->label = __('Menus', 'acfe');
@@ -26,34 +30,51 @@ class acfe_field_menus extends acf_field{
             'layout'                => '',
             'toggle'                => 0,
             'allow_custom'          => 0,
+            'other_choice'          => 0,
             'return_format'         => 'object',
         );
         
-        parent::__construct();
-        
     }
     
-    function get_pretty_menus($allowed = array()){
     
-        $menus = wp_get_nav_menus();
-        $choices = array();
+    /**
+     * get_pretty_menus
+     *
+     * @param $allowed
+     *
+     * @return array
+     */
+    function get_pretty_menus($allowed = array()){
         
+        // vars
+        $choices = array();
+        $menus = wp_get_nav_menus();
+        
+        // loop
         foreach($menus as $menu){
             
-            if(!empty($allowed) && !in_array($menu->slug, $allowed))
-                continue;
-    
-            $choices[$menu->slug] = $menu->name;
+            if(empty($allowed) || in_array($menu->slug, $allowed)){
+                $choices[ $menu->slug ] = $menu->name;
+            }
             
         }
         
+        // return
         return $choices;
     
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
-        
-        $field['default_value'] = acf_encode_choices($field['default_value'], false);
+    
+        if(isset($field['default_value'])){
+            $field['default_value'] = acf_encode_choices($field['default_value'], false);
+        }
         
         // Allow Menus
         acf_render_field_setting($field, array(
@@ -383,89 +404,114 @@ class acfe_field_menus extends acf_field{
         
     }
     
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function update_field($field){
         
         $field['default_value'] = acf_decode_choices($field['default_value'], true);
         
-        if($field['field_type'] === 'radio')
+        if($field['field_type'] === 'radio'){
             $field['default_value'] = acfe_unarray($field['default_value']);
+        }
         
         return $field;
         
     }
     
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function prepare_field($field){
-        
-        // Set Field Type
-        $field['type'] = $field['field_type'];
-        
-        // Choices
+    
+        // field type
+        $type = $field['type'];
+        $field_type = $field['field_type'];
+    
+        $field['type'] = $field_type;
+        $field['wrapper']['data-ftype'] = $type;
+    
+        // choices
         $field['choices'] = $this->get_pretty_menus($field['menus']);
+    
+        // allow custom
+        if($field['allow_custom']){
         
-        // Allow Custom
-        if(acf_maybe_get($field, 'allow_custom')){
+            $value = acf_maybe_get($field, 'value');
+            $value = acf_get_array($value);
+        
+            foreach($value as $v){
             
-            if($value = acf_maybe_get($field, 'value')){
-                
-                $value = acf_get_array($value);
-                
-                foreach($value as $v){
-                    
-                    if(isset($field['choices'][$v]))
-                        continue;
-                    
-                    $field['choices'][$v] = $v;
-                    
+                // append custom value to choices
+                if(!isset($field['choices'][ $v ])){
+                    $field['choices'][ $v ] = $v;
+                    $field['custom_choices'][ $v ] = $v;
                 }
-                
             }
-            
-        }
         
+        }
+    
         // return
         return $field;
         
     }
     
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|string[]
+     */
     function format_value($value, $post_id, $field){
     
-        // Bail early
-        if(empty($value))
+        // bail early
+        if(empty($value)){
             return $value;
+        }
     
-        // Vars
+        // vars
         $is_array = is_array($value);
         $value = acf_get_array($value);
     
-        // Loop
+        // loop
         foreach($value as &$v){
         
-            // Retrieve Object
+            // get object
             $object = wp_get_nav_menu_object($v);
         
-            if(!$object || is_wp_error($object))
-                continue;
+            if(!$object || is_wp_error($object)) continue;
         
-            // Return: Object
+            // return: object
             if($field['return_format'] === 'object'){
-    
                 $v = $object;
             
-            // Return: ID
+            // return: id
             }elseif($field['return_format'] === 'id'){
-    
                 $v = $object->term_id;
-                
             }
         
         }
     
-        // Do not return array
+        // check array
         if(!$is_array){
             $value = acfe_unarray($value);
         }
     
-        // Return
+        // return
         return $value;
         
     }

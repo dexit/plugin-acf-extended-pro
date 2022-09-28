@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_payment_cart')):
 
@@ -9,6 +10,9 @@ class acfe_payment_cart extends acf_field{
     
     public $payment_field = false;
     
+    /**
+     * initialize
+     */
     function initialize(){
         
         $this->name = 'acfe_payment_cart';
@@ -31,6 +35,12 @@ class acfe_payment_cart extends acf_field{
         
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
     
         // Choices
@@ -50,7 +60,7 @@ class acfe_payment_cart extends acf_field{
         
         // add choices
         if($payment_field){
-            $choices[ $field['payment_field'] ] = $this->get_field_label($payment_field);
+            $choices[ $field['payment_field'] ] = acfe_get_pretty_field_label($payment_field, true);
         }
     
         // Payment Field
@@ -315,73 +325,13 @@ class acfe_payment_cart extends acf_field{
         
     }
     
-    function prepare_field($field){
-        
-        // payment field
-        $this->payment_field = $this->get_payment_field($field);
-        
-        // no payment field found
-        if(!$this->payment_field){
-            return false;
-        }
     
-        // get meta
-        $meta = acf_get_meta(acfe_get_post_id());
-    
-        // loop meta
-        foreach($meta as $key => $val){
-        
-            // find the payment field in meta
-            if($val !== $this->payment_field['key']) continue;
-        
-            // hide field if payment value is set on current post
-            return false;
-        
-        }
-    
-        // type
-        $field['wrapper']['data-type'] = $field['field_type'];
-        
-        // return
-        return $field;
-        
-    }
-    
-    function render_field($field){
-    
-        // settings
-        $field['type'] = $field['field_type'];
-        $field['other_choice'] = 0;
-        $field['ajax'] = 0;
-        $field['allow_custom'] = 0;
-        
-        // currency
-        $currency = acf_maybe_get($this->payment_field, 'currency', 'USD');
-        $currency = acfe_get_currency($currency, 'symbol');
-    
-        // loop choices
-        foreach(array_keys($field['choices']) as $item){
-            
-            // display format
-            $label = $field['display_format'];
-            
-            // parse template tags
-            $label = str_replace('{item}', $item, $label);
-            $label = str_replace('{price}', $this->get_item_price($item, $field), $label);
-            $label = str_replace('{currency}', $currency, $label);
-        
-            // set choice
-            $field['choices'][ $item ] = $label;
-        
-        }
-        
-        // render
-        acf_get_field_type($field['type'])->render_field($field);
-        
-    }
-    
-    /*
-     * Update Field
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
      */
     function update_field($field){
         
@@ -400,8 +350,126 @@ class acfe_payment_cart extends acf_field{
         
     }
     
-    /*
-     * Validate Value
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return false
+     */
+    function prepare_field($field){
+        
+        // payment field
+        $this->payment_field = acfe_get_payment_field_from_field($field);
+        
+        // no payment field found
+        // hide cart
+        if(!$this->payment_field){
+            return false;
+        }
+    
+        // get meta
+        $meta = acf_get_meta(acfe_get_post_id());
+    
+        // loop meta
+        foreach($meta as $meta_key => $meta_value){
+    
+            // hide cart if payment was already done and saved
+            if($meta_value === $this->payment_field['key']){
+                return false;
+            }
+        
+        }
+    
+        // field type
+        $type = $field['type'];
+        $field_type = $field['field_type'];
+    
+        $field['type'] = $field_type;
+        $field['wrapper']['data-ftype'] = $type;
+        $field['other_choice'] = 0;
+        $field['ajax'] = 0;
+        $field['allow_custom'] = 0;
+    
+        // choices
+        $field['choices'] = $this->get_choices($field);
+    
+        // labels
+        $field = acfe_prepare_checkbox_labels($field);
+        
+        // return
+        return $field;
+        
+    }
+    
+    
+    /**
+     * get_choices
+     *
+     * @param $field
+     *
+     * @return array
+     */
+    function get_choices($field){
+    
+        // JS items
+        $js_items = array();
+    
+        // currency
+        $currency = acf_maybe_get($this->payment_field, 'currency', 'USD');
+        $symbol = acfe_get_currency($currency, 'symbol');
+        
+        // loop choices
+        foreach(array_keys($field['choices']) as $item){
+            
+            // allow optgroup
+            if(strpos($item, '##') === 0){
+                continue;
+            }
+    
+            // add to JS
+            $js_items[] = array(
+                'name' => $item,
+                'price' => floatval($this->get_item_price($item, $field)),
+            );
+        
+            // display format
+            $label = $field['display_format'];
+        
+            // parse template tags
+            $label = str_replace('{item}', $item, $label);
+            $label = str_replace('{price}', $this->get_item_price($item, $field), $label);
+            $label = str_replace('{currency}', $symbol, $label);
+        
+            // set choice
+            $field['choices'][ $item ] = $label;
+        
+        }
+    
+        // localize JS data
+        acfe_append_localize_data('carts', array(
+            'field_name' => $field['_name'],
+            'field_key'  => $field['key'],
+            'symbol'     => $symbol,
+            'currency'   => $currency,
+            'items'      => $js_items,
+        ));
+        
+        return $field['choices'];
+        
+    }
+    
+    
+    /**
+     * validate_value
+     *
+     * @param $valid
+     * @param $value
+     * @param $field
+     * @param $input
+     *
+     * @return string|null
      */
     function validate_value($valid, $value, $field, $input){
         
@@ -417,10 +485,9 @@ class acfe_payment_cart extends acf_field{
         foreach($items as $item){
     
             // validate item
-            if($this->validate_item($item, $field)) continue;
-            
-            // return error
-            return __("This item doesn't exists. Please try again", 'acfe');
+            if(!$this->validate_item($item, $field)){
+                return __("This item doesn't exists. Please try again", 'acfe');
+            }
         
         }
         
@@ -428,8 +495,15 @@ class acfe_payment_cart extends acf_field{
         
     }
     
-    /*
-     * Update Value
+    
+    /**
+     * update_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return null
      */
     function update_value($value, $post_id, $field){
         
@@ -441,16 +515,18 @@ class acfe_payment_cart extends acf_field{
             return $value;
         }
         
-        // do not save in admin
-        if(is_admin()){
-            return null;
-        }
-        
-        // do not save
+        // do not save meta
         return null;
         
     }
     
+    
+    /**
+     * set_cart_data
+     *
+     * @param $value
+     * @param $field
+     */
     function set_cart_data($value, $field){
     
         // items
@@ -479,7 +555,9 @@ class acfe_payment_cart extends acf_field{
         foreach($items as $item){
         
             // validate item
-            if(!$this->validate_item($item, $field)) continue;
+            if(!$this->validate_item($item, $field)){
+                continue;
+            }
         
             // vars
             $name = wp_strip_all_tags($item);
@@ -501,6 +579,15 @@ class acfe_payment_cart extends acf_field{
         
     }
     
+    
+    /**
+     * validate_item
+     *
+     * @param $item
+     * @param $field
+     *
+     * @return bool
+     */
     function validate_item($item, $field){
         
         $choices = array_keys($field['choices']);
@@ -509,76 +596,28 @@ class acfe_payment_cart extends acf_field{
         
     }
     
+    
+    /**
+     * get_item_price
+     *
+     * @param $item
+     * @param $field
+     *
+     * @return int
+     */
     function get_item_price($item, $field){
         
         $price = 0;
         
         foreach(array_keys($field['choices']) as $key){
             
-            if($key !== $item) continue;
-        
-            $price = $field['choices'][ $key ];
+            if($key === $item){
+                $price = $field['choices'][ $key ];
+            }
         
         }
         
         return $price;
-        
-    }
-    
-    function get_payment_field($field){
-    
-        // payment field already set in field
-        if($field['payment_field']){
-        
-            // get field
-            $payment_field = acf_get_field($field['payment_field']);
-            
-            // found field
-            if($payment_field){
-                return $payment_field;
-            }
-        
-        }
-    
-        // retrieve payment field in the same field group
-        $field_group = acfe_get_field_group_from_field($field);
-    
-        // get fields
-        $fields = acf_get_fields($field_group['key']);
-    
-        // return
-        return $this->find_payment_field($fields);
-        
-    }
-    
-    function find_payment_field($fields){
-        
-        // loop
-        foreach($fields as $field){
-            
-            // Recursive search for sub_fields (groups & clones)
-            if(acf_maybe_get($field, 'sub_fields')){
-                return $this->find_payment_field($field['sub_fields']);
-            }
-            
-            // allow only payment field
-            if($field['type'] !== 'acfe_payment') continue;
-            
-            // return field
-            return $field;
-            
-        }
-        
-        // nothing found
-        return false;
-        
-    }
-    
-    function get_field_label($field){
-        
-        $label = acf_maybe_get($field, 'label', $field['name']);
-        
-        return "{$label} ({$field['key']})";
         
     }
     

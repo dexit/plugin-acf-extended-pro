@@ -1,18 +1,20 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 // Check settings
-if((!acfe_is_dev() && !acfe_is_super_dev()) || !acf_current_user_can_admin())
+if((!acfe_is_dev() && !acfe_is_super_dev()) || !acf_current_user_can_admin()){
     return;
+}
 
 if(!class_exists('acfe_pro_dev')):
 
 class acfe_pro_dev{
     
-    /*
-     * Construct
+    /**
+     * construct
      */
     function __construct(){
         
@@ -21,6 +23,7 @@ class acfe_pro_dev{
         
         // wp + acf meta boxes
         add_action('post_submitbox_misc_actions',                       array($this, 'post_submitbox_misc_actions'));
+        add_action('attachment_submitbox_misc_actions',                 array($this, 'post_submitbox_misc_actions'));
         add_action('acf/options_page/submitbox_before_major_actions',   array($this, 'options_page_submitbox_misc_actions'), 1);
         
         // acfe meta boxes
@@ -37,10 +40,18 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * post_submitbox_misc_actions
+     *
+     * @param $post
+     */
     function post_submitbox_misc_actions($post){
         
         // check restricted post types
-        if(acfe_is_post_type_reserved_dev($post->post_type)) return;
+        if(acfe_is_post_type_reserved_dev($post->post_type)){
+            return;
+        }
     
         //vars
         $post_id = $post->ID;
@@ -102,6 +113,11 @@ class acfe_pro_dev{
         // Add modal in footer
         // Fix issue when sidebar is fixed when post editor is very long
         add_action('admin_footer', function() use($post){
+            
+            // try to unserialize post content
+            $post->post_content = maybe_unserialize($post->post_content);
+            $post->post_content = @map_deep($post->post_content, '_wp_specialchars');
+            
             ?>
             <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
                 <div class="acfe-modal-spacer">
@@ -113,6 +129,14 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * term_submitbox_misc_actions
+     *
+     * acfe/term/submitbox_before_major_actions
+     *
+     * @param $term
+     */
     function term_submitbox_misc_actions($term){
     
         // check restricted taxonomies
@@ -178,6 +202,14 @@ class acfe_pro_dev{
     
     }
     
+    
+    /**
+     * user_submitbox_misc_actions
+     *
+     * acfe/user/submitbox_before_major_actions
+     *
+     * @param $user
+     */
     function user_submitbox_misc_actions($user){
         
         //vars
@@ -237,6 +269,14 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * settings_submitbox_misc_actions
+     *
+     * acfe/settings/submitbox_before_major_actions
+     *
+     * @param $page
+     */
     function settings_submitbox_misc_actions($page){
         
         //vars
@@ -274,6 +314,14 @@ class acfe_pro_dev{
     
     }
     
+    
+    /**
+     * options_page_submitbox_misc_actions
+     *
+     * acf/options_page/submitbox_before_major_actions
+     *
+     * @param $page
+     */
     function options_page_submitbox_misc_actions($page){
         
         // vars
@@ -321,6 +369,14 @@ class acfe_pro_dev{
     
     }
     
+    
+    /**
+     * posts_submitbox_misc_actions
+     *
+     * acfe/posts/submitbox_before_major_actions
+     *
+     * @param $post_type
+     */
     function posts_submitbox_misc_actions($post_type){
     
         // vars
@@ -369,6 +425,14 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * terms_submitbox_misc_actions
+     *
+     * acfe/terms/submitbox_before_major_actions
+     *
+     * @param $taxonomy
+     */
     function terms_submitbox_misc_actions($taxonomy){
     
         // vars
@@ -417,6 +481,12 @@ class acfe_pro_dev{
     
     }
     
+    
+    /**
+     * attachments_submitbox_misc_actions
+     *
+     * acfe/attachments/submitbox_before_major_actions
+     */
     function attachments_submitbox_misc_actions(){
     
         // vars
@@ -465,6 +535,12 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * users_submitbox_misc_actions
+     *
+     * acfe/users/submitbox_before_major_actions
+     */
     function users_submitbox_misc_actions(){
     
         // vars
@@ -502,6 +578,10 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * add_list_meta_boxes
+     */
     function add_list_meta_boxes(){
         
         $screens = array(
@@ -567,6 +647,13 @@ class acfe_pro_dev{
         
     }
     
+    
+    /**
+     * render_metabox_submit
+     *
+     * @param $object
+     * @param $metabox
+     */
     function render_metabox_submit($object, $metabox){
     
         // screen
@@ -596,6 +683,6 @@ class acfe_pro_dev{
     
 }
 
-new acfe_pro_dev();
+acf_new_instance('acfe_pro_dev');
 
 endif;

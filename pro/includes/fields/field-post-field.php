@@ -1,13 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_post_field')):
 
-class acfe_field_post_field extends acf_field{
+class acfe_field_post_field extends acfe_field{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
         $this->name = 'acfe_post_field';
         $this->label = __('Post Field', 'acfe');
@@ -16,12 +20,14 @@ class acfe_field_post_field extends acf_field{
             'field_type' => 'title'
         );
         
-        $this->add_field_filter('acfe/field_wrapper_attributes', array($this, 'field_wrapper_attributes'), 10, 2);
-        
-        parent::__construct();
-        
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
         
         // Type
@@ -72,6 +78,15 @@ class acfe_field_post_field extends acf_field{
         
     }
     
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
+     */
     function field_wrapper_attributes($wrapper, $field){
         
         $wrapper['data-field-type'] = $field['field_type'];
@@ -96,6 +111,14 @@ class acfe_field_post_field extends acf_field{
         
     }
     
+    
+    /**
+     * load_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
     function load_field($field){
         
         $field['name'] = '';
@@ -106,19 +129,31 @@ class acfe_field_post_field extends acf_field{
         
     }
     
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return false
+     */
     function prepare_field($field){
         
+        // get post id
         $post_id = acf_get_valid_post_id();
         
-        if(!$post_id)
+        // hide field
+        if(!$post_id){
             return false;
+        }
         
         $data = acf_get_post_id_info($post_id);
         
-        // Bail early if not Post
-        if($data['type'] !== 'post')
+        // hide field on screens that are not post edit
+        if($data['type'] !== 'post'){
             return false;
+        }
         
+        // return
         return $field;
         
     }

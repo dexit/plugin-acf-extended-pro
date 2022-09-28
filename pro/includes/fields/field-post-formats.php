@@ -1,13 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_post_formats')):
 
 class acfe_post_formats extends acf_field{
     
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
         $this->name = 'acfe_post_formats';
         $this->label = __('Post Formats', 'acfe');
@@ -29,17 +33,60 @@ class acfe_post_formats extends acf_field{
             'other_choice'          => 0,
         );
         
-        parent::__construct();
+    }
+    
+    
+    /**
+     * get_choices
+     *
+     * @param $field
+     *
+     * @return array
+     */
+    function get_choices($field = array()){
+        
+        // vars
+        $choices = array();
+        $allowed = acf_maybe_get($field, 'formats', array());
+        
+        // bail early
+        if(!current_theme_supports('post-formats')){
+            return $choices;
+        }
+        
+        // get formats
+        $formats = get_theme_support('post-formats');
+        $formats = reset($formats);
+        
+        // add 'standard' as first in list
+        array_unshift($formats, 'standard');
+        
+        // loop
+        foreach($formats as $format){
+            
+            // filter
+            if(empty($allowed) || in_array($format, $allowed)){
+                $choices[ $format ] = get_post_format_string($format);
+            }
+            
+        }
+        
+        // return
+        return $choices;
         
     }
     
-    /*
-     * Render Field Settings
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
      */
     function render_field_settings($field){
-        
-        // Encode Choices
-        $field['default_value'] = acf_encode_choices($field['default_value'], false);
+    
+        if(isset($field['default_value'])){
+            $field['default_value'] = acf_encode_choices($field['default_value'], false);
+        }
         
         // Allow Formats
         acf_render_field_setting($field, array(
@@ -353,101 +400,73 @@ class acfe_post_formats extends acf_field{
         
     }
     
-    /*
-     * Update Field
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
      */
     function update_field($field){
         
-        // Checkbox: Default Value
         $field['default_value'] = acf_decode_choices($field['default_value'], true);
         
-        // Radio: Default Value
         if($field['field_type'] === 'radio'){
-            
             $field['default_value'] = acfe_unarray($field['default_value']);
-            
         }
         
         return $field;
         
     }
     
-    /*
-     * Prepare Field
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return array|mixed
      */
     function prepare_field($field){
-        
-        // Field Type
-        $field['type'] = $field['field_type'];
-        
-        // Choices
+    
+        // field type
+        $type = $field['type'];
+        $field_type = $field['field_type'];
+    
+        $field['type'] = $field_type;
+        $field['wrapper']['data-ftype'] = $type;
+    
+        // choices
         $field['choices'] = $this->get_choices($field);
     
-        // Radio: Value
-        if($field['field_type'] === 'radio')
+        // radio value
+        if($field['field_type'] === 'radio'){
             $field['value'] = acfe_unarray($field['value']);
-    
-        // Labels
-        $field = acfe_prepare_checkbox_labels($field);
-        
-        // Checkbox: Allow Custom
-        if(acf_maybe_get($field, 'allow_custom')){
-            
-            if($value = acf_maybe_get($field, 'value')){
-                
-                $value = acf_get_array($value);
-                
-                foreach($value as $v){
-                    
-                    if(isset($field['choices'][$v]))
-                        continue;
-                    
-                    $field['choices'][$v] = $v;
-                    
-                }
-                
-            }
-            
         }
+    
+        // labels
+        $field = acfe_prepare_checkbox_labels($field);
+    
+        // allow custom
+        if($field['allow_custom']){
         
+            $value = acf_maybe_get($field, 'value');
+            $value = acf_get_array($value);
+        
+            foreach($value as $v){
+            
+                // append custom value to choices
+                if(!isset($field['choices'][ $v ])){
+                    $field['choices'][ $v ] = $v;
+                    $field['custom_choices'][ $v ] = $v;
+                }
+            }
+        
+        }
+    
         // return
         return $field;
-        
-    }
-    
-    /*
-     * Get Choices
-     */
-    function get_choices($field = array()){
-        
-        // vars
-        $choices = array();
-        $allowed = acf_maybe_get($field, 'formats');
-        
-        // bail early
-        if(!current_theme_supports('post-formats'))
-            return $choices;
-        
-        // get formats
-        $formats = get_theme_support('post-formats');
-        $formats = reset($formats);
-        
-        // add 'standard' as first in list
-        array_unshift($formats, 'standard');
-        
-        // loop
-        foreach($formats as $format){
-            
-            // filter
-            if($allowed && !in_array($format, $allowed)) continue;
-            
-            // add choice
-            $choices[$format] = get_post_format_string($format);
-            
-        }
-        
-        // return
-        return $choices;
         
     }
     

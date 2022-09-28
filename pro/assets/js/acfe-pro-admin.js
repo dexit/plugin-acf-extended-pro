@@ -1,32 +1,244 @@
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
-     * Rewrite Rules
-     */
     new acf.Model({
 
-        wait: 'ready',
+        wait: 'prepare',
+
+        events: {
+            'click .acfe-dev-edit-meta': 'onEdit',
+        },
+
+        $acf: function() {
+            return $('#acfe-acf-custom-fields');
+        },
+
+        $wp: function() {
+            return $('#acfe-wp-custom-fields');
+        },
 
         initialize: function() {
 
-            // validate screen
-            if (acf.get('screen') !== 'acfe_rewrite_rules') {
+        },
+
+        onEdit: function(e, $el) {
+
+            e.preventDefault();
+
+            var $tr = $el.closest('tr');
+
+            var id = $el.attr('data-meta-id');
+            var key = $el.attr('data-meta-key');
+            var type = $el.attr('data-meta-type');
+            var nonce = $el.attr('data-nonce');
+
+            $.ajax({
+                url: acf.get('ajaxurl'),
+                type: 'post',
+                data: {
+                    action: 'acfe/dev/edit_meta',
+                    id: id,
+                    key: key,
+                    type: type,
+                    _wpnonce: nonce,
+                },
+                success: function(response) {
+
+                    if (response === '0' || response === '-1') {
+                        return;
+                    }
+
+                    // Open
+                    new acfe.Popup({
+                        title: 'Edit Meta',
+                        size: 'medium',
+                        destroy: true,
+                        content: response,
+                        events: {
+                            'click .save': 'clickSave',
+                        },
+
+                        footer: function() {
+                            return '<button class="button close">Close</button> <a class="button button-primary save">Save</a>';
+                        },
+
+                        clickSave: function(e, $el) {
+
+                            var data = acf.serialize(this.$content());
+
+                            this.close();
+
+                            $.ajax({
+                                url: acf.get('ajaxurl'),
+                                type: 'post',
+                                data: {
+                                    action: 'acfe/dev/update_meta',
+                                    id: id,
+                                    key: key,
+                                    type: type,
+                                    data: data,
+                                    _wpnonce: nonce,
+                                },
+                                success: function(response) {
+
+                                    if (response !== '0') {
+
+                                        if (data.value === '') {
+                                            data.value = '(empty)';
+                                        }
+
+                                        $tr.find('td strong').text(data.name);
+                                        $tr.find('td pre').text(data.value);
+
+                                    }
+
+                                }
+                            });
+
+                        },
+
+                        onClose: function() {
+
+
+
+                        }
+                    });
+
+                }
+            });
+
+
+
+        }
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    var moduleManager = new acf.Model({
+        wait: 'prepare',
+        priority: 1,
+        initialize: function() {
+            if (acf.get('screen') === 'acfe_rewrite_rules') {
+                new module();
+            }
+        }
+    });
+
+    var module = acf.Model.extend({
+
+        data: {
+            'firstMatch': null,
+            'rewriteRules': {},
+        },
+
+        events: {
+            'mouseover span.regex-repeater': 'hoverRepeater',
+            'mouseout span.regex-repeater': 'hoverRepeater',
+            'mouseover span.regexgroup,span.regexgroup-target': 'hoverRegex',
+            'mouseout span.regexgroup,span.regexgroup-target': 'hoverRegex',
+            'keyup #acfe-rewrite-rules-url': 'onSearch',
+            'click #acfe-rewrite-rules-clear': 'onClear',
+        },
+
+        hoverRepeater: function(e, $el) {
+
+            // Highlight the target of a repeater
+            $el.parent().toggleClass('highlight');
+
+        },
+
+        hoverRegex: function(e, $el) {
+
+            var id = $el[0].id;
+            if (id.substr(-7) === '-target') {
+                id = id.substr(0, id.length - 7);
+            }
+
+            // Highlight corresponding regex groups and their targets in the "Substitution" column
+            $('#' + id + ', #' + id + '-target').toggleClass('highlight');
+
+        },
+
+        onSearch: function(e, $el) {
+
+            var url = $el.val();
+
+            // Empty box, show all rules
+            if (url === '') {
+                $('.rewrite-rule-line').removeClass('rewrite-rule-matched rewrite-rule-matched-first rewrite-rule-unmatched');
                 return;
             }
 
-            // disable window unload
-            acf.unload.disable();
+            var matchedRules = {};
+            var isFirst = true;
+            var rewrite_rules = this.get('rewriteRules');
 
-            // set rewrite rules
+            for (var idx in rewrite_rules) {
+
+                var result = rewrite_rules[idx].exec(url);
+
+                if (result) {
+
+                    // If it is a match, show it
+                    matchedRules[idx] = result;
+                    var elRule = $('#rewrite-rule-' + idx).addClass('rewrite-rule-matched').removeClass('rewrite-rule-unmatched');
+
+                    // Fill in the corresponding query values
+                    for (var rIdx = 0; rIdx < result.length; rIdx++) {
+                        $('#regex-' + idx + '-group-' + rIdx + '-target-value').html(result[rIdx] || '');
+                    }
+
+                    if (isFirst) {
+
+                        // If it is the first match, highlight it
+                        elRule.addClass('rewrite-rule-matched-first');
+                        isFirst = false;
+
+                        // The previous first match is not longer the first match
+                        if (this.get('firstMatch') !== idx) {
+                            $('#rewrite-rule-' + this.get('firstMatch')).removeClass('rewrite-rule-matched-first');
+                            this.set('firstMatch', idx);
+                        }
+
+                    }
+
+                } else {
+
+                    // If it is not a match, hide it
+                    $('#rewrite-rule-' + idx).removeClass('rewrite-rule-matched').addClass('rewrite-rule-unmatched');
+
+                }
+
+            }
+
+        },
+
+        onClear: function(e, $el) {
+
+            e.preventDefault();
+            $('#acfe-rewrite-rules-url').val('');
+            $('.rewrite-rule-line').removeClass('rewrite-rule-matched rewrite-rule-matched-first rewrite-rule-unmatched');
+
+        },
+
+        setup: function(props) {
+
+            // get rewrite rules
             var rewrite_rules = acf.get('rewrite_rules');
 
             // Compile all regexes
             for (var idx in rewrite_rules) {
 
-                var pattern = rewrite_rules[idx]
+                var pattern = rewrite_rules[idx];
 
                 // Fix double backslash \\
                 pattern = pattern.replace(/\\\\/g, '\\');
@@ -39,122 +251,14 @@
 
             }
 
-            // Highlight corresponding regex groups and their targets in the "Substitution" column
-            $('span.regexgroup, span.regexgroup-target').hover(function() {
-
-                var id = $(this)[0].id;
-                if (id.substr(-7) === '-target') {
-                    id = id.substr(0, id.length - 7);
-                }
-
-                $('#' + id + ', #' + id + '-target').toggleClass('highlight');
-
-            });
-
-            // Highlight the target of a repeater
-            $('span.regex-repeater').hover(function() {
-                $(this).parent().toggleClass('highlight');
-            });
-
-            var idxFirstMatchedRewriteRule = null;
-
-            $('#acfe-rewrite-rules-url').keyup(function() {
-
-                var url = $(this).val();
-
-                // Empty box, show all rules
-                if (url === '') {
-                    $('.rewrite-rule-line').removeClass('rewrite-rule-matched rewrite-rule-matched-first rewrite-rule-unmatched');
-                    return;
-                }
-
-                var matchedRules = {};
-                var isFirst = true;
-
-                for (var idx in rewrite_rules) {
-
-                    var result = rewrite_rules[idx].exec(url);
-
-                    if (result) {
-
-                        // If it is a match, show it
-                        matchedRules[idx] = result;
-                        var elRule = $('#rewrite-rule-' + idx).addClass('rewrite-rule-matched').removeClass('rewrite-rule-unmatched');
-
-                        // Fill in the corresponding query values
-                        for (var rIdx = 0; rIdx < result.length; rIdx++) {
-                            $('#regex-' + idx + '-group-' + rIdx + '-target-value').html(result[rIdx] || '');
-                        }
-
-                        if (isFirst) {
-
-                            // If it is the first match, highlight it
-                            elRule.addClass('rewrite-rule-matched-first');
-                            isFirst = false;
-
-                            // The previous first match is not longer the first match
-                            if (idxFirstMatchedRewriteRule !== idx) {
-                                $('#rewrite-rule-' + idxFirstMatchedRewriteRule).removeClass('rewrite-rule-matched-first');
-                                idxFirstMatchedRewriteRule = idx;
-                            }
-
-                        }
-
-                    } else {
-
-                        // If it is not a match, hide it
-                        $('#rewrite-rule-' + idx).removeClass('rewrite-rule-matched').addClass('rewrite-rule-unmatched');
-
-                    }
-
-                }
-            });
-
-            // Clear the tester and show all rules
-            $('#acfe-rewrite-rules-clear').click(function(e) {
-
-                e.preventDefault();
-                $('#acfe-rewrite-rules-url').val('');
-                $('.rewrite-rule-line').removeClass('rewrite-rule-matched rewrite-rule-matched-first rewrite-rule-unmatched');
-
-            });
+            this.set('rewriteRules', rewrite_rules);
 
         },
-
-    });
-
-})(jQuery);
-(function($) {
-
-    if (typeof acf === 'undefined')
-        return;
-
-    /*
-     * Screen Layouts
-     */
-    new acf.Model({
-
-        wait: 'prepare',
 
         initialize: function() {
 
-            if (acfe.currentFilename() !== 'post.php' && acfe.currentFilename() !== 'post-new.php' || !$('body').hasClass('acfe-screen-layouts')) {
-                return;
-            }
-
-            this.newScreen();
-
-        },
-
-        newScreen: function() {
-
-            var column = $('.columns-prefs input:checked').val();
-
-            if (!column || column === '1' || column === '2') {
-                return;
-            }
-
-            $('#post-body.metabox-holder').removeClass('columns-2').addClass('columns-' + column);
+            // disable window unload
+            acf.unload.disable();
 
         },
 
@@ -163,15 +267,52 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
-     * Scripts UI
-     */
-    new acf.Model({
-
+    var moduleManager = new acf.Model({
         wait: 'prepare',
+        priority: 1,
+        initialize: function() {
+            if ($('body').hasClass('acfe-screen-layouts') && acfe.inArray(acfe.getCurrentFilename(), ['post.php', 'post-new.php'])) {
+                new module();
+            }
+        }
+    });
+
+    var module = acf.Model.extend({
+
+        initialize: function() {
+
+            var column = $('.columns-prefs input:checked').val();
+
+            if (column && column !== '1' && column !== '2') {
+                $('#post-body.metabox-holder').removeClass('columns-2').addClass('columns-' + column);
+            }
+
+        },
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    var moduleManager = new acf.Model({
+        wait: 'prepare',
+        priority: 1,
+        initialize: function() {
+            if (acf.get('screen') === 'acfe_scripts') {
+                new module();
+            }
+        }
+    });
+
+    var module = acf.Model.extend({
 
         i: -1,
         xhr: false,
@@ -186,13 +327,9 @@
             run: false,
         },
 
-        scriptData: {
+        scriptData: {},
 
-        },
-
-        scriptStats: {
-
-        },
+        scriptStats: {},
 
         $events: function() {
             return $('#events .events');
@@ -206,8 +343,6 @@
             return this.$events().find('> .event[data-status="' + status + '"]');
         },
 
-        eventScope: '#acfe-scripts',
-
         events: {
             'click #start': 'onStart',
             'click #stop': 'onStop',
@@ -216,6 +351,21 @@
             'click #tail': 'onTail',
             'click .filter': 'onFilter',
             'click [name="acf[confirm]"]': 'onConfirm',
+        },
+
+        actions: {
+            'resize': 'onResize',
+            'ready': 'onResize',
+        },
+
+        onResize: function() {
+            this.updateEventsHeight();
+        },
+
+        onScroll: function(e) {
+            if (!this.isEventsScrolled()) {
+                $('#tail').removeClass('disabled');
+            }
         },
 
         onStart: function(e, $el) {
@@ -234,11 +384,8 @@
         },
 
         onClear: function(e) {
-
             e.preventDefault();
-
             this.clear(true);
-
         },
 
         onTail: function(e, $el) {
@@ -246,9 +393,7 @@
             e.preventDefault();
 
             if (!$el.hasClass('disabled')) {
-
                 this.snapEventsScroll();
-
             }
         },
 
@@ -260,21 +405,17 @@
             var $event = this.$eventStatus(status);
 
             if ($el.hasClass('disabled')) {
-
                 $el.removeClass('disabled');
                 $event.show();
 
             } else {
-
                 $el.addClass('disabled');
                 $event.not('[data-type="confirm"]').hide();
 
             }
 
             if ($('#tail').hasClass('disabled')) {
-
                 this.snapEventsScroll();
-
             }
 
         },
@@ -322,9 +463,7 @@
 
                 // Hide event if filtered
                 if ($('.filters > .filter[data-status="' + $event.attr('data-status') + '"]').hasClass('disabled')) {
-
                     $event.hide();
-
                 }
 
                 this.timer.start();
@@ -383,9 +522,7 @@
 
             // Link
             if (args.link) {
-
                 details = !details.length ? args.link : args.link + ' | ' + details;
-
             }
 
             // Confirm
@@ -412,9 +549,7 @@
 
             // Hide event if filtered
             if ($('.filters > .filter[data-status="' + args.status + '"]').hasClass('disabled') && args.type !== 'confirm') {
-
                 $event.hide();
-
             }
 
             var $clear = $('#clear');
@@ -428,31 +563,29 @@
             this.updateFilters();
 
             if (isEventsScrolled) {
-
                 this.snapEventsScroll();
-
             }
 
         },
 
-        initialize: function() {
+        setup: function(props) {
 
-            if (acf.get('screen') !== 'acfe_scripts') {
-                return;
-            }
+            // setup element
+            this.$el = $(document);
 
-            // vars
-            var $page = $(this.eventScope);
-
-            // $el
-            this.$el = $page;
-            this.inherit($page);
+            // data
+            this.set('script', acf.get('script'));
+            this.set('run', acf.get('script_run'));
 
             // timer
             this.timer = new ACFEScriptsTimer();
 
             // stats
             this.stats = new ACFEScriptsStats();
+
+        },
+
+        initialize: function() {
 
             // disable window unload
             acf.unload.disable();
@@ -465,26 +598,8 @@
                 this.submitForm(this);
             }
 
-            // unscoped events
-            this.addUnscopedEvents(this);
-
-        },
-
-        addUnscopedEvents: function(self) {
-
-            // snap events scroll
-            $('.events').scroll(function() {
-
-                if (self.isEventsScrolled()) return;
-
-                $('#tail').removeClass('disabled');
-
-            });
-
-            // update events height
-            $(window).resize(function() {
-                self.updateEventsHeight();
-            });
+            // events scroll
+            this.on(this.$events(), 'scroll', 'onScroll');
 
         },
 
@@ -514,9 +629,7 @@
 
         },
 
-        stop: function(noNewAjax) {
-
-            noNewAjax = noNewAjax || false;
+        stop: function(noNewAjax = false) {
 
             // stop & reset xhr
             if (this.xhr) {
@@ -532,11 +645,9 @@
 
             // new ajax stop
             if (!noNewAjax) {
-
                 this.newAjax({
                     type: 'stop',
                 });
-
             }
 
             // buttons
@@ -610,9 +721,7 @@
 
         },
 
-        clear: function(addEvent) {
-
-            addEvent = addEvent || false;
+        clear: function(addEvent = false) {
 
             var hasConfirm = this.$eventType('confirm');
 
@@ -755,7 +864,6 @@
             if (this.restart) {
 
                 this.restart = false;
-
                 return this.start();
 
             }
@@ -774,7 +882,6 @@
             } else if (json.event === 'restart') {
 
                 this.restart = true;
-
                 return this.stop();
 
             }
@@ -879,7 +986,7 @@
 
     });
 
-    /*
+    /**
      * Scripts UI: Timer
      */
     var ACFEScriptsTimer = acf.Model.extend({
@@ -891,10 +998,9 @@
             return $('#events .postbox-footer .timer > .time');
         },
 
-        start: function(reset) {
+        start: function(reset = false) {
 
             var self = this;
-            reset = reset || false;
 
             if (reset) {
                 self.$time().html('00:00:00');
@@ -935,7 +1041,7 @@
 
     });
 
-    /*
+    /**
      * Scripts UI: Stats
      */
     var ACFEScriptsStats = acf.Model.extend({
@@ -1012,9 +1118,7 @@
         clear: function() {
 
             this.$total().find('> span').html('-');
-
             this.$left().find('> span').html('-');
-
             this.$timeLeft().find('> span').html('-');
 
         },
@@ -1024,71 +1128,75 @@
 })(jQuery);
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
-     * Settings UI
-     */
-    new acf.Model({
+    var moduleManager = new acf.Model({
+        wait: 'prepare',
+        priority: 1,
+        initialize: function() {
+            if (acf.get('screen') === 'acfe_settings') {
+                new module();
+            }
+        }
+    });
+
+    var module = acf.Model.extend({
 
         actions: {
-            'ready': 'ready',
             'new_field': 'newField',
         },
 
-        ready: function() {
+        events: {
+            'click [data-acfe-settings-action="edit"]': 'onClickEdit',
+            'click [data-acfe-settings-action="default"]': 'onClickDefault',
+        },
 
-            $('[data-acfe-settings-action="edit"]').click(function(e) {
+        onClickEdit: function(e, $el) {
 
-                var $this = $(this);
-                var key = $this.data('acfe-settings-field');
-                var field = acf.getField(key);
+            var key = $el.data('acfe-settings-field');
+            var field = acf.getField(key);
 
-                field.showEnable(field.cid);
+            field.showEnable(field.cid);
 
-                acf.hide($this);
-                acf.show($this.closest('div').find('[data-acfe-settings-action="default"]'));
+            acf.hide($el);
+            acf.show($el.closest('div').find('[data-acfe-settings-action="default"]'));
 
-                var $tab = $this.closest('.inside').find('> .acf-tab-wrap > .acf-tab-group > li.active span.acfe-tab-badge');
-                var count = parseInt($tab.text()) + 1;
-                $tab.text(count);
+            var $tab = $el.closest('.inside').find('> .acf-tab-wrap > .acf-tab-group > li.active span.acfe-tab-badge');
+            var count = parseInt($tab.text()) + 1;
+            $tab.text(count);
 
-                if (count > 0) {
-                    acf.show($tab);
-                }
+            if (count > 0) {
+                acf.show($tab);
+            }
 
-            });
+        },
 
-            $('[data-acfe-settings-action="default"]').click(function(e) {
+        onClickDefault: function(e, $el) {
 
-                var $this = $(this);
-                var key = $this.data('acfe-settings-field');
-                var field = acf.getField(key);
+            var key = $el.data('acfe-settings-field');
+            var field = acf.getField(key);
 
-                field.hideDisable(field.cid);
+            field.hideDisable(field.cid);
 
-                acf.hide($this);
-                acf.show($this.closest('div').find('[data-acfe-settings-action="edit"]'));
+            acf.hide($el);
+            acf.show($el.closest('div').find('[data-acfe-settings-action="edit"]'));
 
-                var $tab = $this.closest('.inside').find('> .acf-tab-wrap > .acf-tab-group > li.active span.acfe-tab-badge');
-                var count = parseInt($tab.text()) - 1;
-                $tab.text(count);
+            var $tab = $el.closest('.inside').find('> .acf-tab-wrap > .acf-tab-group > li.active span.acfe-tab-badge');
+            var count = parseInt($tab.text()) - 1;
+            $tab.text(count);
 
-                if (count === 0) {
-                    acf.hide($tab);
-                }
-
-            });
+            if (count === 0) {
+                acf.hide($tab);
+            }
 
         },
 
         newField: function(field) {
-
             if (field.$el.hasClass('acfe-disabled')) {
                 field.hideDisable(field.cid);
             }
-
         }
 
     });

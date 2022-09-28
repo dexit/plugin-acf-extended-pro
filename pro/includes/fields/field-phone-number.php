@@ -1,16 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_phone_number')):
 
 class acfe_field_phone_number extends acf_field{
     
-    /*
-     * Construct
+    /**
+     * initialize
      */
-    function __construct(){
+    function initialize(){
         
         $this->name = 'acfe_phone_number';
         $this->label = __('Phone Number', 'acfe');
@@ -20,6 +21,7 @@ class acfe_field_phone_number extends acf_field{
             'preferred_countries'   => array(),
             'default_country'       => '',
             'geolocation'           => 0,
+            'geolocation_token'     => '',
             'native'                => 0,
             'national'              => 0,
             'dropdown'              => 0,
@@ -29,12 +31,13 @@ class acfe_field_phone_number extends acf_field{
             'return_format'         => 'number',
         );
         
-        parent::__construct();
-        
     }
     
-    /*
-     * Render Field Settings
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
      */
     function render_field_settings($field){
         
@@ -87,11 +90,27 @@ class acfe_field_phone_number extends acf_field{
     
         // Geolocation
         acf_render_field_setting($field, array(
-            'label'         => __('Geolocation','acf'),
-            'instructions'  => 'Lookup the user\'s country based on their IP address',
+            'label'         => __('Geolocation', 'acfe'),
+            'instructions'  => __("Lookup the user's country based on their IP address using <a href='https://ipinfo.io/' target='_blank'>IPinfo.io</a>", 'acfe'),
             'name'          => 'geolocation',
             'type'          => 'true_false',
             'ui'            => 1,
+        ));
+    
+        acf_render_field_setting($field, array(
+            'label'         => __('Geolocation API token', 'acfe'),
+            'instructions'  => __('<a href="https://ipinfo.io/" target="_blank">IPinfo.io</a> API token', 'acfe'),
+            'name'          => 'geolocation_token',
+            'type'          => 'text',
+            'conditional_logic'    => array(
+                array(
+                    array(
+                        'field'     => 'geolocation',
+                        'operator'  => '==',
+                        'value'     => '1',
+                    ),
+                ),
+            )
         ));
     
         // Native Names
@@ -155,41 +174,53 @@ class acfe_field_phone_number extends acf_field{
             'type'          => 'text',
         ));
         
-        // return_format
+        $format = array(
+            'array'  => __('Phone Array', 'acfe'),
+            'number' => __('Phone Number', 'acfe'),
+        );
+        
+        if(class_exists('libphonenumber\PhoneNumberUtil')){
+        
+            $format['national'] = __('National Number', 'acfe');
+            $format['international'] = __('International Number', 'acfe');
+        
+        }
+        
+        // return format
         acf_render_field_setting($field, array(
             'label'         => __('Return Value', 'acf'),
             'instructions'  => '',
             'type'          => 'radio',
             'name'          => 'return_format',
             'layout'        => 'horizontal',
-            'choices'       => array(
-                'array'         => __('Phone Array', 'acf'),
-                'number'        => __('Phone Number', 'acf'),
-            ),
+            'choices'       => $format
         ));
         
-        // Server Validation
+        // server Validation
         if(!class_exists('libphonenumber\PhoneNumberUtil')){
         
             acf_render_field_setting($field, array(
-                'label'         => __('Server Validation', 'acf'),
+                'label'         => __('Additional Settings', 'acfe'),
                 'instructions'  => '',
                 'type'          => 'message',
                 'new_lines'     => 'br',
-                'message'       => '<a href="https://github.com/giggsey/libphonenumber-for-php" target="_blank">Libphonenumber for PHP</a> was not found on your WordPress website.<br />In order to enable the server validation you must manually include the library or install the <a href="https://www.acf-extended.com/addons/acf-extended-pro-libphonenumber.zip" target="_blank">ACF Extended: Phone Number Library Addon</a>.',
+                'message'       => __('Additional settings such as "National Number", "International Number" return formats and phone number server validation become available when using the <a href="https://github.com/giggsey/libphonenumber-for-php" target="_blank">Libphonenumber for PHP</a> library.<br />You can install this library manually or with the <a href="https://www.acf-extended.com/addons/acf-extended-pro-libphonenumber.zip" target="_blank">ACF Extended: Phone Number Library Addon</a> plugin.', 'acfe'),
             ));
         
         }
         
     }
     
-    /*
-     * Register Scripts
+    
+    /**
+     * input_admin_enqueue_scripts
      */
     function input_admin_enqueue_scripts(){
         
+        // suffix
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
         
+        // scripts
         wp_register_script('acfe-intl-tel-input', acfe_get_url('pro/assets/inc/intl-tel-input/intl-tel-input' . $suffix . '.js'), array('acf-input'), '17.0.0');
         wp_register_style('acfe-intl-tel-input', acfe_get_url('pro/assets/inc/intl-tel-input/intl-tel-input' . $suffix . '.css'), array(), '17.0.0');
         
@@ -202,25 +233,36 @@ class acfe_field_phone_number extends acf_field{
                 'phoneNumberTooLong'    => _x('Phone Number is too long',   'Phone Number JS phoneNumberTooLong',   'acfe'),
             )
         ));
+    
+        if(acfe_is_block_editor()){
+    
+            wp_enqueue_script('acfe-intl-tel-input');
+            wp_enqueue_style('acfe-intl-tel-input');
+        
+        }
         
     }
     
-    /*
-     * Render Field
+    
+    /**
+     * render_field
+     *
+     * @param $field
      */
     function render_field($field){
         
-        // Enqueue
+        // enqueue
         wp_enqueue_script('acfe-intl-tel-input');
         wp_enqueue_style('acfe-intl-tel-input');
         
-        // Div
+        // div
         $div = array(
             'class'                     => "acfe-phone-number {$field['class']}",
             'data-countries'            => $field['countries'],
             'data-preferred_countries'  => $field['preferred_countries'],
             'data-default_country'      => $field['default_country'],
             'data-geolocation'          => $field['geolocation'],
+            'data-geolocation_token'    => $field['geolocation_token'],
             'data-native'               => $field['native'],
             'data-dropdown'             => $field['dropdown'],
             'data-dial_code'            => $field['dial_code'],
@@ -228,21 +270,25 @@ class acfe_field_phone_number extends acf_field{
             'data-placeholder'          => $field['placeholder'],
         );
         
-        $value = $field['value'] === false ? '' : $field['value'];
-        $hidden_value = is_array($value) ? $value : '';
-        $text_value = is_array($value) ? acf_maybe_get($field['value'], 'number') : $value;
+        // value
+        $value = $field['value'];
+        
+        // decode old array format
+        if(is_array($value)){
+            $value = acf_maybe_get($value, 'number');
+        }
         
         // Hidden
         $hidden_input = array(
             'name'  => $field['name'],
-            'value' => $hidden_value,
+            'value' => $value,
         );
         
         // Text
         $text_input = array(
             'type'  => 'tel',
             'class' => 'input',
-            'value' => $text_value,
+            'value' => $value,
         );
         
         // Render
@@ -255,99 +301,272 @@ class acfe_field_phone_number extends acf_field{
         
     }
     
+    
+    /**
+     * validate_value
+     *
+     * @param $valid
+     * @param $value
+     * @param $field
+     * @param $input
+     *
+     * @return mixed|string|null
+     */
     function validate_value($valid, $value, $field, $input){
         
-        if(!$value)
+        // bail early
+        if(!$value){
             return $valid;
+        }
         
-        // Check library
-        if(!class_exists('libphonenumber\PhoneNumberUtil'))
+        // check library
+        if(!class_exists('libphonenumber\PhoneNumberUtil')){
             return $valid;
+        }
         
-        // Check string
-        if(!is_string($value))
-            return __('Invalid Phone Number', 'acfe');
-        
-        // Decode JSON
-        $value = json_decode(wp_unslash($value), true);
-        
-        if(!$value)
-            return __('Invalid Phone Number', 'acfe');
-        
-        // Ensure value is an array
-        $value = acf_get_array($value);
-        
-        // Format array
-        $value = wp_parse_args($value, array(
-            'number' => '',
-            'country' => '',
-        ));
-        
-        // Bail early
-        if(empty($value['number']) || empty($value['country']))
-            $valid = __('Invalid Phone Number', 'acfe');
-        
-        // Get libphonenumber instance
+        // get libphonenumber instance
         $libphonenumber = libphonenumber\PhoneNumberUtil::getInstance();
         
-        // Validate
+        // validate
         try{
         
-            $number_data = $libphonenumber->parse($value['number'], $value['country']);
-        
-            if(!$libphonenumber->isValidNumber($number_data))
+            $number_data = $libphonenumber->parse($value);
+            
+            // check number validity
+            if(!$libphonenumber->isValidNumber($number_data)){
                 $valid = __('Invalid Phone Number', 'acfe');
+            }
+            
+            // check allowed countries
+            if($field['countries']){
+                
+                // get phone country
+                $country = strtolower($libphonenumber->getRegionCodeForNumber($number_data));
+                
+                // check allowed
+                if(!in_array($country, $field['countries'])){
+                    $valid = __('Invalid Country', 'acfe');
+                }
+                
+            }
         
         }catch(libphonenumber\NumberParseException $e){
-            
             $valid = __('Invalid Phone Number', 'acfe');
-            
         }
         
         return $valid;
         
     }
     
+    
+    /**
+     * update_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false
+     */
     function update_value($value, $post_id, $field){
         
-        // Decode JSON string
-        if(is_string($value)){
-            $value = json_decode(wp_unslash($value), true);
-        }
-    
-        // Ensure value is an array.
-        if($value){
-    
-            $value = acf_get_array($value);
-            
-            return wp_parse_args($value, array(
-                'number' => '',
-                'country' => '',
-            ));
-            
+        // parse old array format
+        if(is_array($value)){
+            $value = acf_maybe_get($value, 'number');
         }
         
-        // Return
-        return false;
+        // return
+        return $value;
         
     }
     
-    /*
-     * Format Value
-     */
-    function format_value($value, $post_id, $field){
     
-        // Decode JSON string
-        if(acfe_is_json($value)){
-            $value = json_decode(wp_unslash($value), true);
-        }
+    /**
+     * load_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return mixed
+     */
+    function load_value($value, $post_id, $field){
         
-        // Number
-        if($field['return_format'] === 'number'){
+        // parse old array format
+        if(is_array($value)){
             $value = acf_maybe_get($value, 'number');
         }
+        
+        // return
+        return $value;
+        
+    }
     
-        // Return
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|mixed|string|null
+     */
+    function format_value($value, $post_id, $field){
+        
+        // bail early
+        if(empty($value)){
+            return $value;
+        }
+        
+        // array
+        if($field['return_format'] === 'array'){
+            
+            $array = array(
+                'number'        => $value,
+                'country'       => $this->get_phone_country($value),
+                'national'      => $this->get_phone_format($value, 'national'),
+                'international' => $this->get_phone_format($value, 'international'),
+            );
+            
+            // set value
+            $value = $array;
+        
+        // number
+        }elseif($field['return_format'] === 'number'){
+            
+            // do nothing
+    
+        // national + international
+        }elseif($field['return_format'] === 'national' || $field['return_format'] === 'international'){
+            
+            $value = $this->get_phone_format($value, $field['return_format']);
+            
+        }
+    
+        // return
+        return $value;
+        
+    }
+    
+    
+    /**
+     * get_phone_country
+     *
+     * @param $value
+     *
+     * @return mixed|string
+     */
+    function get_phone_country($value){
+    
+        // libphonenumber
+        if(class_exists('libphonenumber\PhoneNumberUtil')){
+    
+            // retrieve library
+            $libphonenumber = libphonenumber\PhoneNumberUtil::getInstance();
+    
+            try{
+        
+                // parse number
+                $number_data = $libphonenumber->parse($value);
+        
+                return strtolower($libphonenumber->getRegionCodeForNumber($number_data));
+        
+            }catch(libphonenumber\NumberParseException $e){}
+            
+            return '';
+            
+        // simple phones
+        }else{
+    
+            $phones = acfe_include('pro/includes/data/phones.php');
+            $number = str_replace('+', '', $value);
+            $storage = array();
+    
+            foreach($phones as $phone){
+        
+                if(acfe_starts_with($number, $phone['code'])){
+                    $storage[] = $phone;
+                }
+        
+            }
+    
+            if(!$storage){
+                return '';
+            }
+            
+            $found = array();
+            
+            // sort storage by priority
+            usort($storage, function($a, $b){
+                return $a['priority'] - $b['priority'];
+            });
+            
+            // loop storage
+            foreach($storage as $store){
+                
+                // parse full code + area
+                foreach($store['full'] as $full){
+                    
+                    if(acfe_starts_with($number, $full)){
+                        $found = $store;
+                        break;
+                    }
+                    
+                }
+                
+            }
+            
+            // found full code + area
+            if($found){
+                return $found['country'];
+            }
+            
+            // use top priority code
+            $data = current($storage);
+            
+            return $data['country'];
+            
+        }
+        
+    }
+    
+    
+    /**
+     * get_phone_format
+     *
+     * @param $value
+     * @param $format
+     *
+     * @return mixed|string
+     */
+    function get_phone_format($value, $format = 'national'){
+        
+        // bail early
+        if(!class_exists('libphonenumber\PhoneNumberUtil')){
+            return $value;
+        }
+    
+        // retrieve library
+        $libphonenumber = libphonenumber\PhoneNumberUtil::getInstance();
+    
+        try{
+        
+            // parse number
+            $number_data = $libphonenumber->parse($value);
+        
+            // 044 668 18 00
+            if($format === 'national'){
+                $value = $libphonenumber->format($number_data, libphonenumber\PhoneNumberFormat::NATIONAL);
+            
+                // +41 44 668 18 00
+            }elseif($format === 'international'){
+                $value = $libphonenumber->format($number_data, libphonenumber\PhoneNumberFormat::INTERNATIONAL);
+            }
+        
+        }catch(libphonenumber\NumberParseException $e){}
+        
+        // return
         return $value;
         
     }

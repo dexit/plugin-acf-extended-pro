@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 // Check setting
 if(!acf_get_setting('acfe/modules/rewrite_rules'))
@@ -28,7 +29,9 @@ class acfe_pro_rewrite_rules{
      */
     function admin_menu(){
     
-        if(!acf_get_setting('show_admin')) return;
+        if(!acf_get_setting('show_admin')){
+            return;
+        }
         
         // add page
         $page = add_management_page(__('Rewrite Rules'), __('Rewrite Rules'), acf_get_setting('capability'), 'acfe-rewrite-rules', array($this, 'html'));
@@ -67,7 +70,7 @@ class acfe_pro_rewrite_rules{
         // Preload
         $rewrite_rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
         $rewrite_rules_ui = array();
-        $public_query_vars = apply_filters( 'query_vars', $GLOBALS['wp']->public_query_vars );
+        $public_query_vars = apply_filters('query_vars', $GLOBALS['wp']->public_query_vars);
         $rewrite_patterns = array();
     
         $idx = 0;
@@ -77,25 +80,27 @@ class acfe_pro_rewrite_rules{
             
                 $idx++;
                 $regex_tree = null;
-                $rewrite_patterns[$idx] = addslashes($pattern);
+                $rewrite_patterns[ $idx ] = addslashes($pattern);
                 $rewrite_rule_ui = array(
                     'pattern' => $pattern,
                 );
             
-                try {
+                try{
                     $regex_tree = $this->parse( $pattern );
                 } catch ( Exception $e ) {
                     $rewrite_rule_ui['error'] = $e;
                 }
             
-                $regex_groups = $this->collect_groups( $regex_tree );
+                $regex_groups = $this->collect_groups($regex_tree);
             
-                $rewrite_rule_ui['print'] = $this->print_regex( $regex_tree, $idx );
+                $rewrite_rule_ui['print'] = $this->print_regex($regex_tree, $idx);
             
-                $substitution_parts = $this->parse_substitution( $substitution );
+                $substitution_parts = $this->parse_substitution($substitution);
             
                 $substitution_parts_ui = array();
-                foreach ( $substitution_parts as $query_var => $query_value ) {
+                
+                foreach($substitution_parts as $query_var => $query_value){
+                    
                     $substitution_part_ui = array(
                         'query_var' => $query_var,
                         'query_value' => $query_value,
@@ -106,36 +111,40 @@ class acfe_pro_rewrite_rules{
                     // This is so complicated to handle situations where `$query_value` contains multiple `$matches[DD]`
                     $query_value_replacements = array();
                 
-                    if ( preg_match_all( '/\$matches\[(\d+)\]/', $query_value, $matches, PREG_OFFSET_CAPTURE ) ) {
+                    if(preg_match_all('/\$matches\[(\d+)\]/', $query_value, $matches, PREG_OFFSET_CAPTURE)){
                     
-                        foreach ( $matches[0] as $m_idx => $match ) {
+                        foreach($matches[0] as $m_idx => $match){
                         
-                            $regex_group_idx = $matches[1][$m_idx][0];
-                            $query_value_replacements[$match[1]] = array(
-                                'replacement' => $this->print_regex( $regex_groups[$regex_group_idx], $idx, true ),
-                                'length' => strlen( $match[0] ),
-                                'offset' => $match[1],
-                            );
+                            $regex_group_idx = $matches[1][ $m_idx ][0];
+                            
+                            if(isset($regex_groups[ $regex_group_idx ])){
+    
+                                $query_value_replacements[ $match[1] ] = array(
+                                    'replacement' => $this->print_regex($regex_groups[ $regex_group_idx ], $idx, true),
+                                    'length' => strlen($match[0]),
+                                    'offset' => $match[1],
+                                );
+                                
+                            }
                         
                         }
                     
                     }
-                    krsort( $query_value_replacements );
-                    foreach ( $query_value_replacements as $query_value_replacement ) {
-                    
-                        $query_value_ui = substr_replace( $query_value_ui, $query_value_replacement['replacement'], $query_value_replacement['offset'], $query_value_replacement['length'] );
-                    
+                    krsort($query_value_replacements);
+                    foreach($query_value_replacements as $query_value_replacement){
+                        $query_value_ui = substr_replace($query_value_ui, $query_value_replacement['replacement'], $query_value_replacement['offset'], $query_value_replacement['length']);
                     }
+                    
                     $substitution_part_ui['query_value_ui'] = $query_value_ui;
                 
                     // Highlight non-public query vars
-                    $substitution_part_ui['is_public'] = in_array( $query_var, $public_query_vars );
+                    $substitution_part_ui['is_public'] = in_array($query_var, $public_query_vars);
                     $substitution_parts_ui[] = $substitution_part_ui;
                 
                 }
             
                 $rewrite_rule_ui['substitution_parts'] = $substitution_parts_ui;
-                $rewrite_rules_ui[$idx] = $rewrite_rule_ui;
+                $rewrite_rules_ui[ $idx ] = $rewrite_rule_ui;
             
             }
             
@@ -228,7 +237,7 @@ class acfe_pro_rewrite_rules{
                     <?php foreach($this->rewrite_rules_ui as $idx => $rewrite_rule_ui): ?>
                     
                         <tr id="rewrite-rule-<?php echo $idx; ?>" class="rewrite-rule-line">
-                            <?php if ( array_key_exists( 'error', $rewrite_rule_ui ) ) : ?>
+                            <?php if(array_key_exists('error', $rewrite_rule_ui)): ?>
                                 <td colspan="2">
                                     <code><?php echo $rewrite_rule_ui['pattern']; ?></code>
                                     <p class="error">Error parsing regex: <?php echo $rewrite_rule_ui['error']; ?></p>
@@ -236,7 +245,7 @@ class acfe_pro_rewrite_rules{
                             <?php else : ?>
                                 <td><code><?php echo $rewrite_rule_ui['print']; ?></code></td>
                                 <td>
-                                    <pre><?php foreach ( $rewrite_rule_ui['substitution_parts'] as $substitution_part_ui ) {
+                                    <pre><?php foreach($rewrite_rule_ui['substitution_parts'] as $substitution_part_ui){
                                         if ( $substitution_part_ui['is_public'] ) {
                                             echo '<span class="queryvar-public">';
                                         } else {
@@ -359,22 +368,35 @@ class acfe_pro_rewrite_rules{
      */
     function parse_substitution($substitution){
         
-        if ( strncmp( 'index.php?', $substitution, 10 ) == 0 ) {
-            $substitution = substr( $substitution, 10 );
+        if(strncmp('index.php?', $substitution, 10) == 0){
+            $substitution = substr($substitution, 10);
         }
-        
-        parse_str( $substitution, $parsed_url_parts );
-        
+    
         $cleaned_url_parts = array();
         
-        foreach ( $parsed_url_parts as $query_var => $query_value ) {
+        // exception when rewrite tag is not declared
+        if(strpos($substitution, '%') !== false){
+    
+            $cleaned_url_parts[ $substitution ] = '';
             
-            if ( is_array( $query_value ) ) {
-                foreach ( $query_value as $idx => $value ) {
-                    $cleaned_url_parts[$query_var . '[' . $idx . ']'] = $value;
+        }else{
+    
+            parse_str($substitution, $parsed_url_parts);
+    
+            foreach($parsed_url_parts as $query_var => $query_value){
+        
+                if (is_array($query_value)){
+            
+                    foreach($query_value as $idx => $value){
+                        $cleaned_url_parts[$query_var . '[' . $idx . ']'] = $value;
+                    }
+            
+                }else{
+            
+                    $cleaned_url_parts[$query_var] = $query_value;
+            
                 }
-            } else {
-                $cleaned_url_parts[$query_var] = $query_value;
+        
             }
             
         }

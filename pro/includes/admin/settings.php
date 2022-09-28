@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_admin_settings')):
 
@@ -57,6 +58,8 @@ class acfe_pro_admin_settings{
         // Enqueue
         acf_enqueue_scripts();
     
+        add_action('admin_footer', array($this, 'admin_footer'));
+    
         // Submit
         if(acf_verify_nonce('acfe_settings')){
         
@@ -80,6 +83,17 @@ class acfe_pro_admin_settings{
         
         }
         
+    }
+    
+    
+    function admin_footer(){
+        ?>
+        <script type="text/javascript">
+        (function($) {
+            $('body').removeClass('post-type-acf-field-group');
+        })(jQuery);
+        </script>
+        <?php
     }
     
     /*
@@ -412,11 +426,14 @@ class acfe_pro_admin_settings{
                     }
                 ));
     
+                $icon = acf_version_compare('wp', '>=', '5.5') ? 'dashicons-info-outline' : 'dashicons-info';
+    
                 foreach($fields as $field){ ?>
 
                     <div class="acf-field">
                         <div class="acf-label">
-                            <label><span class="acf-js-tooltip dashicons dashicons-info" title="<?php echo $field['name']; ?>"></span><?php echo $field['label']; ?></label>
+                            <span class="acfe-field-tooltip acf-js-tooltip dashicons <?php echo $icon; ?>" title="<?php echo $field['name']; ?>"></span>
+                            <label><?php echo $field['label']; ?></label>
                             <?php if($field['description']){ ?>
                                 <p class="description"><?php echo $field['description']; ?></p>
                             <?php } ?>

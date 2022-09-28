@@ -1,30 +1,30 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_field_checkbox')):
 
-class acfe_pro_field_checkbox{
+class acfe_pro_field_checkbox extends acfe_field_extend{
     
-    public $instance;
-    
-    /*
-     * Construct
+    /**
+     * initialize
      */
-    function __construct(){
-        
-        // instance
-        $this->instance = $instance = acf_get_field_type('checkbox');
+    function initialize(){
     
-        // render field
-        remove_action('acf/render_field/type=checkbox', array($instance, 'render_field'), 9);
-        add_action('acf/render_field/type=checkbox',    array($this, 'render_field'), 9);
+        $this->name = 'checkbox';
+        $this->replace = array(
+            'render_field'
+        );
         
     }
     
-    /*
-     * Render Field
+    
+    /**
+     * render_field
+     *
+     * @param $field
      */
     function render_field($field){
         
@@ -87,8 +87,13 @@ class acfe_pro_field_checkbox{
         
     }
     
-    /*
-     * Render Field Toggle
+    
+    /**
+     * render_field_toggle
+     *
+     * @param $field
+     *
+     * @return string
      */
     function render_field_toggle($field){
     
@@ -120,8 +125,13 @@ class acfe_pro_field_checkbox{
         
     }
     
-    /*
-     * Render Field Choices
+    
+    /**
+     * render_field_choices
+     *
+     * @param $field
+     *
+     * @return string
      */
     function render_field_choices($field){
         
@@ -130,8 +140,15 @@ class acfe_pro_field_checkbox{
         
     }
     
-    /*
-     * Walk Choices
+    
+    /**
+     * walk
+     *
+     * @param $choices
+     * @param $args
+     * @param $depth
+     *
+     * @return string
      */
     function walk($choices = array(), $args = array(), $depth = 0){
         
@@ -227,18 +244,25 @@ class acfe_pro_field_checkbox{
         
     }
     
-    /*
-     * Get Checkbox Input
+    
+    /**
+     * get_checkbox_input
+     *
      * Modified from acf_get_checkbox_input()
+     *
+     * @param $atts
+     * @param $field
+     *
+     * @return string
      */
     function get_checkbox_input($atts, $field){
         
-        // Allow radio or checkbox type.
+        // allow radio or checkbox type.
         $atts = wp_parse_args($atts, array(
             'type' => 'checkbox'
         ));
         
-        // Get label.
+        // get label
         $label = '';
         
         if(isset($atts['label'])){
@@ -270,14 +294,15 @@ class acfe_pro_field_checkbox{
     
         // append
         if(!empty($buffer)){
-        
             $choice_render = $buffer;
-        
         }
         
-        // Render.
+        // render
         $checked = isset($atts['checked']);
+        
+        // return
         return '<label' . ($checked ? ' class="selected"' : '') . '>' . $choice_render . '</label>';
+        
     }
     
 }

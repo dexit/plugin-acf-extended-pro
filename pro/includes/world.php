@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('ACFE_World_Data')):
 
@@ -85,8 +86,8 @@ class ACFE_World_Query{
     function filter(){
         
         // vars
-        $args = $this->args;
-        $data = $this->data;
+        $args = acf_get_array($this->args);
+        $data = acf_get_array($this->data);
         
         // generate rules
         $_args = array_keys($args);

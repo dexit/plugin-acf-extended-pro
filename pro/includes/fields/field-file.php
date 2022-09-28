@@ -1,224 +1,39 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_field_file')):
 
-class acfe_pro_field_file{
+class acfe_pro_field_file extends acfe_field_extend{
     
-    public $files = array();
-    
-    function __construct(){
+    /**
+     * initialize
+     */
+    function initialize(){
         
-        $file = acf_get_field_type('file');
-        $media = acf_get_instance('ACF_Media');
-        
-        // Render Field
-        remove_action('acf/render_field/type=file',             array($file, 'render_field'), 9);
-        add_action('acf/render_field/type=file',                array($this, 'render_field'), 9);
-        
-        // Upload Files
-        remove_action('acf/save_post',                          array($media, 'save_files'), 5);
-        add_action('acf/save_post',                             array($this, 'save_files'), 5);
-        
-        // Update Value
-        remove_filter('acf/update_value/type=file',             array($file, 'update_value'));
-        add_filter('acf/update_value/type=file',                array($this, 'update_value'), 10, 3);
-        
-        // Validate Value
-        remove_filter('acf/validate_value/type=file',           array($file, 'validate_value'));
-        add_filter('acf/validate_value/type=file',              array($this, 'validate_value'), 10, 4);
-        
-        // Format Value
-        remove_filter('acf/format_value/type=file',             array($file, 'format_value'));
-        add_filter('acf/format_value/type=file',                array($this, 'format_value'), 10, 3);
-        
-        // Upload Prefilter
-        add_filter('acfe/upload_dir/type=file',                 array($this, 'upload_dir'), 10, 2);
-        
-        // Settings
-        add_action('acf/render_field_settings/type=file',       array($this, 'field_settings'));
-        
-    }
-    
-    function save_files($post_id = 0){
-        
-        // bail early if no $_FILES data
-        if(empty($_FILES['acf']['name'])){
-            return;
-        }
-        
-        // upload files
-        $this->upload_files();
-        
-    }
-    
-    function upload_files($ancestors = array()){
-        
-        // vars
-        $file = array(
-            'name'      => '',
-            'type'      => '',
-            'tmp_name'  => '',
-            'error'     => '',
-            'size'      => ''
+        $this->name = 'file';
+        $this->replace = array(
+            'render_field',
+            'update_value',
+            'validate_value',
+            'format_value',
         );
         
-        // populate with $_FILES data
-        foreach(array_keys($file) as $k){
-            
-            $file[$k] = $_FILES['acf'][$k];
-            
-        }
-        
-        // walk through ancestors
-        if(!empty($ancestors)){
-            
-            foreach($ancestors as $a){
-                
-                foreach(array_keys($file) as $k){
-                    
-                    $file[ $k ] = $file[ $k ][ $a ];
-                    
-                }
-                
-            }
-            
-        }
-        
-        // is array?
-        if(is_array($file['name'])){
-            
-            foreach(array_keys($file['name']) as $k){
-                
-                $_ancestors = array_merge($ancestors, array($k));
-                
-                $this->upload_files($_ancestors);
-                
-            }
-            
-            return;
-            
-        }
-        
-        // bail ealry if file has error (no file uploaded)
-        if($file['error']){
-            
-            return;
-            
-        }
-        
-        // Remove numeric ancestor: acf[field_123abc][0]
-        foreach($ancestors as $_k => $ancestor){
-            
-            if(!is_numeric($ancestor))
-                continue;
-            
-            unset($ancestors[$_k]);
-            
-        }
-        
-        //acf_log('-------------- Advanced Uploader: Upload ---------------');
-        //acf_log('File name:', $file['name']);
-        
-        // assign global _acfuploader for media validation
-        $_POST['_acfuploader'] = end($ancestors);
-        
-        // file found!
-        $attachment_id = acf_upload_file($file);
-        
-        // Save file globally (to be reused later)
-        $this->files[] = $file;
-        
-        // update $_POST
-        array_unshift($ancestors, 'acf');
-        
-        $this->update_nested_array($_POST, $ancestors, $attachment_id);
+        // Upload Prefilter
+        $this->add_field_filter('acfe/upload_dir', array($this, 'upload_dir'), 10, 2);
         
     }
     
-    function update_nested_array(&$array, $ancestors, $value){
-        
-        // if no more ancestors, update the current var
-        if(empty($ancestors)){
-            
-            //acf_log('-------- Advanced Uploader: Second Pass (empty) --------');
-            //acf_log('$array before:', $array);
-            
-            // Search: array([0] => url=C:/fakepath/image.gif&name=image.gif&size=465547&type=image%2Fgif)
-            if(is_array($array)){
-                
-                foreach($array as &$row){
-                    
-                    if(!is_string($row) || stripos($row, 'url=') !== 0)
-                        continue;
-                    
-                    $file_parsed = null;
-                    parse_str(wp_specialchars_decode($row), $file_parsed);
-                    
-                    // Get global uploaded files to make sure the order is respected (check name & size)
-                    foreach($this->files as $file_uploaded){
     
-                        $file_parsed['name'] = wp_unslash($file_parsed['name']);
-                        
-                        if($file_uploaded['name'] !== $file_parsed['name'] || absint($file_uploaded['size']) !== absint($file_parsed['size']))
-                            continue;
-                        
-                        // Found. Replace with Attachment ID
-                        $row = $value;
-                        
-                        break 2;
-                        
-                    }
-                    
-                }
-                
-            }else{
-                
-                // Search: 146 (Attachment ID already set before)
-                if(is_numeric($array)){
-                    
-                    // Convert to array for next upload (if any)
-                    $array = acf_get_array($array);
-                    $array[] = $value;
-                    
-                    // Other: Native behavior
-                }else{
-                    
-                    $array = $value;
-                    
-                }
-                
-            }
-            
-            //acf_log('$array after:', $array);
-            
-            // return
-            return true;
-            
-        }
-        
-        // shift the next ancestor from the array
-        $k = array_shift($ancestors);
-        
-        // if exists
-        if(isset($array[$k])){
-            
-            //acf_log('-------- Advanced Uploader: First Pass (!empty) --------');
-            //acf_log('$array['.$k.']', $array[$k]);
-            
-            return $this->update_nested_array($array[$k], $ancestors, $value);
-            
-        }
-        
-        // return
-        return false;
-        
-    }
-    
-    /*
-     * File Upload Dir
+    /**
+     * upload_dir
+     *
+     * @param $uploads
+     * @param $field
+     *
+     * @return mixed
      */
     function upload_dir($uploads, $field){
         
@@ -257,7 +72,13 @@ class acfe_pro_field_file{
         
     }
     
-    function field_settings($field){
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
+    function render_field_settings($field){
         
         // Preview Style
         acf_render_field_setting($field, array(
@@ -457,6 +278,12 @@ class acfe_pro_field_file{
         
     }
     
+    
+    /**
+     * render_field
+     *
+     * @param $field
+     */
     function render_field($field){
         
         // uploader setting
@@ -511,21 +338,15 @@ class acfe_pro_field_file{
         }
         
         if($min){
-            
             $div['data-min'] = $min;
-            
         }
         
         if($max){
-            
             $div['data-max'] = $max;
-            
         }
         
         if(!$stylised_button){
-            
             $div['data-basic'] = true;
-            
         }
         
         if($preview_style){
@@ -585,13 +406,11 @@ class acfe_pro_field_file{
         
         // has value
         if($has_value){
-            
             $div['class'] .= ' has-value';
-            
         }
         
         ?>
-        <div <?php acf_esc_attr_e($div); ?>>
+        <div <?php echo acf_esc_attrs($div); ?>>
             
             <?php
             acf_hidden_input(array(
@@ -622,7 +441,7 @@ class acfe_pro_field_file{
                     
                     ?>
 
-                    <div <?php acf_esc_attr_e($wrap); ?>>
+                    <div <?php echo acf_esc_attrs($wrap); ?>>
                         
                         <?php
                         acf_hidden_input(array(
@@ -673,11 +492,12 @@ class acfe_pro_field_file{
             }
             
             $button_label = acf_maybe_get($field, 'button_label');
-            if(empty($button_label))
+            if(empty($button_label)){
                 $button_label = __('Add File','acf');
+            }
             ?>
 
-            <div <?php acf_esc_attr_e($wrapper); ?>>
+            <div <?php echo acf_esc_attrs($wrapper); ?>>
                 
                 <?php if($uploader == 'basic'): ?>
 
@@ -697,9 +517,10 @@ class acfe_pro_field_file{
                         <?php
                         
                         $args = array(
-                            'name'      => $field_name,
-                            'id'        => $field['id'],
-                            'accept'    => $field['mime_types']
+                            'name'   => $field_name,
+                            'id'     => $field['id'],
+                            'key'    => $field['key'],
+                            'accept' => $field['mime_types']
                         );
                         
                         if($multiple){
@@ -733,6 +554,16 @@ class acfe_pro_field_file{
         
     }
     
+    
+    /**
+     * update_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|null
+     */
     function update_value($value, $post_id, $field){
         
         // Bail early if no value.
@@ -777,6 +608,17 @@ class acfe_pro_field_file{
         
     }
     
+    
+    /**
+     * validate_value
+     *
+     * @param $valid
+     * @param $value
+     * @param $field
+     * @param $input
+     *
+     * @return false|mixed|string
+     */
     function validate_value($valid, $value, $field, $input){
         
         $values = acf_get_array($value);
@@ -840,6 +682,16 @@ class acfe_pro_field_file{
         
     }
     
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed
+     */
     function format_value($value, $post_id, $field){
         
         $values = acf_get_array($value);
@@ -884,6 +736,6 @@ class acfe_pro_field_file{
     
 }
 
-new acfe_pro_field_file();
+acf_new_instance('acfe_pro_field_file');
 
 endif;

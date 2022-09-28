@@ -1,44 +1,259 @@
 (function($) {
 
-    if (typeof acf === 'undefined')
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
         return;
+    }
 
-    /*
+    /**
      * Duplicate Field
      */
     new acf.Model({
 
-        actions: {
-            'duplicate_field_object': 'onDuplicateObject',
+        wait: 'ready',
+
+        data: {
+            'shift': false,
         },
 
-        onDuplicateObject: function(field, newField) {
+        actions: {
+            'add_field_object': 'onAddField',
+            'duplicate_field_object': 'onDuplicateField',
+        },
 
-            var label = prompt('Field label', field.prop('label'));
+        events: {
+            'blur .field-label': 'onChangeLabel',
+        },
 
-            if (!label || !label.length)
+        initialize: function() {
+
+            this.on('keyup keydown', 'onShiftKey');
+
+            $('.add-field').addClass('acf-js-tooltip').attr('title', acf.__('Shift+click: Alternative mode'));
+
+        },
+
+        onShiftKey: function(e, $el) {
+            if (this.get('shift') !== e.shiftKey) {
+                this.set('shift', e.shiftKey);
+            }
+        },
+
+        onChangeLabel: function(e, $el) {
+
+            var field = acf.getFieldObject($el.closest('.acf-field-object'));
+
+            if (!field.get('newType')) {
                 return;
+            }
 
-            if (label === field.prop('label'))
+            // set
+            var label = field.get('label');
+            var name = acf.applyFilters('generate_field_object_name', acf.strSanitize(label), field);
+
+            if (name !== field.prop('name')) {
+
+                // set name
+                field.prop('name', name);
+
+                // only once
+                field.set('newType', false);
+
+            }
+
+        },
+
+        onAddField: function(field) {
+
+            // no prompt if no shift
+            if (!this.get('shift')) {
                 return;
+            }
 
-            var name = acf.applyFilters('generate_field_object_name', acf.strSanitize(label), newField);
+            var label = prompt(acf.__('Enter a Field Type'));
 
-            newField.prop('label', label);
-            newField.prop('name', name);
+            if (label && label.length) {
+                this.assignFieldProps(field, label, true);
+            }
+
+            // set shift back to false
+            this.set('shift', false);
+
+        },
+
+        onDuplicateField: function(_field, field) {
+
+            // no prompt if shift
+            if (this.get('shift')) {
+                return;
+            }
+
+            var _label = _field.prop('label');
+            var label = prompt(acf.__('Enter the Field Label') + '\n' + acf.__('Hint: Shift+click to bypass this prompt'), _label);
+
+            if (label && label.length && label !== _label) {
+                this.assignFieldProps(field, label);
+            }
+
+        },
+
+        assignFieldProps: function(field, label, searchType = false) {
+
+            var name = acf.applyFilters('generate_field_object_name', acf.strSanitize(label), field);
+
+            field.prop('label', label);
+            field.prop('name', name);
+
+            if (searchType) {
+
+                // search for field type based on label
+                var newType = acf.isget(acf.get('fieldTypes'), label, 'name');
+
+                // search for field type based on name
+                if (!newType) {
+                    newType = acf.isget(acf.get('fieldTypes'), name, 'name');
+                }
+
+                // search for field type based on name (with acfe_ prefixed)
+                if (!newType) {
+                    newType = acf.isget(acf.get('fieldTypes'), 'acfe_' + name, 'name');
+                }
+
+                if (newType) {
+
+                    // assign new field type
+                    field.$('.field-type').val(newType).change();
+
+                    // allow change name based on label (only once)
+                    field.set('newType', true);
+
+                }
+
+            }
 
         }
 
+
     });
 
-    /*
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
+     * Flexible Content: Layouts Locations
+     */
+    new acf.Model({
+
+        wait: 'ready',
+
+        events: {
+            'click .add-location-rule': 'onClickAddRule',
+            'click .add-location-group': 'onClickAddGroup',
+            'click .remove-location-rule': 'onClickRemoveRule',
+            'change .refresh-location-rule': 'onChangeRemoveRule'
+        },
+
+        initialize: function() {
+            this.$el = $('.acf-field-object-flexible-content');
+        },
+
+        onClickAddRule: function(e, $el) {
+            this.addRule($el.closest('tr'));
+        },
+
+        onClickRemoveRule: function(e, $el) {
+            this.removeRule($el.closest('tr'));
+        },
+
+        onChangeRemoveRule: function(e, $el) {
+            this.changeRule($el.closest('tr'));
+        },
+
+        onClickAddGroup: function(e, $el) {
+            this.addGroup($el.closest('.rule-groups'));
+        },
+
+        addRule: function($tr) {
+            acf.duplicate($tr);
+        },
+
+        removeRule: function($tr) {
+
+            $tr.closest('.acf-field-object').change();
+
+            if ($tr.siblings('tr').length === 0) {
+                $tr.closest('.rule-group').remove();
+            } else {
+                $tr.remove();
+            }
+
+        },
+
+        changeRule: function($rule) {
+
+            // vars
+            var $group = $rule.closest('.rule-group');
+            var prefix = $rule.find('td.param select').attr('name').replace('[param]', '');
+
+            // ajaxdata
+            var ajaxdata = {};
+            ajaxdata.action = 'acfe/layout/render_location_rule';
+            ajaxdata.prefix = prefix;
+            ajaxdata.rule = acf.serialize($rule, prefix);
+            ajaxdata.rule.id = $rule.data('id');
+            ajaxdata.rule.group = $group.data('id');
+
+            // temp disable
+            acf.disable($rule.find('td.value'));
+
+            // ajax
+            $.ajax({
+                url: acf.get('ajaxurl'),
+                data: acf.prepareForAjax(ajaxdata),
+                type: 'post',
+                dataType: 'html',
+                success: function(html) {
+                    if (!html) return;
+                    $rule.replaceWith(html);
+                }
+            });
+        },
+
+        addGroup: function($ruleGroups) {
+
+            // vars
+            var $group = $ruleGroups.find('.rule-group:last');
+
+            // duplicate
+            $group2 = acf.duplicate($group);
+
+            // update h4
+            $group2.find('h4').text(acf.__('or'));
+
+            // remove all tr's except the first one
+            $group2.find('tr').not(':first').remove();
+
+        }
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
      * Global Conditional Field Settings
      */
     var ConditionalLogicField = acf.models.ConditionalLogicFieldSetting;
 
     acf.models.ConditionalLogicFieldSetting = ConditionalLogicField.extend({
 
-        /*
+        /**
          * Source: /assets/js/acf-field-group.js:1352
          */
         renderField: function() {
@@ -130,7 +345,7 @@
 
         },
 
-        /*
+        /**
          * Source: /assets/js/acf-field-group.js:1408
          */
         renderOperator: function() {
@@ -190,115 +405,14 @@
 
     });
 
-    /*
-     * Field Group Enhanced UI
-     */
-    new acf.Model({
+})(jQuery);
+(function($) {
 
-        actions: {
-            'prepare_field/name=acfe_note': 'note',
-            'prepare_field/name=hide_on_screen': 'hideOnScreen',
-            'prepare_field/name=acfe_permissions': 'permissions',
-            'prepare_field/name=acfe_meta': 'meta',
-        },
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
 
-        getTab: function(field, key) {
-
-            return field.$el.closest('.inside').find('.acf-tab-group a[data-key=' + key + ']');
-
-        },
-
-        hideOnScreen: function(field) {
-
-            var $tab = this.getTab(field, 'screen');
-            var tabTitle = $tab.text();
-
-            var val = field.val();
-            $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
-
-            field.on('change', function() {
-
-                var val = field.val();
-                $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
-
-            });
-
-        },
-
-        permissions: function(field) {
-
-            var $tab = this.getTab(field, 'permissions');
-            var tabTitle = $tab.text();
-
-            var val = field.val();
-            $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
-
-            field.on('change', function() {
-
-                var val = field.val();
-                $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
-
-            });
-
-        },
-
-        meta: function(field) {
-
-            var $tab = this.getTab(field, 'advanced');
-            var tabTitle = $tab.text();
-
-            var val = field.val();
-            $tab.html(tabTitle + (val ? ' <span class="acfe-tab-badge">' + val + '</span>' : ''));
-
-            field.on('change', function() {
-
-                var val = field.val();
-                $tab.html(tabTitle + (val ? ' <span class="acfe-tab-badge">' + val + '</span>' : ''));
-
-            });
-
-        },
-
-        note: function(field) {
-
-            var $tab = this.getTab(field, 'note');
-            var tabTitle = $tab.text();
-
-            var val = field.val();
-            $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">1</span>' : ''));
-
-            field.on('change', function() {
-
-                var val = field.val();
-                $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">1</span>' : ''));
-
-            });
-
-        },
-
-    });
-
-    /*
-     * Field: WYSIWYG
-     */
-    new acf.Model({
-
-        actions: {
-            'new_field/name=acfe_wysiwyg_toolbar_1': 'buttonClass',
-            'new_field/name=acfe_wysiwyg_toolbar_2': 'buttonClass',
-            'new_field/name=acfe_wysiwyg_toolbar_3': 'buttonClass',
-            'new_field/name=acfe_wysiwyg_toolbar_4': 'buttonClass',
-        },
-
-        buttonClass: function(field) {
-
-            field.$('.acf-button').removeClass('button-primary');
-
-        }
-
-    });
-
-    /*
+    /**
      * Field: Google Map
      */
     var mapEvent = false;
@@ -324,15 +438,14 @@
         },
 
         getGoogleMap: function(field) {
-
-            return acf.getInstance(field.$el.closest('tbody.acf-field-settings').find('> .acf-field-setting-acfe_google_map_preview'));
-
+            return acf.getInstance(field.$el.closest('tbody.acf-field-settings').find('> .acf-field-setting-default_value'));
         },
 
         mapInit: function(map, marker, field) {
 
-            if (field.get('name') !== 'acfe_google_map_preview')
+            if (field.get('name') !== 'default_value') {
                 return;
+            }
 
             google.maps.event.addListener(map, 'zoom_changed', function() {
 
@@ -729,101 +842,126 @@
 
     });
 
-    /*
-     * Flexible Content: Layouts Locations
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
+     * Field Group Enhanced UI
      */
     new acf.Model({
 
-        wait: 'ready',
-
-        events: {
-            'click .add-location-rule': 'onClickAddRule',
-            'click .add-location-group': 'onClickAddGroup',
-            'click .remove-location-rule': 'onClickRemoveRule',
-            'change .refresh-location-rule': 'onChangeRemoveRule'
+        actions: {
+            'prepare_field/name=acfe_note': 'note',
+            'prepare_field/name=hide_on_screen': 'hideOnScreen',
+            'prepare_field/name=acfe_permissions': 'permissions',
+            'prepare_field/name=acfe_meta': 'meta',
         },
 
-        initialize: function() {
-            this.$el = $('.acf-field-object-flexible-content');
-        },
+        getTab: function(field, key) {
 
-        onClickAddRule: function(e, $el) {
-            this.addRule($el.closest('tr'));
-        },
-
-        onClickRemoveRule: function(e, $el) {
-            this.removeRule($el.closest('tr'));
-        },
-
-        onChangeRemoveRule: function(e, $el) {
-            this.changeRule($el.closest('tr'));
-        },
-
-        onClickAddGroup: function(e, $el) {
-            this.addGroup($el.closest('.rule-groups'));
-        },
-
-        addRule: function($tr) {
-            acf.duplicate($tr);
-        },
-
-        removeRule: function($tr) {
-
-            $tr.closest('.acf-field-object').change();
-
-            if ($tr.siblings('tr').length === 0) {
-                $tr.closest('.rule-group').remove();
-            } else {
-                $tr.remove();
-            }
+            return field.$el.closest('.inside').find('.acf-tab-group a[data-key=' + key + ']');
 
         },
 
-        changeRule: function($rule) {
+        hideOnScreen: function(field) {
 
-            // vars
-            var $group = $rule.closest('.rule-group');
-            var prefix = $rule.find('td.param select').attr('name').replace('[param]', '');
+            var $tab = this.getTab(field, 'screen');
+            var tabTitle = $tab.text();
 
-            // ajaxdata
-            var ajaxdata = {};
-            ajaxdata.action = 'acfe/layout/render_location_rule';
-            ajaxdata.prefix = prefix;
-            ajaxdata.rule = acf.serialize($rule, prefix);
-            ajaxdata.rule.id = $rule.data('id');
-            ajaxdata.rule.group = $group.data('id');
+            var val = field.val();
+            $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
 
-            // temp disable
-            acf.disable($rule.find('td.value'));
+            field.on('change', function() {
 
-            // ajax
-            $.ajax({
-                url: acf.get('ajaxurl'),
-                data: acf.prepareForAjax(ajaxdata),
-                type: 'post',
-                dataType: 'html',
-                success: function(html) {
-                    if (!html) return;
-                    $rule.replaceWith(html);
-                }
+                var val = field.val();
+                $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
+
             });
+
         },
 
-        addGroup: function($ruleGroups) {
+        permissions: function(field) {
 
-            // vars
-            var $group = $ruleGroups.find('.rule-group:last');
+            var $tab = this.getTab(field, 'permissions');
+            var tabTitle = $tab.text();
 
-            // duplicate
-            $group2 = acf.duplicate($group);
+            var val = field.val();
+            $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
 
-            // update h4
-            $group2.find('h4').text(acf.__('or'));
+            field.on('change', function() {
 
-            // remove all tr's except the first one
-            $group2.find('tr').not(':first').remove();
+                var val = field.val();
+                $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">' + val.length + '</span>' : ''));
+
+            });
+
+        },
+
+        meta: function(field) {
+
+            var $tab = this.getTab(field, 'advanced');
+            var tabTitle = $tab.text();
+
+            var val = field.val();
+            $tab.html(tabTitle + (val ? ' <span class="acfe-tab-badge">' + val + '</span>' : ''));
+
+            field.on('change', function() {
+
+                var val = field.val();
+                $tab.html(tabTitle + (val ? ' <span class="acfe-tab-badge">' + val + '</span>' : ''));
+
+            });
+
+        },
+
+        note: function(field) {
+
+            var $tab = this.getTab(field, 'note');
+            var tabTitle = $tab.text();
+
+            var val = field.val();
+            $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">1</span>' : ''));
+
+            field.on('change', function() {
+
+                var val = field.val();
+                $tab.html(tabTitle + (val.length ? ' <span class="acfe-tab-badge">1</span>' : ''));
+
+            });
+
+        },
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
+     * Field: WYSIWYG
+     */
+    new acf.Model({
+
+        actions: {
+            'new_field/name=acfe_wysiwyg_toolbar_1': 'buttonClass',
+            'new_field/name=acfe_wysiwyg_toolbar_2': 'buttonClass',
+            'new_field/name=acfe_wysiwyg_toolbar_3': 'buttonClass',
+            'new_field/name=acfe_wysiwyg_toolbar_4': 'buttonClass',
+        },
+
+        buttonClass: function(field) {
+
+            field.$('.acf-button').removeClass('button-primary');
 
         }
+
     });
 
 })(jQuery);

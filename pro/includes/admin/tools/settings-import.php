@@ -1,7 +1,8 @@
 <?php 
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_settings_import')):
 
@@ -18,7 +19,19 @@ class acfe_settings_import extends ACF_Admin_Tool{
     function html(){
         
         ?>
-        <p>Import ACF Settings</p>
+    
+        <?php if(acfe_is_acf_6()): ?>
+
+            <div class="acf-postbox-header">
+                <h2 class="acf-postbox-title"><?php _e('Import ACF Settings', 'acfe'); ?></h2>
+            </div>
+            <div class="acf-postbox-inner">
+    
+        <?php else: ?>
+
+            <p><?php _e('Import ACF Settings', 'acfe'); ?></p>
+    
+        <?php endif; ?>
         
         <div class="acf-fields">
             <?php 
@@ -37,6 +50,11 @@ class acfe_settings_import extends ACF_Admin_Tool{
         <p class="acf-submit">
             <button type="submit" name="action" class="button button-primary"><?php _e('Import File'); ?></button>
         </p>
+    
+        <?php if(acfe_is_acf_6()): ?>
+            </div>
+        <?php endif; ?>
+        
         <?php
         
     }

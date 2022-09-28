@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_payment_selector')):
 
@@ -9,6 +10,9 @@ class acfe_payment_selector extends acf_field{
     
     public $payment_field = false;
     
+    /**
+     * initialize
+     */
     function initialize(){
         
         $this->name = 'acfe_payment_selector';
@@ -26,6 +30,12 @@ class acfe_payment_selector extends acf_field{
         
     }
     
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
     function render_field_settings($field){
     
         // enable local
@@ -39,7 +49,7 @@ class acfe_payment_selector extends acf_field{
     
         // add choices
         if($payment_field){
-            $choices[ $field['payment_field'] ] = $this->get_field_label($payment_field);
+            $choices[ $field['payment_field'] ] = acfe_get_pretty_field_label($payment_field, true);
         }
     
         // Payment Field
@@ -157,10 +167,18 @@ class acfe_payment_selector extends acf_field{
         
     }
     
+    
+    /**
+     * prepare_field
+     *
+     * @param $field
+     *
+     * @return false
+     */
     function prepare_field($field){
         
         // payment field
-        $this->payment_field = $this->get_payment_field($field);
+        $this->payment_field = acfe_get_payment_field_from_field($field);
     
         // no payment field found
         if(!$this->payment_field){
@@ -171,13 +189,13 @@ class acfe_payment_selector extends acf_field{
         $meta = acf_get_meta(acfe_get_post_id());
     
         // loop meta
-        foreach($meta as $key => $val){
-        
-            // find the payment field in meta
-            if($val !== $this->payment_field['key']) continue;
+        foreach($meta as $meta_key => $meta_value){
         
             // hide field if payment value is set on current post
-            return false;
+            if($meta_value === $this->payment_field['key']){
+                return false;
+            }
+        
         
         }
         
@@ -200,6 +218,12 @@ class acfe_payment_selector extends acf_field{
         
     }
     
+    
+    /**
+     * render_field
+     *
+     * @param $field
+     */
     function render_field($field){
     
         // settings
@@ -247,6 +271,16 @@ class acfe_payment_selector extends acf_field{
         
     }
     
+    
+    /**
+     * update_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return null
+     */
     function update_value($value, $post_id, $field){
         
         // return value for local meta
@@ -254,70 +288,8 @@ class acfe_payment_selector extends acf_field{
             return $value;
         }
     
-        // do not save in admin
-        if(is_admin()){
-            return null;
-        }
-    
-        // do not save
+        // do not save meta
         return null;
-        
-    }
-    
-    function get_payment_field($field){
-        
-        // payment field already set in field
-        if($field['payment_field']){
-            
-            // get field
-            $payment_field = acf_get_field($field['payment_field']);
-            
-            // found field
-            if($payment_field){
-                return $payment_field;
-            }
-            
-        }
-        
-        // retrieve payment field in the same field group
-        $field_group = acfe_get_field_group_from_field($field);
-        
-        // get fields
-        $fields = acf_get_fields($field_group['key']);
-        
-        // return
-        return $this->find_payment_field($fields);
-        
-    }
-    
-    function find_payment_field($fields){
-        
-        // loop
-        foreach($fields as $field){
-            
-            // Recursive search for sub_fields (groups & clones)
-            if(acf_maybe_get($field, 'sub_fields')){
-                return $this->find_payment_field($field['sub_fields']);
-            }
-            
-            // allow only payment field
-            if($field['type'] !== 'acfe_payment') continue;
-            
-            // return field
-            return $field;
-            
-        }
-        
-        // nothing found
-        return false;
-        
-    }
-    
-    function get_field_label($field){
-        
-        $label = acf_maybe_get($field, 'label', $field['name']);
-        
-        return "{$label} ({$field['key']})";
         
     }
     

@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_dynamic_templates')):
 
@@ -11,7 +12,8 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
      * Initialize
      */
     function initialize(){
-        
+    
+        $this->name = 'template';
         $this->active = acf_get_setting('acfe/modules/templates');
         $this->post_type = 'acfe-template';
         $this->label = 'Template Title';
@@ -682,7 +684,7 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
     function location_types($choices){
         
         $name = __('Forms', 'acf');
-        $choices[$name] = acfe_array_insert_after('options_page', $choices[$name], 'acfe_template', __('Dynamic Template', 'acfe'));
+        $choices[$name] = acfe_array_insert_after($choices[$name], 'options_page', 'acfe_template', __('Dynamic Template', 'acfe'));
         
         return $choices;
         

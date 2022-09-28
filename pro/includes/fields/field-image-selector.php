@@ -1,16 +1,17 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_field_image_selector')):
     
 class acfe_field_image_selector extends acf_field{
     
-    /*
-     * Construct
+    /**
+     * initialize
      */
-    function __construct(){
+    function initialize(){
         
         $this->name = 'acfe_image_selector';
         $this->label = __('Image Selector', 'acfe');
@@ -28,42 +29,13 @@ class acfe_field_image_selector extends acf_field{
             'layout'                => 'horizontal',
         );
         
-        parent::__construct();
-        
     }
     
-    /*
-     * Validate Field
-     */
-    function validate_field($field){
-        
-        // validate field
-        $field = parent::validate_field($field);
     
-        // compatibility: removed 'images' setting, use choices instead
-        if(isset($field['images'])){
-    
-            // vars
-            $choices = $field['choices'];
-            $images = acf_maybe_get($field, 'images');
-            $images = acf_get_array($images);
-    
-            // merge & combine images
-            $choices = array_merge($images, $choices);
-            $choices = array_combine($choices, $choices);
-    
-            // assign choices
-            $field['choices'] = $choices;
-            
-        }
-        
-        // return
-        return $field;
-        
-    }
-    
-    /*
-     * Render Field Settings
+    /**
+     * render_field_settings
+     *
+     * @param $field
      */
     function render_field_settings($field){
         
@@ -183,27 +155,37 @@ class acfe_field_image_selector extends acf_field{
         
     }
     
-    /*
-     * Update Field
+    
+    /**
+     * update_field
+     *
+     * @param $field
+     *
+     * @return mixed
      */
     function update_field($field){
         
-        // Choices
+        // choices
         $field['choices'] = acf_decode_choices($field['choices']);
         
-        // Default value
+        // default value
         $field['default_value'] = acf_decode_choices($field['default_value'], true);
         
+        // single value
         if(!$field['multiple']){
             $field['default_value'] = acfe_unarray($field['default_value']);
         }
         
+        // return
         return $field;
         
     }
     
-    /*
-     * Render Field
+    
+    /**
+     * render_field
+     *
+     * @param $field
      */
     function render_field($field){
         
@@ -245,7 +227,9 @@ class acfe_field_image_selector extends acf_field{
                     $src = wp_get_attachment_image_src($image, $field['image_size']);
                     
                     // invalid image
-                    if(!$src) continue;
+                    if(!$src){
+                        continue;
+                    }
                     
                     $url = $src[0];
                     
@@ -287,13 +271,22 @@ class acfe_field_image_selector extends acf_field{
         
     }
     
-    /*
-     * Format Value
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|string[]
      */
     function format_value($value, $post_id, $field){
         
         // bail early
-        if(empty($value)) return $value;
+        if(empty($value)){
+            return $value;
+        }
         
         // vars
         $is_array = is_array($value);
@@ -302,37 +295,33 @@ class acfe_field_image_selector extends acf_field{
         // loop
         foreach($value as &$v){
             
-            // retrieve image
+            // get image
             $image = acf_maybe_get($field['choices'], $v, $v);
     
             // value
             if($field['return_format'] == 'value'){
-        
                 // do nothing
         
             // label
             }elseif($field['return_format'] == 'image'){
-    
                 $v = $image;
         
             // array
             }elseif($field['return_format'] == 'array'){
-    
                 $v = array(
                     'value' => $v,
                     'image' => $image
                 );
-        
             }
             
         }
         
-        // Do not return array
+        // check array
         if(!$is_array){
             $value = acfe_unarray($value);
         }
         
-        // Return
+        // return
         return $value;
         
     }

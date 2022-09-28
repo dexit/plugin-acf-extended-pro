@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_field_group_hide_on_screen')):
 
@@ -25,18 +26,18 @@ class acfe_pro_field_group_hide_on_screen{
      */
     function prepare_hide_on_screen($field){
     
-        $field['choices']['title']              = 'Title';
-        $field['choices']['save_draft']         = 'Save Draft';
-        $field['choices']['preview']            = 'Preview';
-        $field['choices']['post_status']        = 'Post Status';
-        $field['choices']['visibility']         = 'Post Visibility';
-        $field['choices']['publish_date']       = 'Publish Date';
-        $field['choices']['trash']              = 'Move to trash';
-        $field['choices']['publish']            = 'Publish/Update';
-        $field['choices']['minor_publish']      = 'Minor Publishing Actions';
-        $field['choices']['misc_publish']       = 'Misc Publishing Actions';
-        $field['choices']['major_publish']      = 'Major Publishing Actions';
-        $field['choices']['publish_metabox']    = 'Publish Metabox';
+        $field['choices']['title']              = __('Title', 'acfe');
+        $field['choices']['save_draft']         = __('Save Draft', 'acfe');
+        $field['choices']['preview']            = __('Preview', 'acfe');
+        $field['choices']['post_status']        = __('Post Status', 'acfe');
+        $field['choices']['visibility']         = __('Post Visibility', 'acfe');
+        $field['choices']['publish_date']       = __('Publish Date', 'acfe');
+        $field['choices']['trash']              = __('Move to trash', 'acfe');
+        $field['choices']['publish']            = __('Publish/Update', 'acfe');
+        $field['choices']['minor_publish']      = __('Minor Publishing Actions', 'acfe');
+        $field['choices']['misc_publish']       = __('Misc Publishing Actions', 'acfe');
+        $field['choices']['major_publish']      = __('Major Publishing Actions', 'acfe');
+        $field['choices']['publish_metabox']    = __('Publish Metabox', 'acfe');
         
         // Sort ASC
         asort($field['choices']);
@@ -50,6 +51,11 @@ class acfe_pro_field_group_hide_on_screen{
      */
     function get_field_group_style($style, $field_group){
     
+        if(!is_array($field_group['hide_on_screen'])){
+            return $style;
+        }
+    
+        $hide = array();
         $elements = array(
             'title'             => '#titlediv > #titlewrap',
             'save_draft'        => '#minor-publishing-actions > #save-action',
@@ -64,26 +70,19 @@ class acfe_pro_field_group_hide_on_screen{
             'major_publish'     => '#major-publishing-actions',
             'publish_metabox'   => '#submitdiv',
         );
-    
-        if(!is_array($field_group['hide_on_screen']))
-            return $style;
-    
-        $hide = array();
-    
+        
         foreach($field_group['hide_on_screen'] as $k){
         
-            if(!isset($elements[$k]))
-                continue;
-        
-            $id = $elements[$k];
-            $hide[] = $id;
+            if(isset($elements[ $k ])){
+                $id = $elements[ $k ];
+                $hide[] = $id;
+            }
         
         }
     
-        if(empty($hide))
-            return $style;
-    
-        $style .= implode(', ', $hide) . ' {display: none;}';
+        if(!empty($hide)){
+            $style .= implode(', ', $hide) . ' {display: none;}';
+        }
     
         return $style;
         

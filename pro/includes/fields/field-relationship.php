@@ -1,29 +1,36 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
-if(!class_exists('acfe_field_relationship')):
+if(!class_exists('acfe_pro_field_relationship')):
 
-class acfe_field_relationship{
+class acfe_pro_field_relationship extends acfe_field_extend{
     
-    function __construct(){
-    
-        add_action('acf/render_field_settings/type=relationship',       array($this, 'field_settings'));
-        add_action('acf/render_field_settings/type=post_object',        array($this, 'field_settings'));
-    
-        add_filter('acfe/field_wrapper_attributes/type=relationship',   array($this, 'field_wrapper'), 10, 2);
-        add_filter('acfe/field_wrapper_attributes/type=post_object',    array($this, 'field_wrapper'), 10, 2);
+    /**
+     * initialize
+     */
+    function initialize(){
         
-        add_action('acf/render_field/type=relationship',                array($this, 'render'));
-        add_action('acf/render_field/type=post_object',                 array($this, 'render'));
-        
-        add_action('wp_ajax_acfe/relationship/add_post',                array($this, 'relationship_ajax'));
-        add_action('wp_ajax_nopriv_acfe/relationship/add_post',         array($this, 'relationship_ajax'));
+        $this->name = 'relationship';
+        $this->defaults = array(
+            'acfe_add_post'  => 0,
+            'acfe_edit_post' => 0,
+        );
+    
+        $this->add_action('wp_ajax_acfe/relationship/add_post',        array($this, 'ajax_add_post'));
+        $this->add_action('wp_ajax_nopriv_acfe/relationship/add_post', array($this, 'ajax_add_post'));
         
     }
     
-    function field_settings($field){
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
+    function render_field_settings($field){
     
         acf_render_field_setting($field, array(
             'label'         => __('Allow Post Creation','acf'),
@@ -43,18 +50,23 @@ class acfe_field_relationship{
         
     }
     
-    function field_wrapper($wrapper, $field){
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
+     */
+    function field_wrapper_attributes($wrapper, $field){
         
-        if(acf_maybe_get($field, 'acfe_add_post')){
-            
+        if($field['acfe_add_post']){
             $wrapper['data-acfe-add-post'] = 1;
-            
         }
         
-        if(acf_maybe_get($field, 'acfe_edit_post')){
-            
+        if($field['acfe_edit_post']){
             $wrapper['data-acfe-edit-post'] = 1;
-            
         }
         
         
@@ -62,10 +74,18 @@ class acfe_field_relationship{
         
     }
     
-    function render($field){
+    
+    /**
+     * render_field
+     *
+     * @param $field
+     */
+    function render_field($field){
         
         // bail early
-        if(!acf_maybe_get($field, 'acfe_add_post')) return;
+        if(!acf_maybe_get($field, 'acfe_add_post')){
+            return;
+        }
         
         // allowed post types
         $allowed_post_types = acf_get_array($field['post_type']);
@@ -91,7 +111,9 @@ class acfe_field_relationship{
         */
         
         // bail early
-        if(empty($post_types)) return;
+        if(empty($post_types)){
+            return;
+        }
         
         // default button
         $button = array(
@@ -137,6 +159,14 @@ class acfe_field_relationship{
     
     }
     
+    
+    /**
+     * get_add_new_button_href
+     *
+     * @param $post_type
+     *
+     * @return string|null
+     */
     function get_add_new_button_href($post_type){
     
         // href
@@ -154,10 +184,18 @@ class acfe_field_relationship{
         
     }
     
-    function relationship_ajax(){
+    
+    /**
+     * ajax_add_post
+     *
+     * wp_ajax_acfe/relationship/add_post
+     */
+    function ajax_add_post(){
         
         // validate action
-        if(!acf_verify_ajax()) die();
+        if(!acf_verify_ajax()){
+            die();
+        }
         
         // validate options
         $options = wp_parse_args($_POST, array(
@@ -169,7 +207,9 @@ class acfe_field_relationship{
         $field = acf_get_field($options['field_key']);
         
         // field not found
-        if(!$field) die();
+        if(!$field){
+            die();
+        }
         
         // get post
         $post = get_post($options['pid']);
@@ -187,6 +227,6 @@ class acfe_field_relationship{
     
 }
 
-new acfe_field_relationship();
+acf_new_instance('acfe_pro_field_relationship');
 
 endif;

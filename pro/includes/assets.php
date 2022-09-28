@@ -1,14 +1,15 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_pro_assets')):
 
 class acfe_pro_assets{
     
-    /*
-     * Construct
+    /**
+     * construct
      */
     function __construct(){
         
@@ -19,8 +20,9 @@ class acfe_pro_assets{
         
     }
     
-    /*
-     * Init
+    
+    /**
+     * init
      */
     function init(){
         
@@ -39,8 +41,11 @@ class acfe_pro_assets{
         
     }
     
-    /*
-     * WP Admin Enqueue Scripts
+    
+    /**
+     * wp_admin_enqueue_scripts
+     *
+     * admin_enqueue_scripts
      */
     function wp_admin_enqueue_scripts(){
         
@@ -57,8 +62,11 @@ class acfe_pro_assets{
         
     }
     
-    /*
-     * ACF Admin Enqueue Scripts
+    
+    /**
+     * acf_admin_enqueue_scripts
+     *
+     * acf/input/admin_enqueue_scripts
      */
     function acf_admin_enqueue_scripts(){
     

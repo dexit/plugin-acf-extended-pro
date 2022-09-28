@@ -1,7 +1,8 @@
 <?php
 
-if(!defined('ABSPATH'))
+if(!defined('ABSPATH')){
     exit;
+}
 
 if(!class_exists('acfe_payment_hooks')):
 
@@ -22,8 +23,18 @@ class acfe_payment_hooks{
         
     }
     
-    /*
-     * Stripe Cart
+    
+    /**
+     * stripe_cart
+     *
+     * Adds Payment Cart infos into stripe object
+     *
+     * @param $args
+     * @param $field
+     * @param $gateway
+     * @param $post_id
+     *
+     * @return array|mixed
      */
     function stripe_cart($args, $field, $gateway, $post_id){
         
@@ -45,8 +56,18 @@ class acfe_payment_hooks{
         
     }
     
-    /*
-     * PayPal Cart
+    
+    /**
+     * paypal_cart
+     *
+     * Adds Payment Cart infos into paypal object
+     *
+     * @param $args
+     * @param $field
+     * @param $gateway
+     * @param $post_id
+     *
+     * @return mixed
      */
     function paypal_cart($args, $field, $gateway, $post_id){
         
@@ -68,8 +89,18 @@ class acfe_payment_hooks{
         
     }
     
-    /*
-     * Payment Object
+    
+    /**
+     * payment_object
+     *
+     * Adds Payment Cart infos into payment object
+     *
+     * @param $response
+     * @param $field
+     * @param $gateway
+     * @param $post_id
+     *
+     * @return mixed
      */
     function payment_object($response, $field, $gateway, $post_id){
     
@@ -85,6 +116,14 @@ class acfe_payment_hooks{
         
     }
     
+    
+    /**
+     * ajax_get_payment_field
+     *
+     * wp_ajax_acfe/get_payment_field
+     *
+     * Used for Payment Field ajax setting in Payment Cart & Selector
+     */
     function ajax_get_payment_field(){
         
         // validate
@@ -106,6 +145,14 @@ class acfe_payment_hooks{
         
     }
     
+    
+    /**
+     * ajax_get_payment_field_results
+     *
+     * @param $options
+     *
+     * @return array[]
+     */
     function ajax_get_payment_field_results($options){
         
         // vars
@@ -186,6 +233,16 @@ class acfe_payment_hooks{
         
     }
     
+    
+    /**
+     * ajax_get_payment_field_choices
+     *
+     * @param $choices
+     * @param $fields
+     * @param $field_group
+     *
+     * @return array|mixed
+     */
     function ajax_get_payment_field_choices($choices, $fields, $field_group){
         
         // bail early
@@ -205,23 +262,17 @@ class acfe_payment_hooks{
             }
             
             // allow only specific field
-            if($field['type'] !== 'acfe_payment') continue;
+            if($field['type'] !== 'acfe_payment'){
+                continue;
+            }
             
             // set choice
-            $choices[ $field_group['title'] ][ $field['key'] ] = $this->get_field_label($field);
+            $choices[ $field_group['title'] ][ $field['key'] ] = acfe_get_pretty_field_label($field, true);
             
         }
         
         // return
         return $choices;
-        
-    }
-    
-    function get_field_label($field){
-        
-        $label = acf_maybe_get($field, 'label', $field['name']);
-        
-        return "{$label} ({$field['key']})";
         
     }
     
