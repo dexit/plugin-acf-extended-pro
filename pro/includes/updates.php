@@ -293,34 +293,56 @@ class ACFE_Updates {
                     
                     <?php acf_nonce_input($nonce); ?>
                     
-                    <table class="form-table">
-                        <tbody>
-                        <tr>
-                            <th>
-                                <label for="acfe_pro_licence"><?php _e('License Key', 'acf'); ?></label>
-                            </th>
-                            <td>
-                                <?php
-                                
-                                // render field
-                                acf_render_field(array(
-                                    'type'      => 'text',
-                                    'name'      => 'acfe_pro_licence',
-                                    'value'     => str_repeat('*', strlen($license)),
-                                    'readonly'  => $readonly,
-                                ));
-                                
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th></th>
-                            <td>
-                                <input type="submit" value="<?php echo esc_attr($button); ?>" class="button button-primary">
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <?php if(acf_version_compare(acf_get_setting('version'),  '>=', '6.0')): ?>
+
+                        <label for="acfe_pro_licence"><?php _e('License Key', 'acf'); ?></label>
+                    
+                        <?php
+                        // render field
+                        acf_render_field(array(
+                            'type'      => 'text',
+                            'name'      => 'acfe_pro_licence',
+                            'value'     => str_repeat('*', strlen($license)),
+                            'readonly'  => $readonly,
+                        ));
+                        ?>
+
+                        <input type="submit" value="<?php echo esc_attr($button); ?>" class="button button-primary">
+                    
+                    <?php else: ?>
+
+                        <table class="form-table">
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label for="acfe_pro_licence"><?php _e('License Key', 'acf'); ?></label>
+                                </th>
+                                <td>
+                                    <?php
+                
+                                    // render field
+                                    acf_render_field(array(
+                                        'type'      => 'text',
+                                        'name'      => 'acfe_pro_licence',
+                                        'value'     => str_repeat('*', strlen($license)),
+                                        'readonly'  => $readonly,
+                                    ));
+                
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <td>
+                                    <input type="submit" value="<?php echo esc_attr($button); ?>" class="button button-primary">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    
+                    <?php endif; ?>
+                    
+                    
                 </form>
         
             </div>
@@ -357,25 +379,55 @@ class ACFE_Updates {
                             <label><?php _e('Update Available', 'acf'); ?></label>
                         </th>
                         <td>
-                            <?php if($update_available): ?>
-
-                                <span style="margin-right: 5px;"><?php _e('Yes', 'acf'); ?></span>
+                            
+                                <?php if($update_available): ?>
+    
+                                    <span style="margin-right: 5px;"><?php _e('Yes', 'acf'); ?></span>
+    
+                                    <?php if(acf_version_compare(acf_get_setting('version'),  '<', '6.0')): ?>
+                                        <?php if($active): ?>
+                                            <a class="button button-primary" href="<?php echo esc_attr( admin_url('plugins.php?s=Advanced+Custom+Fields:+Extended+PRO') ); ?>">
+                                                <?php _e('Update Plugin', 'acf'); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <a class="button" disabled="disabled" href="#"><?php _e('Please enter your license key above to unlock updates', 'acf'); ?></a>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                 
-                                <?php if($active): ?>
-                                    <a class="button button-primary" href="<?php echo esc_attr( admin_url('plugins.php?s=Advanced+Custom+Fields:+Extended+PRO') ); ?>">
-                                        <?php _e('Update Plugin', 'acf'); ?>
-                                    </a>
                                 <?php else: ?>
-                                    <a class="button" disabled="disabled" href="#"><?php _e('Please enter your license key above to unlock updates', 'acf'); ?></a>
+    
+                                    <span style="margin-right: 5px;"><?php _e('No', 'acf'); ?></span>
+                                
+                                    <?php if(acf_version_compare(acf_get_setting('version'),  '<', '6.0')): ?>
+                                        <a class="button" href="<?php echo esc_attr(add_query_arg('acfe-pro-check', 1)); ?>"><?php _e('Check Again', 'acf'); ?></a>
+                                    <?php endif; ?>
+                                
                                 <?php endif; ?>
-            
-                            <?php else: ?>
-
-                                <span style="margin-right: 5px;"><?php _e('No', 'acf'); ?></span>
-                                <a class="button" href="<?php echo esc_attr(add_query_arg('acfe-pro-check', 1)); ?>"><?php _e('Check Again', 'acf'); ?></a>
-                            <?php endif; ?>
                         </td>
                     </tr>
+
+                    <?php if(acf_version_compare(acf_get_setting('version'),  '>=', '6.0')): ?>
+                        <tr class="acfe-update-button-row">
+                            
+                            <td colspan="2">
+                                <?php if($update_available): ?>
+        
+                                    <?php if($active): ?>
+                                        <a class="button button-primary" href="<?php echo esc_attr( admin_url('plugins.php?s=Advanced+Custom+Fields:+Extended+PRO') ); ?>">
+                                            <?php _e('Update Plugin', 'acf'); ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <a class="button" disabled="disabled" href="#"><?php _e('Please enter your license key above to unlock updates', 'acf'); ?></a>
+                                    <?php endif; ?>
+    
+                                <?php else: ?>
+                                    <a class="button" href="<?php echo esc_attr(add_query_arg('acfe-pro-check', 1)); ?>"><?php _e('Check Again', 'acf'); ?></a>
+                                <?php endif; ?>
+                            </td>
+                            
+                        </tr>
+                        
+                    <?php endif; ?>
                     
                     <?php if($changelog): ?>
                         <tr>

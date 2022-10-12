@@ -476,7 +476,7 @@
 
             // validate
             var valid = acf.validateForm({
-                form: self.$('form'),
+                form: self.$('.wrap form'), // validate forms inside page wrap
                 reset: true,
                 success: function() {
                     self.start();

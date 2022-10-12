@@ -126,13 +126,60 @@ body.acf-settings-updates #acfe-update-information .changelog h4 {
     display: none
 }
 
-.acf-admin-6.custom-fields_page_acf-settings-updates .acf-settings-wrap {
+.acf-admin-6.acf-settings-updates .acf-settings-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap {
     grid-template-columns: 50% 1fr
 }
 
-.acf-admin-6.custom-fields_page_acf-settings-updates .acf-settings-wrap>.acf-updates-wrap,
-.acf-admin-6.custom-fields_page_acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap {
-    width: 100%
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acf-license-information label,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-license-information label,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acf-license-information label,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-license-information label {
+    font-weight: 600
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-license-information form,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-license-information form {
+    margin-top: 24px
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-license-information .acf-input-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-license-information .acf-input-wrap {
+    margin-top: 8px;
+    margin-bottom: 24px
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-update-information .form-table td,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-update-information .form-table th,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-update-information .form-table td,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-update-information .form-table th {
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 24px;
+    padding-left: 0;
+    color: #344054;
+    font-size: 13px
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-update-information .form-table tr.acfe-update-button-row td,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-update-information .form-table tr.acfe-update-button-row td {
+    padding-bottom: 0
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acfe-updates-wrap {
+    width: 100%;
+    margin: 0;
+    float: none
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap .acf-box:last-of-type,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap .acf-box:last-of-type,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap .acf-box:last-of-type,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acfe-updates-wrap .acf-box:last-of-type {
+    margin-top: 35px
 }
 
 .tools_page_acfe-rewrite-rules .heading {

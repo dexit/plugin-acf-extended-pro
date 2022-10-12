@@ -10,6 +10,9 @@ class acfe_field_min_max{
     
     var $allowed_field_types = array();
     
+    /**
+     * construct
+     */
     function __construct(){
         
         $acfe_fields_conditions = array(
@@ -264,7 +267,8 @@ class acfe_field_min_max{
 
         foreach($this->allowed_field_types as $rule){
     
-            add_action("acf/render_field_settings/type={$rule['field_type']}", array($this, 'field_settings'));
+            add_action("acf/validate_field/type={$rule['field_type']}",        array($this, 'validate_field'));
+            add_action("acf/render_field_settings/type={$rule['field_type']}", array($this, 'render_field_settings'));
             add_filter("acf/validate_value/type={$rule['field_type']}",        array($this, 'validate_value'), 10, 4);
         
         }
@@ -272,17 +276,42 @@ class acfe_field_min_max{
         
     }
     
-    function field_settings($field){
+    
+    /**
+     * validate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function validate_field($field){
+        
+        // add default settings
+        if(!isset($field['min'])) $field['min'] = '';
+        if(!isset($field['max'])) $field['max'] = '';
+        
+        return $field;
+        
+    }
+    
+    
+    /**
+     * render_field_settings
+     *
+     * @param $field
+     */
+    function render_field_settings($field){
         
         $row = array();
         
         foreach($this->allowed_field_types as $rule){
             
-            if($field['type'] !== $rule['field_type'])
-                continue;
-            
-            $row = $rule;
-            break;
+            if($field['type'] === $rule['field_type']){
+                
+                $row = $rule;
+                break;
+                
+            }
             
         }
         
@@ -305,14 +334,12 @@ class acfe_field_min_max{
             '_append'       => 'min'
         );
         
-        // After
+        // after
         if(acf_maybe_get($row, 'after')){
-        
             $min['wrapper']['data-after'] = $row['after'];
-        
         }
         
-        // Conditional Logic
+        // conditional Logic
         if(acf_maybe_get($row, 'conditional_logic')){
             
             $min['conditional_logic'] = $row['conditional_logic'];
@@ -320,6 +347,7 @@ class acfe_field_min_max{
             
         }
         
+        // render field setting
         acf_render_field_setting($field, $min);
         acf_render_field_setting($field, $max);
         

@@ -1802,7 +1802,7 @@ body .daterangepicker.daterangepicker-allow-null .drp-buttons .cancelBtn {
 
 .acf-file-uploader.-select2 .values .file-wrap .file-info p {
     margin: 0;
-    line-height: 22px;
+    line-height: 21px;
     overflow: visible;
     font-size: 14px
 }
@@ -1854,7 +1854,8 @@ body .daterangepicker.daterangepicker-allow-null .drp-buttons .cancelBtn {
 }
 
 .acf-file-uploader.-select2:not([data-multiple="1"]) .values {
-    padding: 0
+    padding: 0;
+    display: block
 }
 
 .acf-file-uploader.-select2:not([data-multiple="1"]) .values .file-wrap {
@@ -1863,13 +1864,18 @@ body .daterangepicker.daterangepicker-allow-null .drp-buttons .cancelBtn {
     margin: 0
 }
 
+.acf-file-uploader.-select2:not([data-multiple="1"]) .values .file-wrap .acf-icon {
+    line-height: 24px;
+    height: 28px
+}
+
 .acf-file-uploader.-select2:not([data-multiple="1"]) .values .file-wrap .file-info {
     margin-left: 8px;
     margin-right: 19px
 }
 
 .acf-file-uploader.-select2:not([data-multiple="1"]) .values .file-wrap .file-info p {
-    line-height: 28px
+    line-height: 27px
 }
 
 .acf-file-uploader.-select2:not([data-multiple="1"]) .values .file-wrap .file-info .acf-actions {

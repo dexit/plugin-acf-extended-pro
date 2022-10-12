@@ -14,6 +14,17 @@ class acfe_pro_field_file extends acfe_field_extend{
     function initialize(){
         
         $this->name = 'file';
+    
+        $this->defaults = array(
+            'preview_style'   => 'default',
+            'placeholder'     => __('Select', 'acf'),
+            'upload_folder'   => '',
+            'button_label'    => __('Add File','acf'),
+            'stylised_button' => 0,
+            'file_count'      => 0,
+            'multiple'        => 0,
+        );
+        
         $this->replace = array(
             'render_field',
             'update_value',
@@ -286,30 +297,19 @@ class acfe_pro_field_file extends acfe_field_extend{
      */
     function render_field($field){
         
-        // uploader setting
-        $uploader = acf_get_setting('uploader');
+        // settings
+        $uploader        = $field['uploader'] ? $field['uploader'] : acf_get_setting('uploader');
+        $preview_style   = $field['preview_style'];
+        $placeholder     = $field['placeholder'];
+        $stylised_button = $field['stylised_button'];
+        $file_count      = $field['file_count'];
+        $multiple        = $field['multiple'];
+        $min             = $field['min'];
+        $max             = $field['max'];
         
-        // uploader field
-        $uploader = acf_maybe_get($field, 'uploader', $uploader);
-        
-        // preview style
-        $preview_style = acf_maybe_get($field, 'preview_style', 'default');
-        
-        // placeholder
-        $placeholder = acf_maybe_get($field, 'placeholder');
-        
-        // stylised button
-        $stylised_button = acf_maybe_get($field, 'stylised_button');
-        
-        // file count
-        $file_count = acf_maybe_get($field, 'file_count');
-        
-        // multiple
-        $multiple = acf_maybe_get($field, 'multiple');
-        
-        // min/max
-        $min = acf_maybe_get($field, 'min');
-        $max = acf_maybe_get($field, 'max');
+        if($placeholder && !in_array($preview_style, array('inline', 'select2'))){
+            $placeholder = false;
+        }
         
         if($multiple || $uploader === 'wp'){
             $stylised_button = true;
@@ -321,10 +321,10 @@ class acfe_pro_field_file extends acfe_field_extend{
         }
         
         $div = array(
-            'class'             => 'acf-file-uploader',
-            'data-library'      => $field['library'],
-            'data-mime_types'   => $field['mime_types'],
-            'data-uploader'     => $uploader,
+            'class'           => 'acf-file-uploader',
+            'data-library'    => $field['library'],
+            'data-mime_types' => $field['mime_types'],
+            'data-uploader'   => $uploader,
         );
         
         $field_name = $field['name'];
@@ -491,10 +491,7 @@ class acfe_pro_field_file extends acfe_field_extend{
                 $wrapper['class'] .= ' hide-if-value';
             }
             
-            $button_label = acf_maybe_get($field, 'button_label');
-            if(empty($button_label)){
-                $button_label = __('Add File','acf');
-            }
+            $button_label = $field['button_label'] ? $field['button_label'] : __('Add File','acf');
             ?>
 
             <div <?php echo acf_esc_attrs($wrapper); ?>>

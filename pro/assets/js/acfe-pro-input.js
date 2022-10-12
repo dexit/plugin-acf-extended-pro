@@ -3888,38 +3888,22 @@
     }
 
     /**
-     * Post Object
+     * Post Object: Add Post
      */
-    var Field = acfe.FieldExtend.extend({
+    var AddPost = acfe.FieldExtend.extend({
 
-        wait: 'load',
+        id: 'acfe_pro_post_object_add_post',
 
         type: 'post_object',
 
+        dependencies: ['acfe_pro_relationship_modal'],
+
         conditions: function() {
-            return this.has('acfeAddPost') || this.has('acfeEditPost');
+            return this.has('acfeAddPost');
         },
 
         events: {
             'click a.add-post': 'onAddPost',
-            'click a.edit-post': 'onEditPost',
-        },
-
-        initialize: function() {
-
-            // add action on select2
-            this.field.select2.on('select2:selecting', this.proxy(this.onSelecting));
-
-        },
-
-        onSelecting: function(e) {
-
-            var $el = $(e.params.args.originalEvent.target);
-
-            if ($el.hasClass('edit-post')) {
-                this.onEditPost(e, $el);
-            }
-
         },
 
         onAddPost: function(e, $el) {
@@ -3948,14 +3932,55 @@
 
             }
 
+        },
 
+    });
+
+    acfe.registerFieldExtend(AddPost);
+
+
+    /**
+     * Post Object: Edit Post
+     */
+    var EditPost = acfe.FieldExtend.extend({
+
+        id: 'acfe_pro_post_object_edit_post',
+
+        type: 'post_object',
+
+        dependencies: ['acfe_pro_relationship_modal'],
+
+        conditions: function() {
+            return this.has('acfeEditPost');
+        },
+
+        events: {
+            'click a.edit-post': 'onEditPost',
+        },
+
+        initialize: function() {
+
+            acf.getFieldType(this.get('type')).prototype.initialize.apply(this, arguments);
+
+            // add action on select2
+            this.select2.on('select2:selecting', this.proxy(this.onSelecting));
+
+        },
+
+        onSelecting: function(e) {
+
+            var $el = $(e.params.args.originalEvent.target);
+
+            if ($el.hasClass('edit-post')) {
+                this.onEditPost(e, $el);
+            }
 
         },
 
         onEditPost: function(e, $el) {
 
             // close selection
-            this.field.select2.$el.select2('close');
+            this.select2.$el.select2('close');
 
             // prevent default
             e.preventDefault();
@@ -3977,20 +4002,15 @@
 
         },
 
-        newModal: function(url, relation = 'add') {
-
-            new acfe.RelationshipModal({
-                field: this.field,
-                url: url,
-                relation: relation
-            });
-
-        }
-
     });
 
-    acfe.registerFieldExtend(Field);
+    acfe.registerFieldExtend(EditPost);
 
+    /**
+     * Post Obect: Select2 Template Selection
+     *
+     * @type {acf.Model}
+     */
     var templateSelection = new acf.Model({
 
         filters: {
@@ -4020,35 +4040,28 @@
     }
 
     /**
-     * Relationship
+     * Relationship: Add Post
      */
-    var Field = acfe.FieldExtend.extend({
+    var AddPost = acfe.FieldExtend.extend({
+
+        id: 'acfe_pro_relationship_add_post',
+
+        dependencies: ['acfe_pro_relationship_modal'],
 
         type: 'relationship',
 
         conditions: function() {
-            return this.has('acfeAddPost') || this.has('acfeEditPost');
+            return this.has('acfeAddPost');
         },
-
-        replace: ['newValue', 'walkChoices'],
 
         events: {
             'click a.add-post': 'onAddPost',
-            'click a.edit-post': 'onEditPost',
         },
 
-        initialize: function() {
+        setup: function() {
 
-            // add post
-            if (this.has('acfeAddPost')) {
-                this.$('.filters').addClass('-add-post');
-                this.$('.filters').append(this.$('.filter.-add-post'));
-            }
-
-            // edit post
-            if (this.has('acfeEditPost')) {
-                this.field.$listItems('values').append('<a href="#" class="acf-icon -pencil small dark edit-post"></a>');
-            }
+            this.$('.filters').addClass('-add-post');
+            this.$('.filters').append(this.$('.filter.-add-post'));
 
         },
 
@@ -4080,6 +4093,36 @@
 
         },
 
+    });
+
+    acfe.registerFieldExtend(AddPost);
+
+
+    /**
+     * Relationship: Edit Post
+     */
+    var EditPost = acfe.FieldExtend.extend({
+
+        id: 'acfe_pro_relationship_edit_post',
+
+        dependencies: ['acfe_pro_relationship_modal'],
+
+        type: 'relationship',
+
+        conditions: function() {
+            return this.has('acfeEditPost');
+        },
+
+        events: {
+            'click a.edit-post': 'onEditPost',
+        },
+
+        setup: function() {
+
+            this.$listItems('values').append('<a href="#" class="acf-icon -pencil small dark edit-post"></a>');
+
+        },
+
         onEditPost: function(e, $el) {
 
             // prevent default
@@ -4098,24 +4141,10 @@
 
         },
 
-        newModal: function(url, relation = 'add') {
-
-            new acfe.RelationshipModal({
-                field: this.field,
-                url: url,
-                relation: relation
-            });
-
-        },
-
         newValue: function(props) {
 
-            // parent call
-            var value = this.apply('newValue', arguments);
-
-            if (!this.has('acfeEditPost')) {
-                return value;
-            }
+            // parent newValue
+            var value = acf.getFieldType(this.get('type')).prototype.newValue.apply(this, arguments);
 
             var $html = $('<div>' + value + '</div>');
 
@@ -4128,12 +4157,8 @@
 
         walkChoices: function(data) {
 
-            // parent call
-            var choices = this.apply('walkChoices', arguments);
-
-            if (!this.has('acfeEditPost')) {
-                return choices;
-            }
+            // parent walkChoices
+            var choices = acf.getFieldType(this.get('type')).prototype.walkChoices.apply(this, arguments);
 
             var $html = $('<div>' + choices + '</div>');
 
@@ -4145,7 +4170,7 @@
 
     });
 
-    acfe.registerFieldExtend(Field);
+    acfe.registerFieldExtend(EditPost);
 
 })(jQuery);
 (function($) {
@@ -4154,6 +4179,36 @@
         return;
     }
 
+    /**
+     * Relationship: Modal
+     */
+    var FieldModal = acfe.FieldExtend.extend({
+
+        id: 'acfe_pro_relationship_modal',
+
+        type: ['relationship', 'post_object'],
+
+        conditions: function() {
+            return this.has('acfeAddPost') || this.has('acfeEditPost');
+        },
+
+        newModal: function(url, relation = 'add') {
+
+            new acfe.RelationshipModal({
+                field: this,
+                url: url,
+                relation: relation
+            });
+
+        },
+
+    });
+
+    acfe.registerFieldExtend(FieldModal);
+
+    /**
+     * Relationship: Callbacks
+     */
     new acf.Model({
 
         actions: {
