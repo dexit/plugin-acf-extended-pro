@@ -518,6 +518,23 @@ class acfe_templates extends acf_field{
         
     }
     
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['placeholder'] = acf_translate($field['placeholder']);
+        $field['search_placeholder'] = acf_translate($field['search_placeholder']);
+        
+        return $field;
+        
+    }
+    
 }
 
 // initialize

@@ -97,8 +97,8 @@ html.acfe-hide-wp #wpfooter {
 
 body.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap {
     width: 49.5%;
-    float: left;
-    margin-right: 1%
+    margin-right: 1%;
+    float: left
 }
 
 body.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap {
@@ -109,6 +109,11 @@ body.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap {
 body.acf-settings-updates #acf_pro_licence,
 body.acf-settings-updates #acfe_pro_licence {
     width: 100%
+}
+
+body.acf-settings-updates #acf-update-information,
+body.acf-settings-updates #acfe-update-information {
+    max-width: 100%
 }
 
 body.acf-settings-updates #acf-update-information ul,
@@ -128,7 +133,57 @@ body.acf-settings-updates #acfe-update-information .changelog h4 {
 
 .acf-admin-6.acf-settings-updates .acf-settings-wrap,
 .acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap {
-    grid-template-columns: 50% 1fr
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+    gap: 0
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>h1,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>h1 {
+    width: 100%
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acfe-updates-wrap {
+    width: 49% !important;
+    float: none
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap .acf-box:last-of-type,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap .acf-box:last-of-type,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap .acf-box:last-of-type,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acfe-updates-wrap .acf-box:last-of-type {
+    margin-top: 35px
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap {
+    margin-right: 2% !important
+}
+
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acf-license-information,
+.acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-license-information,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acf-license-information,
+.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-license-information {
+    margin-right: 0;
+    margin-left: 0
 }
 
 .acf-admin-6.acf-settings-updates .acf-settings-wrap #acf-license-information label,
@@ -164,22 +219,6 @@ body.acf-settings-updates #acfe-update-information .changelog h4 {
 .acf-admin-6.acf-settings-updates .acf-settings-wrap #acfe-update-information .form-table tr.acfe-update-button-row td,
 .acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap #acfe-update-information .form-table tr.acfe-update-button-row td {
     padding-bottom: 0
-}
-
-.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap,
-.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap,
-.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap,
-.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acfe-updates-wrap {
-    width: 100%;
-    margin: 0;
-    float: none
-}
-
-.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acf-updates-wrap .acf-box:last-of-type,
-.acf-admin-6.acf-settings-updates .acf-settings-wrap>.acfe-updates-wrap .acf-box:last-of-type,
-.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acf-updates-wrap .acf-box:last-of-type,
-.acf-admin-6.custom-fields_page_acf-settings-update .acf-settings-wrap>.acfe-updates-wrap .acf-box:last-of-type {
-    margin-top: 35px
 }
 
 .tools_page_acfe-rewrite-rules .heading {

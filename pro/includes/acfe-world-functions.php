@@ -4,12 +4,16 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-/*
- * Get Countries
+/**
+ * acfe_get_countries
+ *
+ * @param $args
+ *
+ * @return mixed
  */
 function acfe_get_countries($args = array()){
     
-    // Default args
+    // default args
     $args = wp_parse_args($args, array(
         'type'          => 'countries',
         'code__in'      => false,
@@ -30,16 +34,22 @@ function acfe_get_countries($args = array()){
         'groupby'       => false,
     ));
     
-    // Query
+    // query
     $query = new ACFE_World_Query($args);
     
-    // Results
+    // results
     return $query->data;
     
 }
 
-/*
- * Get Country
+
+/**
+ * acfe_get_country
+ *
+ * @param $code
+ * @param $field
+ *
+ * @return false|mixed|null
  */
 function acfe_get_country($code, $field = ''){
     
@@ -58,12 +68,16 @@ function acfe_get_country($code, $field = ''){
     
 }
 
-/*
- * Get Languages
+/**
+ * acfe_get_languages
+ *
+ * @param $args
+ *
+ * @return mixed
  */
 function acfe_get_languages($args = array()){
     
-    // Default args
+    // default args
     $args = wp_parse_args($args, array(
         'type'              => 'languages',
         'name__in'          => false,
@@ -86,16 +100,22 @@ function acfe_get_languages($args = array()){
         'groupby'           => false,
     ));
     
-    // Query
+    // query
     $query = new ACFE_World_Query($args);
     
-    // Results
+    // results
     return $query->data;
     
 }
 
-/*
- * Get Language
+
+/**
+ * acfe_get_language
+ *
+ * @param $locale
+ * @param $field
+ *
+ * @return false|mixed|null
  */
 function acfe_get_language($locale, $field = ''){
     
@@ -114,12 +134,17 @@ function acfe_get_language($locale, $field = ''){
     
 }
 
-/*
- * Get Currencies
+
+/**
+ * acfe_get_currencies
+ *
+ * @param $args
+ *
+ * @return mixed
  */
 function acfe_get_currencies($args = array()){
     
-    // Default args
+    // default args
     $args = wp_parse_args($args, array(
         'type'          => 'currencies',
         'name__in'      => false,
@@ -143,16 +168,22 @@ function acfe_get_currencies($args = array()){
         'groupby'       => false,
     ));
     
-    // Query
+    // query
     $query = new ACFE_World_Query($args);
     
-    // Results
+    // results
     return $query->data;
     
 }
 
-/*
- * Get Currency
+
+/**
+ * acfe_get_currency
+ *
+ * @param $code
+ * @param $field
+ *
+ * @return false|mixed|null
  */
 function acfe_get_currency($code, $field = ''){
     

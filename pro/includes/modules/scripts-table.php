@@ -8,21 +8,18 @@ if(!defined('ABSPATH')){
  * WP List Table
  */
 if(!class_exists('WP_List_Table')):
-    
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
-    
 endif;
 
 /*
  * ACFE Scripts List
  */
-if(!class_exists('acfe_pro_scripts_list')):
+if(!class_exists('acfe_pro_scripts_table')):
 
-class acfe_pro_scripts_list extends WP_List_Table{
+class acfe_pro_scripts_table extends WP_List_Table{
     
     /**
      * Constructor
-     *
      */
     public function __construct(){
         

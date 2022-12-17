@@ -4,55 +4,84 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-/*
- * Register Local Templates Store
+/**
+ * register store
  */
 acf_register_store('local-templates');
 
-/*
- * Get Local Templates
+
+/**
+ * acfe_get_local_templates
+ *
+ * @return array|mixed|null
  */
 function acfe_get_local_templates(){
     return acf_get_local_store('templates')->get();
 }
 
-/*
- * Get Local Template
+
+/**
+ * acfe_get_local_template
+ *
+ * @param $name
+ *
+ * @return array|mixed|null
  */
 function acfe_get_local_template($name = ''){
     return acf_get_local_store('templates')->get($name);
 }
 
-/*
- * Remove Local Template
+
+/**
+ * acfe_remove_local_template
+ *
+ * @param $name
+ *
+ * @return ACF_Data
  */
 function acfe_remove_local_template($name = ''){
     return acf_get_local_store('templates')->remove($name);
 }
 
-/*
- * Have Local Templates
+
+/**
+ * acfe_have_local_templates
+ *
+ * @return bool
  */
 function acfe_have_local_templates() {
     return acf_get_local_store('templates')->count() ? true : false;
 }
 
-/*
- * Is Local Template
+
+/**
+ * acfe_is_local_template
+ *
+ * @param $name
+ *
+ * @return bool
  */
 function acfe_is_local_template($name = ''){
     return acf_get_local_store('templates')->has($name);
 }
 
-/*
- * Count Local Template
+
+/**
+ * acfe_count_local_templates
+ *
+ * @return int
  */
 function acfe_count_local_templates(){
     return acf_get_local_store('templates')->count();
 }
 
-/*
- * Add Local Template
+
+/**
+ * acfe_add_local_template
+ *
+ * @param $args
+ *
+ * @return bool
  */
 function acfe_add_local_template($args = array()){
     

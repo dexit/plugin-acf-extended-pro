@@ -4,9 +4,10 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-// Check setting
-if(!acf_get_setting('acfe/modules/scripts'))
+// check setting
+if(!acf_get_setting('acfe/modules/scripts')){
     return;
+}
 
 if(!class_exists('acfe_pro_scripts')):
 
@@ -16,8 +17,9 @@ class acfe_pro_scripts{
     var $script;
     var $has_fields = false;
     
-    /*
-     * Construct
+    
+    /**
+     * construct
      */
     function __construct(){
         
@@ -27,6 +29,7 @@ class acfe_pro_scripts{
         add_action('acf/validate_save_post',    array($this, 'validate_save_post'), 1);
         
         // scripts
+        acfe_include('pro/includes/modules/scripts/script-launcher.php');
         acfe_include('pro/includes/modules/scripts/script-orphan-meta-cleaner.php');
         acfe_include('pro/includes/modules/scripts/script-single-meta-converter.php');
         
@@ -41,8 +44,9 @@ class acfe_pro_scripts{
         
     }
     
-    /*
-     * Admin Menu
+    
+    /**
+     * admin_menu
      */
     function admin_menu(){
     
@@ -56,25 +60,24 @@ class acfe_pro_scripts{
     
     }
     
-    /*
-     * HTML
+    
+    /**
+     * html
      */
     function html(){
         
         if($this->is_post()){
-            
             $this->post_html();
             
         }else{
-            
             $this->edit_html();
-            
         }
         
     }
     
-    /*
-     * Load
+    
+    /**
+     * load
      */
     function load(){
         
@@ -139,8 +142,9 @@ class acfe_pro_scripts{
     
     }
     
-    /*
-     * Post Enqueue Scripts
+    
+    /**
+     * post_enqueue_scripts
      */
     function post_enqueue_scripts(){
         
@@ -152,8 +156,9 @@ class acfe_pro_scripts{
         
     }
     
-    /*
-     * Post Head
+    
+    /**
+     * post_head
      */
     function post_head(){
     
@@ -204,22 +209,26 @@ class acfe_pro_scripts{
         
         }
     
-        // Localize postboxes.
+        // localize postboxes
         acf_localize_data(array(
             'postboxes' => $postboxes
         ));
         
-        // Add data
+        // add data
         acf_localize_data(array(
             'script'     => $this->script->name,
             'script_run' => acfe_maybe_get_REQUEST('action') === 'run'
         ));
         
-        // Execute script admin_head()
+        // execute script admin_head()
         $this->script->admin_head();
         
     }
     
+    
+    /**
+     * postbox_submitdiv
+     */
     function postbox_submitdiv(){
     
         if($this->script->description): ?>
@@ -254,6 +263,10 @@ class acfe_pro_scripts{
     
     }
     
+    
+    /**
+     * postbox_events
+     */
     function postbox_events(){
         
         ?>
@@ -289,6 +302,13 @@ class acfe_pro_scripts{
         
     }
     
+    
+    /**
+     * postbox_acf
+     *
+     * @param $post
+     * @param $metabox
+     */
     function postbox_acf($post, $metabox){
         
         // vars
@@ -309,6 +329,10 @@ class acfe_pro_scripts{
         
     }
     
+    
+    /**
+     * post_html
+     */
     function post_html(){
         ?>
         <div class="wrap">
@@ -330,14 +354,14 @@ class acfe_pro_scripts{
         
                     <div id="post-body" class="metabox-holder columns-2">
         
-                        <!-- Sidebar -->
+                        <!-- sidebar -->
                         <div id="postbox-container-1" class="postbox-container">
     
                             <?php do_meta_boxes('acfe_scripts', 'side', $this->script); ?>
         
                         </div>
         
-                        <!-- Metabox -->
+                        <!-- metabox -->
                         <div id="postbox-container-2" class="postbox-container">
     
                             <?php do_meta_boxes('acfe_scripts', 'acf_after_title', $this->script); ?>
@@ -357,6 +381,10 @@ class acfe_pro_scripts{
         
     }
     
+    
+    /**
+     * edit_html
+     */
     function edit_html(){
     
         ?>
@@ -368,13 +396,10 @@ class acfe_pro_scripts{
             
                 <?php
                 
-                $list = new acfe_pro_scripts_list();
-                
-                $list->prepare_items();
-                
-                $list->views();
-            
-                $list->display();
+                $table = new acfe_pro_scripts_table();
+                $table->prepare_items();
+                $table->views();
+                $table->display();
                 
                 ?>
                 
@@ -385,24 +410,35 @@ class acfe_pro_scripts{
     
     }
     
+    
+    /**
+     * is_post
+     *
+     * @return bool
+     */
     function is_post(){
-        
         return isset($_REQUEST['script']) && !empty($_REQUEST['script']);
-        
     }
     
+    
+    /**
+     * is_edit
+     *
+     * @return bool
+     */
     function is_edit(){
-        
         return !$this->is_post();
-        
     }
     
-    /*
-     * Ajax Query
+    
+    /**
+     * ajax_query
      */
     function ajax_query(){
         
-        if(!acf_verify_ajax()) die();
+        if(!acf_verify_ajax()){
+            die();
+        }
         
         // Defaults
         $options = acf_parse_args($_POST, array(
@@ -473,8 +509,11 @@ class acfe_pro_scripts{
         
     }
     
-    /*
-     * Ajax Default Response
+    
+    /**
+     * ajax_response
+     *
+     * @param $script
      */
     function ajax_response($script){
         
@@ -485,26 +524,29 @@ class acfe_pro_scripts{
             'stats' => $script->stats,
         );
         
-        // default: start
-        if($script->type === 'start'){
+        switch($script->type){
             
-            $args['message'] = 'Start';
-            $args['status'] = 'success';
-            $args['event'] = 'request';
-            
-            // default: stop
-        }elseif($script->type === 'stop'){
-            
-            $args['message'] = 'Stop';
-            $args['status'] = 'error';
-            
-            // default: request
-        }elseif($script->type === 'request'){
-            
-            $args['event'] = 'request';
-            
-            if(!$script->recursive){
-                $args['event'] = 'stop';
+            case 'start': {
+                $args['message'] = 'Start';
+                $args['status'] = 'success';
+                $args['event'] = 'request';
+                break;
+            }
+    
+            case 'stop': {
+                $args['message'] = 'Stop';
+                $args['status'] = 'error';
+                break;
+            }
+    
+            case 'request': {
+                $args['event'] = 'request';
+                
+                if(!$script->recursive){
+                    $args['event'] = 'stop';
+                }
+                
+                break;
             }
             
         }
@@ -513,8 +555,14 @@ class acfe_pro_scripts{
         
     }
     
-    /*
-     * Validate Data
+    
+    /**
+     * validate_data
+     *
+     * @param $data
+     * @param $script
+     *
+     * @return array
      */
     function validate_data($data, $script){
         
@@ -532,15 +580,13 @@ class acfe_pro_scripts{
             
             // cast array
             if(is_array($_data_key)){
-                
                 $data[$key] = acf_get_array($data[$key]);
                 
-                // cast int
+            // cast int
             }elseif(is_int($_data_key)){
-                
                 $data[$key] = (int) $data[$key];
                 
-                // cast bool
+            // cast bool
             }elseif(is_bool($_data_key)){
                 
                 if($data[$key] === 'false'){
@@ -551,11 +597,9 @@ class acfe_pro_scripts{
                 
                 $data[$key] = (bool) $data[$key];
                 
-                // cast string
+            // cast string
             }elseif(is_string($_data_key)){
-                
                 $data[$key] = (string) $data[$key];
-                
             }
             
         }
@@ -564,27 +608,31 @@ class acfe_pro_scripts{
         
     }
     
-    /*
-     * Validate Confirm
+    
+    /**
+     * validate_confirm
+     *
+     * @param $confirm
+     * @param $script
+     *
+     * @return mixed|null
      */
     function validate_confirm($confirm, $script){
         
         if($confirm === ''){
-            
             $confirm = null;
             
         }else{
-            
             $confirm = filter_var($confirm, FILTER_VALIDATE_BOOLEAN);
-            
         }
         
         return $confirm;
         
     }
     
-    /*
-     * Validate Save Post
+    
+    /**
+     * validate_save_post
      */
     function validate_save_post(){
         

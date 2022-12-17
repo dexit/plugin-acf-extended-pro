@@ -4,7 +4,7 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-// Check setting
+// check setting
 if(!acfe_get_setting('modules/field_group_ui')){
     return;
 }
@@ -80,7 +80,7 @@ class acfe_field_group_ui{
      */
     function render_settings($field_group){
     
-        // General
+        // general
         acf_render_field_wrap(array(
             'label' => 'General',
             'type'  => 'tab',
@@ -91,7 +91,7 @@ class acfe_field_group_ui{
             )
         ));
         
-        // Form settings
+        // form settings
         acf_render_field_wrap(array(
             'label'         => __('Advanced settings', 'acfe'),
             'name'          => 'acfe_form',
@@ -105,10 +105,8 @@ class acfe_field_group_ui{
                 'data-after' => 'active'
             )
         ));
-    
-        /*
-         * Display Title
-         */
+        
+        // display title
         acf_render_field_wrap(array(
             'label'         => __('Display title', 'acfe'),
             'instructions'  => __('Render this title on edit post screen', 'acfe'),
@@ -124,7 +122,7 @@ class acfe_field_group_ui{
             )
         ));
     
-        // Hide on screen
+        // hide on screen
         acf_render_field_wrap(array(
             'label' => 'Screen',
             'type'  => 'tab',
@@ -136,16 +134,13 @@ class acfe_field_group_ui{
     
         if(acf_maybe_get($field_group, 'acfe_permissions') || acf_is_filter_enabled('acfe/field_group/advanced')){
     
-            // Permission
+            // permissions
             acf_render_field_wrap(array(
                 'label' => 'Permissions',
                 'type'  => 'tab',
                 'key'   => 'permissions'
             ));
-    
-            /*
-             * Permissions
-             */
+            
             acf_render_field_wrap(array(
                 'label'         => __('Permissions'),
                 'name'          => 'acfe_permissions',
@@ -161,14 +156,14 @@ class acfe_field_group_ui{
             
         }
     
-        // Advanced
+        // advanced
         acf_render_field_wrap(array(
             'label' => 'Data',
             'type'  => 'tab',
             'key'   => 'advanced'
         ));
     
-        // Meta
+        // meta
         acf_render_field_wrap(array(
             'label'         => __('Custom meta data'),
             'name'          => 'acfe_meta',
@@ -221,7 +216,7 @@ class acfe_field_group_ui{
             )
         ));
     
-        // Data
+        // data
         acf_render_field_wrap(array(
             'label'         => __('Field group data'),
             'instructions'  => __('View raw field group data, for development use'),
@@ -231,14 +226,14 @@ class acfe_field_group_ui{
             'value'         => $field_group['key'],
         ));
     
-        // Note
+        // note
         acf_render_field_wrap(array(
             'label' => 'Note',
             'type'  => 'tab',
             'key'   => 'note'
         ));
     
-        // Note
+        // note
         acf_render_field_wrap(array(
             'label'         => __('Note'),
             'name'          => 'acfe_note',
@@ -303,9 +298,7 @@ class acfe_field_group_ui{
     
             echo '<div class="field-group-settings field-group-settings-tab">';
         
-            /*
-             * Permissions
-             */
+            // permissions
             acf_render_field_wrap(array(
                 'label'         => __('Permissions', 'acfe'),
                 'name'          => 'acfe_permissions',
@@ -432,17 +425,19 @@ class acfe_field_group_ui{
         $field_group = acf_get_field_group($field['value']);
         
         if(!$field_group){
-            
             echo '<a href="#" class="button disabled" disabled>' . __('Data') . '</a>';
             return;
-            
         }
     
         $raw_field_group = get_post($field_group['ID']);
     
+        // try to unserialize post content
+        $raw_field_group->post_content = maybe_unserialize($raw_field_group->post_content);
+        $raw_field_group->post_content = @map_deep($raw_field_group->post_content, '_wp_specialchars');
+    
         ?>
-        <a href="#" class="acf-button button" data-acfe-modal data-acfe-modal-title="<?php echo $field_group['title']; ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('Data', 'acfe'); ?></a>
-        <div class="acfe-modal">
+        <a href="#" class="acf-button button" data-modal><?php _e('Data', 'acfe'); ?></a>
+        <div class="acfe-modal" data-title="<?php echo $field_group['title']; ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
             <div class="acfe-modal-spacer">
                 <pre style="margin-bottom:15px;"><?php print_r($field_group); ?></pre>
                 <pre><?php print_r($raw_field_group); ?></pre>

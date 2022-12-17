@@ -7,7 +7,10 @@ if(!defined('ABSPATH')){
 if(!class_exists('acfe_pro_field_group_hide_on_screen')):
 
 class acfe_pro_field_group_hide_on_screen{
- 
+    
+    /**
+     * construct
+     */
     function __construct(){
         
         add_action('acf/field_group/admin_head',    array($this, 'admin_head'));
@@ -15,14 +18,21 @@ class acfe_pro_field_group_hide_on_screen{
         
     }
     
+    
+    /**
+     * admin_head
+     */
     function admin_head(){
-        
         add_filter('acf/prepare_field/name=hide_on_screen', array($this, 'prepare_hide_on_screen'), 20);
-        
     }
     
-    /*
-     * Hide on screen: Settings
+    
+    /**
+     * prepare_hide_on_screen
+     *
+     * @param $field
+     *
+     * @return array
      */
     function prepare_hide_on_screen($field){
     
@@ -39,15 +49,21 @@ class acfe_pro_field_group_hide_on_screen{
         $field['choices']['major_publish']      = __('Major Publishing Actions', 'acfe');
         $field['choices']['publish_metabox']    = __('Publish Metabox', 'acfe');
         
-        // Sort ASC
+        // sort asc
         asort($field['choices']);
     
         return $field;
         
     }
     
-    /*
-     * Hide on screen: Styles
+    
+    /**
+     * get_field_group_style
+     *
+     * @param $style
+     * @param $field_group
+     *
+     * @return mixed|string
      */
     function get_field_group_style($style, $field_group){
     

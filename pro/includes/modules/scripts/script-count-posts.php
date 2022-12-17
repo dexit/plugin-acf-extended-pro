@@ -8,8 +8,8 @@ if(!class_exists('acfe_script_count_posts')):
 
 class acfe_script_count_posts extends acfe_script{
     
-    /*
-     * Init
+    /**
+     * initialize
      */
     function initialize(){
         
@@ -65,8 +65,9 @@ class acfe_script_count_posts extends acfe_script{
         
     }
     
-    /*
-     * Start
+    
+    /**
+     * start
      */
     function start(){
     
@@ -81,8 +82,9 @@ class acfe_script_count_posts extends acfe_script{
     
     }
     
-    /*
-     * Stop
+    
+    /**
+     * stop
      */
     function stop(){
     
@@ -94,8 +96,9 @@ class acfe_script_count_posts extends acfe_script{
         
     }
     
-    /*
-     * Request
+    
+    /**
+     * request
      */
     function request(){
     

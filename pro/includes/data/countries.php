@@ -4,7 +4,7 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-/*
+/**
  * https://restcountries.eu/rest/v2/all
  */
 return array(

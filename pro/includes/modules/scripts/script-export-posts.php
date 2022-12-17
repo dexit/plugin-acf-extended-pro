@@ -8,8 +8,8 @@ if(!class_exists('acfe_script_export_posts')):
 
 class acfe_script_export_posts extends acfe_script{
     
-    /*
-     * Init
+    /**
+     * initialize
      */
     function initialize(){
         
@@ -80,8 +80,9 @@ class acfe_script_export_posts extends acfe_script{
         
     }
     
-    /*
-     * Start
+    
+    /**
+     * start
      */
     function start(){
     
@@ -107,8 +108,9 @@ class acfe_script_export_posts extends acfe_script{
         
     }
     
-    /*
-     *
+    
+    /**
+     * stop
      */
     function stop(){
     
@@ -182,8 +184,9 @@ class acfe_script_export_posts extends acfe_script{
         
     }
     
-    /*
-     * Request
+    
+    /**
+     * request
      */
     function request(){
         
@@ -302,8 +305,13 @@ class acfe_script_export_posts extends acfe_script{
         
     }
     
-    /*
-     * Count Posts
+    
+    /**
+     * count_posts
+     *
+     * @param $post_type
+     *
+     * @return int
      */
     function count_posts($post_type){
         

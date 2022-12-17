@@ -7,17 +7,20 @@ if(!defined('ABSPATH')){
 if(!class_exists('acfe_pro_instructions')):
 
 class acfe_pro_instructions{
- 
+    
+    /**
+     * construct
+     */
     function __construct(){
         
-        // Actions
         add_action('acf/field_group/admin_head',    array($this, 'admin_head'));
         add_filter('acf/field_wrapper_attributes',  array($this, 'field_wrapper_attributes'), 10, 2);
         
     }
- 
-    /*
-     * Admin Head
+    
+    
+    /**
+     * admin_head
      */
     function admin_head(){
         
@@ -29,12 +32,15 @@ class acfe_pro_instructions{
         
     }
     
-    /*
-     * Render Field Instructions Settings
+    
+    /**
+     * render_field_instructions_settings
+     *
+     * @param $field
      */
     function render_field_instructions_settings($field){
         
-        // Hide Field
+        // hide Field
         acf_render_field_setting($field, array(
             'label'         => __('Instructions Placement', 'acfe'),
             'instructions'  => '',
@@ -55,6 +61,15 @@ class acfe_pro_instructions{
         
     }
     
+    
+    /**
+     * field_wrapper_attributes
+     *
+     * @param $wrapper
+     * @param $field
+     *
+     * @return mixed
+     */
     function field_wrapper_attributes($wrapper, $field){
         
         if(acf_maybe_get($field, 'instructions')){

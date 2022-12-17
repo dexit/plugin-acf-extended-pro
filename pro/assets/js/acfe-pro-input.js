@@ -11,12 +11,13 @@
 
     acf.models.CheckboxField = Checkbox.extend({
 
-        // on change
+        // enhance onChange method
+        // this allows dynamic render for checkbox field
         onChange: function(e, $el) {
 
             // Vars.
             var checked = $el.prop('checked');
-            var $label = $el.closest('label');
+            var $label = $el.closest('label'); // changed $el.parent('label') to $el.closest('label')
             var $toggle = this.$toggle();
 
             // Add or remove "selected" class.
@@ -57,12 +58,12 @@
 
     acf.models.RadioField = Radio.extend({
 
-        // ACF Extended
-        // change onclick for Radio Dynamic Render
+        // enhance onClick methid
+        // this allows dynamic render for radio field
         onClick: function(e, $el) {
 
             // vars
-            var $label = $el.closest('label');
+            var $label = $el.closest('label'); // changed $el.parent('label') to $el.closest('label')
             var selected = $label.hasClass('selected');
             var val = $el.val();
 
@@ -74,9 +75,11 @@
 
             // allow null
             if (this.get('allow_null') && selected) {
+
                 $label.removeClass('selected');
                 $el.prop('checked', false).trigger('change');
                 val = false;
+
             }
 
             // other
@@ -91,26 +94,6 @@
                     this.$inputText().prop('disabled', true);
                 }
             }
-        },
-
-        // ACF Extended
-        // add setValue method to allow field.val('new_value')
-        setValue: function(val) {
-
-            // already checked
-            if (this.$(':radio[value=' + val + ']').is(':checked')) return;
-
-            // remove all selected
-            this.$('label.selected').removeClass('selected');
-
-            var $option = this.$(':radio[value=' + val + ']');
-            var $label = $option.closest('label');
-
-            // add checked
-            $option.prop('checked', true);
-
-            // add active class
-            $label.addClass('selected');
 
         },
 
@@ -1497,33 +1480,69 @@
         return;
     }
 
-    var FlexibleContent = acf.models.FlexibleContentField;
+    /**
+     * Flexible Content: Grid
+     */
+    var Field = acfe.FieldExtender({
 
-    acf.models.FlexibleContentField = FlexibleContent.extend({
+        id: 'fc_grid',
 
-        /**
-         * Override initialize
-         */
+        type: 'flexible_content',
+
+        condition: function() {
+            return this.has('acfeFlexibleGrid');
+        },
+
+        events: {
+            'click [data-acfe-flexible-grid-col]': 'acfeGridOnClickCol',
+            'click [data-acfe-flexible-grid-align]': 'acfeGridOnClickAlign',
+        },
+
         initialize: function() {
 
-            // Initialize
-            FlexibleContent.prototype.initialize.apply(this, arguments);
+            // initialize
+            this.getParent(Field).initialize.apply(this, arguments);
 
+            // add events
             this.addEvents({
-                'click [data-acfe-flexible-grid-col]': 'acfeGridOnClickCol',
-                'click [data-acfe-flexible-grid-align]': 'acfeGridOnClickAlign',
+                'appendLayout': 'acfeGridAppendLayout',
             });
 
-            this.acfeGridInit();
+            this.acfeResizable(this.$layoutsWrap().find('> .layout'));
 
         },
 
-        /**
-         * Override allowAdd
-         */
+        acfeGridAppendLayout: function(e, $el, $layout) {
+
+            if (this.get('acfeFlexibleGridWrap')) {
+
+                var col = $layout.data('col');
+                var allowedCol = $layout.data('allowed-col');
+
+                // Use minimum allowed size instead of default size
+                if (col > this.acfeGetAvailableCols()) {
+
+                    var min = this.acfeGetMinAllowed(allowedCol);
+
+                    if (acfe.inArray('auto', allowedCol)) {
+                        min = 'auto';
+                    }
+
+                    this.acfeUpdateCol($layout, min);
+
+                }
+
+            }
+
+            $layout.removeClass('ui-resizable');
+            $layout.find('.ui-resizable-handle').remove();
+            this.acfeResizable($layout);
+
+        },
+
         allowAdd: function() {
 
-            if (FlexibleContent.prototype.allowAdd.apply(this, arguments) === false) {
+            if (this.getParent(Field).allowAdd.apply(this, arguments) === false) {
                 return false;
             }
 
@@ -1531,28 +1550,23 @@
 
         },
 
-        /**
-         * Override isFull
-         */
         isFull: function() {
 
-            if (!this.acfeHasAllowedLayout())
+            if (!this.acfeHasAllowedLayout()) {
                 return true;
+            }
 
-            return FlexibleContent.prototype.isFull.apply(this, arguments);
+            return this.getParent(Field).isFull.apply(this, arguments);
 
         },
 
-        /**
-         * Override getPopupHTML
-         */
         getPopupHTML: function() {
 
             // vars
-            var html = FlexibleContent.prototype.getPopupHTML.apply(this, arguments);
+            var html = this.getParent(Field).getPopupHTML.apply(this, arguments);
             var $html = $(html);
 
-            if (this.has('acfeFlexibleGrid') && this.get('acfeFlexibleGridWrap')) {
+            if (this.get('acfeFlexibleGridWrap')) {
 
                 var self = this;
                 var available = this.acfeGetAvailableCols();
@@ -1586,12 +1600,9 @@
 
         },
 
-        /**
-         * Override onClickDuplicate
-         */
         onClickDuplicate: function(e, $el) {
 
-            if (this.allowAdd() && this.has('acfeFlexibleGrid') && this.get('acfeFlexibleGridWrap')) {
+            if (this.allowAdd() && this.get('acfeFlexibleGridWrap')) {
 
                 var available = this.acfeGetAvailableCols();
                 var $layout = $el.closest('.layout');
@@ -1628,7 +1639,7 @@
 
             }
 
-            return FlexibleContent.prototype.onClickDuplicate.apply(this, arguments);
+            return this.getParent(Field).onClickDuplicate.apply(this, arguments);
 
         },
 
@@ -1649,21 +1660,21 @@
         },
 
         acfeGetAvailableCols: function() {
-
             return 12 - this.acfeCountCols();
-
         },
 
         acfeHasAllowedLayout: function() {
 
             // Flexible Wrap
-            if (!this.get('acfeFlexibleGridWrap'))
+            if (!this.get('acfeFlexibleGridWrap')) {
                 return true;
+            }
 
             // Count available
             var available = this.acfeGetAvailableCols();
-            if (!available)
+            if (!available) {
                 return false;
+            }
 
             var self = this;
             var allowed = false;
@@ -1703,8 +1714,9 @@
 
             $.each(this.$layouts(), function() {
 
-                if (this.getAttribute('data-col') !== 'auto')
+                if (this.getAttribute('data-col') !== 'auto') {
                     return;
+                }
 
                 hasAuto = true;
                 return false;
@@ -1726,8 +1738,9 @@
 
             var $field = $layout.find('> .acfe-flexible-layout-col');
 
-            if (!$field.length)
+            if (!$field.length) {
                 return;
+            }
 
             $field.val(val).change();
 
@@ -1744,21 +1757,7 @@
 
         },
 
-        acfeGridInit: function() {
-
-            if (!this.has('acfeFlexibleGrid'))
-                return;
-
-            this.acfeResizable(this.$layoutsWrap().find('> .layout'));
-
-        },
-
         acfeResizable: function($el) {
-
-            /*
-            var allowedCol = $el.data('allowed-col');
-            if(allowedCol.length === 1)
-                return;*/
 
             var self = this;
 
@@ -1767,13 +1766,13 @@
 
             var acfeReduce = function(to, found, orig) {
 
-                if (to === 1)
-                    return orig;
+                if (to === 1) return orig;
 
                 to--;
 
-                if (!acfe.inArray(to, found))
+                if (!acfe.inArray(to, found)) {
                     return acfeReduce(to, found, orig);
+                }
 
                 return to;
 
@@ -1781,13 +1780,13 @@
 
             var acfeIncrease = function(to, found, orig) {
 
-                if (to === 12)
-                    return orig;
+                if (to === 12) return orig;
 
                 to++;
 
-                if (!acfe.inArray(to, found))
+                if (!acfe.inArray(to, found)) {
                     return acfeIncrease(to, found, orig);
+                }
 
                 return to;
 
@@ -1825,6 +1824,11 @@
                     if (realCol === 'auto') {
                         to = 12 - (count - 1);
                         count = 12;
+
+                        if (to < 1 || to > 12) {
+                            to = 11;
+                        }
+
                     }
 
                     var orgTo = to;
@@ -1832,8 +1836,9 @@
 
                     if (direction === '<') {
 
-                        if (realCol === 'auto' && to === 1)
+                        if (realCol === 'auto' && to === 1) {
                             return false;
+                        }
 
                         to = acfeReduce(to, allowedCol, to);
 
@@ -1851,21 +1856,19 @@
                             var sibiling, sibCol;
 
                             if (window.resizeAxis === 'e' && direction === '>') {
-
                                 sibiling = target.next();
 
                             } else if (window.resizeAxis === 'w' && direction === '>') {
-
                                 sibiling = target.prev();
-
                             }
 
                             if (typeof sibiling !== 'undefined' && sibiling.length) {
 
                                 sibCol = sibiling.attr('data-col');
 
-                                if (sibCol === 'auto')
+                                if (sibCol === 'auto') {
                                     sibCol = 1;
+                                }
 
                                 sibCol = parseInt(sibCol);
                                 var orgSibCol = sibCol;
@@ -1885,17 +1888,13 @@
                         }
 
                         if (to >= 1 && to <= 12 && (to + (count - orgTo) <= 12) && (count <= 11 || direction === '<')) {
-
                             self.acfeUpdateCol(target, to);
-
                         }
 
                     } else {
 
                         if (to >= 1 && to <= 12) {
-
                             self.acfeUpdateCol(target, to);
-
                         }
 
                     }
@@ -1913,9 +1912,6 @@
         },
 
         acfeGridOnClickCol: function(e, $el) {
-
-            if (!this.has('acfeFlexibleGrid'))
-                return;
 
             // Vars
             var self = this;
@@ -1942,10 +1938,9 @@
                 }
 
                 if (allowedCol.length) {
-
-                    if (!acfe.inArray(col, allowedCol))
+                    if (!acfe.inArray(col, allowedCol)) {
                         $this.remove();
-
+                    }
                 }
 
                 if (self.get('acfeFlexibleGridWrap')) {
@@ -1973,10 +1968,9 @@
                 confirm: function(e, $el) {
 
                     // check disabled
-                    if ($el.hasClass('disabled'))
-                        return;
-
-                    this.acfeUpdateCol($layout, $el.attr('data-col'));
+                    if (!$el.hasClass('disabled')) {
+                        this.acfeUpdateCol($layout, $el.attr('data-col'));
+                    }
 
                 }
             });
@@ -1987,11 +1981,7 @@
 
         acfeGridOnClickAlign: function(e, $el) {
 
-            if (!this.has('acfeFlexibleGrid'))
-                return;
-
-            // Vars
-            var self = this;
+            // vars
             var $layout = $el.closest('.layout');
 
             var html = this.$('.tmpl-acfe-flexible-grid-align:last').html();
@@ -2005,10 +1995,9 @@
                 confirm: function(e, $el) {
 
                     // check disabled
-                    if ($el.hasClass('disabled'))
-                        return;
-
-                    this.acfeUpdateAlign($layout, $el.attr('data-col'));
+                    if (!$el.hasClass('disabled')) {
+                        this.acfeUpdateAlign($layout, $el.attr('data-col'));
+                    }
 
                 }
             });
@@ -2025,66 +2014,6 @@
             this.html(this.get('text'));
             this.$el.addClass('acf-fc-popup');
         }
-    });
-
-    /**
-     * Enable Resize on Added Layout
-     */
-    acf.addAction('append', function($el) {
-
-        // Bail early if layout is not layout
-        if (!$el.is('.layout'))
-            return;
-
-        // Get Flexible
-        var field = acf.getInstance($el.closest('.acf-field-flexible-content'));
-
-        if (!field.has('acfeFlexibleGrid'))
-            return;
-
-        $el.removeClass('ui-resizable');
-        $el.find('.ui-resizable-handle').remove();
-        field.acfeResizable($el);
-
-    });
-
-    /**
-     * Use Minimum allowed size if not enough space
-     */
-    acf.addAction('after_duplicate', function($el, $el2) {
-
-        // Bail early if layout is not layout
-        if (!$el2.is('.layout'))
-            return;
-
-        // Get Flexible
-        var field = acf.getInstance($el.closest('.acf-field-flexible-content'));
-
-        if (typeof field === 'undefined')
-            return;
-
-        if (!field.has('acfeFlexibleGrid'))
-            return;
-
-        if (field.get('acfeFlexibleGridWrap')) {
-
-            var col = $el2.data('col');
-            var allowedCol = $el2.data('allowed-col');
-
-            // Use minimum allowed size instead of default size
-            if (col > field.acfeGetAvailableCols()) {
-
-                var min = field.acfeGetMinAllowed(allowedCol);
-
-                if (acfe.inArray('auto', allowedCol))
-                    min = 'auto';
-
-                field.acfeUpdateCol($el2, min);
-
-            }
-
-        }
-
     });
 
 })(jQuery);
@@ -2295,7 +2224,7 @@
      */
     var PaymentField = acf.Field.extend({
 
-        wait: false,
+        wait: 'ready',
 
         type: 'acfe_payment',
 
@@ -3890,15 +3819,15 @@
     /**
      * Post Object: Add Post
      */
-    var AddPost = acfe.FieldExtend.extend({
+    var AddPost = acfe.FieldExtender({
 
-        id: 'acfe_pro_post_object_add_post',
+        id: 'post_object_add_post',
 
         type: 'post_object',
 
-        dependencies: ['acfe_pro_relationship_modal'],
+        dependencies: ['relationship_modal'],
 
-        conditions: function() {
+        condition: function() {
             return this.has('acfeAddPost');
         },
 
@@ -3936,21 +3865,19 @@
 
     });
 
-    acfe.registerFieldExtend(AddPost);
-
 
     /**
      * Post Object: Edit Post
      */
-    var EditPost = acfe.FieldExtend.extend({
+    var EditPost = acfe.FieldExtender({
 
-        id: 'acfe_pro_post_object_edit_post',
+        id: 'post_object_edit_post',
 
         type: 'post_object',
 
-        dependencies: ['acfe_pro_relationship_modal'],
+        dependencies: ['relationship_modal'],
 
-        conditions: function() {
+        condition: function() {
             return this.has('acfeEditPost');
         },
 
@@ -3960,7 +3887,7 @@
 
         initialize: function() {
 
-            acf.getFieldType(this.get('type')).prototype.initialize.apply(this, arguments);
+            this.getParent(EditPost).initialize.apply(this, arguments);
 
             // add action on select2
             this.select2.on('select2:selecting', this.proxy(this.onSelecting));
@@ -4004,7 +3931,6 @@
 
     });
 
-    acfe.registerFieldExtend(EditPost);
 
     /**
      * Post Obect: Select2 Template Selection
@@ -4042,15 +3968,15 @@
     /**
      * Relationship: Add Post
      */
-    var AddPost = acfe.FieldExtend.extend({
+    var AddPost = acfe.FieldExtender({
 
-        id: 'acfe_pro_relationship_add_post',
+        id: 'relationship_add_post',
 
-        dependencies: ['acfe_pro_relationship_modal'],
+        dependencies: ['relationship_modal'],
 
         type: 'relationship',
 
-        conditions: function() {
+        condition: function() {
             return this.has('acfeAddPost');
         },
 
@@ -4095,21 +4021,19 @@
 
     });
 
-    acfe.registerFieldExtend(AddPost);
-
 
     /**
      * Relationship: Edit Post
      */
-    var EditPost = acfe.FieldExtend.extend({
+    var EditPost = acfe.FieldExtender({
 
-        id: 'acfe_pro_relationship_edit_post',
+        id: 'relationship_edit_post',
 
-        dependencies: ['acfe_pro_relationship_modal'],
+        dependencies: ['relationship_modal'],
 
         type: 'relationship',
 
-        conditions: function() {
+        condition: function() {
             return this.has('acfeEditPost');
         },
 
@@ -4144,7 +4068,7 @@
         newValue: function(props) {
 
             // parent newValue
-            var value = acf.getFieldType(this.get('type')).prototype.newValue.apply(this, arguments);
+            var value = this.getParent(EditPost).newValue.apply(this, arguments);
 
             var $html = $('<div>' + value + '</div>');
 
@@ -4158,7 +4082,7 @@
         walkChoices: function(data) {
 
             // parent walkChoices
-            var choices = acf.getFieldType(this.get('type')).prototype.walkChoices.apply(this, arguments);
+            var choices = this.getParent(EditPost).walkChoices.apply(this, arguments);
 
             var $html = $('<div>' + choices + '</div>');
 
@@ -4170,8 +4094,6 @@
 
     });
 
-    acfe.registerFieldExtend(EditPost);
-
 })(jQuery);
 (function($) {
 
@@ -4182,13 +4104,13 @@
     /**
      * Relationship: Modal
      */
-    var FieldModal = acfe.FieldExtend.extend({
+    var FieldModal = acfe.FieldExtender({
 
-        id: 'acfe_pro_relationship_modal',
+        id: 'relationship_modal',
 
         type: ['relationship', 'post_object'],
 
-        conditions: function() {
+        condition: function() {
             return this.has('acfeAddPost') || this.has('acfeEditPost');
         },
 
@@ -4203,8 +4125,6 @@
         },
 
     });
-
-    acfe.registerFieldExtend(FieldModal);
 
     /**
      * Relationship: Callbacks
@@ -4260,7 +4180,7 @@
                     }).trigger('change');
 
                     // close popup
-                    acfe.closePopup();
+                    acfe.closeModal();
 
                     break;
                 }
@@ -4296,7 +4216,7 @@
                     });
 
                     // close popup
-                    acfe.closePopup();
+                    acfe.closeModal();
 
                     break;
                 }
@@ -4337,7 +4257,7 @@
                     field.select2.$el.trigger('change');
 
                     // close popup
-                    acfe.closePopup();
+                    acfe.closeModal();
 
                     break;
                 }
@@ -4400,7 +4320,7 @@
                     }
 
                     // close popup
-                    acfe.closePopup();
+                    acfe.closeModal();
 
                     break;
 
@@ -4411,6 +4331,7 @@
         },
 
     });
+
 
     /**
      * Relationship Modal
@@ -4448,10 +4369,10 @@
             var title = this.get('field').$labelWrap().find('>label').text() || this.get('relation');
 
             // Open
-            new acfe.Popup({
+            acfe.newModal({
                 title: title,
                 class: '-iframe',
-                content: '<iframe src="' + url + '" style="width:100%;max-height: 100%;height: 850px;border:0;" />',
+                content: '<iframe src="' + url + '" />',
                 size: 'xlarge',
                 destroy: true
             });
@@ -4459,6 +4380,7 @@
         }
 
     });
+
 
     /**
      * Relationship Confirm
@@ -4480,6 +4402,7 @@
         }
 
     });
+
 
     /**
      * Relationship Iframe

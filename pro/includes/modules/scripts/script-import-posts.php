@@ -8,8 +8,8 @@ if(!class_exists('acfe_script_import_posts')):
 
 class acfe_script_import_posts extends acfe_script{
     
-    /*
-     * Init
+    /**
+     * initialize
      */
     function initialize(){
         
@@ -72,8 +72,9 @@ class acfe_script_import_posts extends acfe_script{
         
     }
     
-    /*
-     * Validate
+    
+    /**
+     * validate
      */
     function validate(){
     
@@ -99,8 +100,9 @@ class acfe_script_import_posts extends acfe_script{
         
     }
     
-    /*
-     * Start
+    
+    /**
+     * start
      */
     function start(){
     
@@ -143,8 +145,9 @@ class acfe_script_import_posts extends acfe_script{
         
     }
     
-    /*
-     *
+    
+    /**
+     * stop
      */
     function stop(){
     
@@ -159,8 +162,9 @@ class acfe_script_import_posts extends acfe_script{
         
     }
     
-    /*
-     * Request
+    
+    /**
+     * request
      */
     function request(){
     

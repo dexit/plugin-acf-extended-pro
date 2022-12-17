@@ -8,15 +8,16 @@ if(!class_exists('ACFE_Updates')):
 
 class ACFE_Updates {
     
+    // vars
     public $license = '';
     public $url     = 'https://www.acf-extended.com';
     public $item    = 'ACF Extended Pro';
     public $updater = false;
     
-    /*
-     * Construct
+    /**
+     * construct
      */
-    public function __construct(){
+    function __construct(){
         
         // get license
         $this->license = acfe_get_settings('license');
@@ -27,8 +28,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Admin Menu
+    
+    /**
+     * admin_menu
      */
     function admin_menu(){
     
@@ -41,8 +43,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Admin Init
+    
+    /**
+     * admin_init
      */
     function admin_init(){
     
@@ -56,26 +59,23 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Load
+    
+    /**
+     * load
      */
     function load(){
     
         // activate
         if(acf_verify_nonce('acfe-pro-activate')){
-        
             $this->activate();
         
         // deactivate
         }elseif(acf_verify_nonce('acfe-pro-deactivate')){
-        
             $this->deactivate();
         
         // check
         }elseif(acf_maybe_get_GET('acfe-pro-check')){
-        
             $this->check();
-        
         }
     
         // check version
@@ -102,8 +102,13 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Admin Body Class
+    
+    /**
+     * admin_body_class
+     *
+     * @param $classes
+     *
+     * @return string
      */
     function admin_body_class($classes){
         
@@ -112,8 +117,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Activate
+    
+    /**
+     * activate
      */
     function activate(){
         
@@ -168,8 +174,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Deactivate
+    
+    /**
+     * deactivate
      */
     function deactivate(){
     
@@ -202,8 +209,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Check
+    
+    /**
+     * check
      */
     function check(){
     
@@ -214,8 +222,11 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Update License
+    
+    /**
+     * update_license
+     *
+     * @param $key
      */
     function update_license($key = ''){
     
@@ -224,8 +235,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * Refresh
+    
+    /**
+     * refresh
      */
     function refresh(){
         
@@ -234,8 +246,9 @@ class ACFE_Updates {
         
     }
     
-    /*
-     * HTML
+    
+    /**
+     * html
      */
     function html(){
         
@@ -468,6 +481,13 @@ class ACFE_Updates {
         
     }
     
+    /**
+     * get_error_message
+     *
+     * @param $error
+     *
+     * @return string|null
+     */
     function get_error_message($error){
         
         // default

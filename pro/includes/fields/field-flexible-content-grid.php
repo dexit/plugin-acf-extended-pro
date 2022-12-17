@@ -330,11 +330,12 @@ class acfe_pro_field_fc_grid{
     
     function load_fields($fields, $field){
         
-        // Check setting
-        if(!$field['acfe_flexible_grid']['acfe_flexible_grid_enabled'])
+        // check setting
+        if(!isset($field['acfe_flexible_grid']['acfe_flexible_grid_enabled']) || !$field['acfe_flexible_grid']['acfe_flexible_grid_enabled']){
             return $fields;
+        }
         
-        // Loop
+        // loop layouts
         foreach($field['layouts'] as $i => $layout){
             
             // Vars

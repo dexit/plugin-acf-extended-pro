@@ -8,10 +8,14 @@ if(!class_exists('ACFE_World_Data')):
 
 class ACFE_World_Data{
     
+    // vars
     public $countries;
     public $languages;
     public $currencies;
     
+    /**
+     * construct
+     */
     function __construct(){
         
         // Data
@@ -19,17 +23,15 @@ class ACFE_World_Data{
         $this->languages = acfe_include('pro/includes/data/languages.php');
         $this->currencies = acfe_include('pro/includes/data/currencies.php');
     
-        // Localize Names
+        // localize Names
         if(function_exists('locale_get_display_region')){
         
-            // Get Locale
+            // get Locale
             $locale = acf_get_locale();
             
-            // Loop
+            // loop
             foreach(array_keys($this->countries) as $code){
-                
-                $this->countries[$code]['localized'] = locale_get_display_region("-$code", $locale);
-                
+                $this->countries[ $code ]['localized'] = locale_get_display_region("-$code", $locale);
             }
         
         }
@@ -44,13 +46,15 @@ if(!class_exists('ACFE_World_Query')):
 
 class ACFE_World_Query{
     
-    // Vars
+    // vars
     public $type;
     public $args;
     public $data;
     
-    /*
-     * Construct
+    /**
+     * construct
+     *
+     * @param $args
      */
     function __construct($args){
         
@@ -70,8 +74,9 @@ class ACFE_World_Query{
         
     }
     
-    /*
-     * Validate
+    
+    /**
+     * validate
      */
     function validate(){
     
@@ -80,8 +85,9 @@ class ACFE_World_Query{
         
     }
     
-    /*
-     * Filter
+    
+    /**
+     * filter
      */
     function filter(){
         
@@ -172,26 +178,26 @@ class ACFE_World_Query{
         
     }
     
-    /*
-     * Order
+    
+    /**
+     * order
      */
     function order(){
     
-        // Vars
+        // vars
         $args = $this->args;
         $data = $this->data;
         
-        // Prepare
+        // prepare
         $orderby = $args['orderby'];
         $order = $args['order'];
         $columns = explode('__', $orderby);
         
-        // Orderby: key
+        // orderby: key
         if(acf_maybe_get($columns, 1) !== 'in'){
-            
             $data = wp_list_sort($data, $orderby, $order, true);
             
-        // Orderby: name__in
+        // orderby: name__in
         }else{
             
             $key = $columns[0];                         // name
@@ -220,37 +226,25 @@ class ACFE_World_Query{
             
         }
         
-        /*
-         * Offset
-         */
+        //offset
         if($args['offset'] > 0){
-            
             $data = array_slice($data, $args['offset']);
-            
         }
         
-        /*
-         * Limit
-         */
+        // limit
         if($args['limit'] > 0){
-            
             $data = array_slice($data, 0, $args['limit']);
-            
         }
         
-        /*
-         * Clone
-         */
+        // clone
         $_data = $data;
         
-        /*
-         * Field
-         */
+        // field
         if($args['field']){
             
             $data = wp_list_pluck($data, $args['field']);
     
-            // Display
+            // display
             if($args['display'] !== false){
         
                 foreach(array_keys($data) as $code){
@@ -274,7 +268,7 @@ class ACFE_World_Query{
         
             }
             
-            // Prepend
+            // prepend
             if($args['prepend'] !== false){
                 
                 foreach(array_keys($data) as $code){
@@ -298,7 +292,7 @@ class ACFE_World_Query{
                 
             }
             
-            // Append
+            // append
             if($args['append'] !== false){
                 
                 foreach(array_keys($data) as $code){
@@ -324,9 +318,7 @@ class ACFE_World_Query{
             
         }
         
-        /*
-         * Groupby
-         */
+        // groupby
         if($args['groupby']){
             
             $groups = array();
@@ -342,28 +334,29 @@ class ACFE_World_Query{
             
             if($groups){
                 
-                // Sort Group ASC
+                // sort group asc
                 ksort($groups);
                 
-                // Assign data
+                // assign data
                 $data = $groups;
                 
             }
             
         }
     
-        // Set data
+        // set data
         $this->data = $data;
         
     }
     
-    /*
-     * Get
+    
+    /**
+     * get
+     *
+     * @return mixed
      */
     function get(){
-        
         return $this->data;
-        
     }
     
 }

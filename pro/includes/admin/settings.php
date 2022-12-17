@@ -8,10 +8,14 @@ if(!class_exists('acfe_pro_admin_settings')):
 
 class acfe_pro_admin_settings{
     
+    // vars
     public $defaults = array();
     public $updated = array();
     public $fields = array();
     
+    /**
+     * construct
+     */
     function __construct(){
         
         $class = acf_get_instance('acfe_admin_settings_ui');
@@ -25,8 +29,9 @@ class acfe_pro_admin_settings{
         
     }
     
-    /*
-     * ACF Init
+    
+    /**
+     * acf_init
      */
     function acf_init(){
         
@@ -42,8 +47,9 @@ class acfe_pro_admin_settings{
         
     }
     
-    /*
-     * Load
+    
+    /**
+     * load
      */
     function load(){
         
@@ -55,20 +61,20 @@ class acfe_pro_admin_settings{
         
         $this->register_fields();
     
-        // Enqueue
+        // enqueue
         acf_enqueue_scripts();
     
         add_action('admin_footer', array($this, 'admin_footer'));
     
-        // Submit
+        // submit
         if(acf_verify_nonce('acfe_settings')){
         
-            // Validate
+            // validate
             if(acf_validate_save_post(true)){
                 
                 $this->save_post();
             
-                // Redirect
+                // redirect
                 wp_redirect(add_query_arg(array('message' => 'acfe_settings')));
                 exit;
             
@@ -76,16 +82,17 @@ class acfe_pro_admin_settings{
         
         }
     
-        // Success
+        // success
         if(acf_maybe_get_GET('message') === 'acfe_settings'){
-        
             acf_add_admin_notice('Settings Saved.', 'success');
-        
         }
         
     }
     
     
+    /**
+     * admin_footer
+     */
     function admin_footer(){
         ?>
         <script type="text/javascript">
@@ -96,8 +103,9 @@ class acfe_pro_admin_settings{
         <?php
     }
     
-    /*
-     * Save Post
+    
+    /**
+     * save_post
      */
     function save_post(){
         
@@ -121,13 +129,18 @@ class acfe_pro_admin_settings{
             
         }
         
-        // Update Settings
+        // update settings
         acfe_update_settings('settings', $values);
         
     }
     
-    /*
-     * Get Setting
+    
+    /**
+     * get_setting
+     *
+     * @param $name
+     *
+     * @return array
      */
     function get_setting($name){
         
@@ -135,8 +148,9 @@ class acfe_pro_admin_settings{
             
             foreach($rows as $row){
                 
-                if($row['name'] !== $name)
+                if($row['name'] !== $name){
                     continue;
+                }
         
                 $setting = $row;
                 break;
@@ -149,8 +163,13 @@ class acfe_pro_admin_settings{
         
     }
     
-    /*
-     * Validate Setting
+    
+    /**
+     * validate_setting
+     *
+     * @param $setting
+     *
+     * @return array
      */
     function validate_setting($setting){
     
@@ -173,12 +192,17 @@ class acfe_pro_admin_settings{
         
     }
     
-    /*
-     * Prepare Setting
+    
+    /**
+     * prepare_setting
+     *
+     * @param $setting
+     *
+     * @return mixed
      */
     function prepare_setting($setting){
     
-        // Vars
+        // vars
         $settings = acfe_get_settings('settings');
         
         $name = $setting['name'];
@@ -197,7 +221,6 @@ class acfe_pro_admin_settings{
             $result = $var;
             
             if($type === 'true_false'){
-    
                 $result = $var ? '<span class="dashicons dashicons-saved"></span>' : '<span class="dashicons dashicons-no-alt"></span>';
                 
             }elseif($type === 'text'){
@@ -224,11 +247,11 @@ class acfe_pro_admin_settings{
                 
             }
     
-            $setting[$v] = $result;
+            $setting[ $v ] = $result;
             
         }
         
-        // Local Changes
+        // local Changes
         if($default !== $updated && $updated !== acfe_get_settings("settings.{$name}")){
             
             $setting['updated'] .= '<span style="color:#888; margin-left:7px;vertical-align: 6px;font-size:11px;">(Local code)</span>';
@@ -236,11 +259,11 @@ class acfe_pro_admin_settings{
             
         }
         
-        // Value
+        // value
         $button_edit = $button_default = $class = '';
         $value = acf_maybe_get($settings, $name);
     
-        // Value exists
+        // value exists
         if($value !== null){
         
             $button_edit = 'acf-hidden';
@@ -267,8 +290,9 @@ class acfe_pro_admin_settings{
         
     }
     
-    /*
-     * HTML
+    
+    /**
+     * html
      */
     function html(){
         
@@ -364,14 +388,15 @@ class acfe_pro_admin_settings{
         <?php
     }
     
-    /*
-     * Render Fields
+    
+    /**
+     * render_fields
      */
     function render_fields(){
     
         foreach(array('ACF', 'ACFE', 'AutoSync', 'Modules', 'Fields') as $tab){
     
-            // Category
+            // category
             $category = sanitize_title($tab);
             
             if(isset($this->fields[$category])){
@@ -381,7 +406,7 @@ class acfe_pro_admin_settings{
                 
                 foreach($this->fields[$category] as $field){
                     
-                    // Prepare
+                    // prepare
                     $field = $this->validate_setting($field);
                     $field = $this->prepare_setting($field);
                     
@@ -399,7 +424,7 @@ class acfe_pro_admin_settings{
                 $class = $count > 0 ? 'acfe-tab-badge' : 'acfe-tab-badge acf-hidden';
                 $tab .= ' <span class="' . $class . '">' . $count . '</span>';
                 
-                // Tab
+                // tab
                 acf_render_field_wrap(array(
                     'type'  => 'tab',
                     'label' => $tab,
@@ -409,7 +434,7 @@ class acfe_pro_admin_settings{
                     ),
                 ));
     
-                // Thead
+                // thead
                 acf_render_field_wrap(array(
                     'type'  => 'acfe_dynamic_render',
                     'label' => '',
@@ -481,8 +506,9 @@ class acfe_pro_admin_settings{
         
     }
     
-    /*
-     * Register Fields
+    
+    /**
+     * register_fields
      */
     function register_fields(){
     
@@ -555,6 +581,14 @@ class acfe_pro_admin_settings{
             'label'         => 'Scripts',
             'name'          => 'acfe/modules/scripts',
             'description'   => 'Enable the Scripts UI. Defaults to true',
+            'type'          => 'true_false',
+            'category'      => 'modules',
+        );
+        
+        $this->fields['modules'][] = array(
+            'label'         => 'Scripts Demo',
+            'name'          => 'acfe/modules/scripts/demo',
+            'description'   => 'Enable Demo Scripts. Defaults to false',
             'type'          => 'true_false',
             'category'      => 'modules',
         );

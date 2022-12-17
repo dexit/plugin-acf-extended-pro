@@ -4,16 +4,17 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-// Check setting
-if(!acf_get_setting('acfe/modules/screen_layouts'))
+// check setting
+if(!acf_get_setting('acfe/modules/screen_layouts')){
     return;
+}
 
 if(!class_exists('acfe_pro_screen_layouts')):
 
 class acfe_pro_screen_layouts{
     
-    /*
-     * Construct
+    /**
+     * construct
      */
     function __construct(){
     
@@ -23,6 +24,10 @@ class acfe_pro_screen_layouts{
         
     }
     
+    
+    /**
+     * load
+     */
     function load(){
     
         add_action('admin_head',        array($this, 'admin_head'));
@@ -30,12 +35,24 @@ class acfe_pro_screen_layouts{
         
     }
     
+    
+    /**
+     * admin_head
+     */
     function admin_head(){
     
         add_screen_option('layout_columns', array('max' => 6, 'default' => 2));
         
     }
     
+    
+    /**
+     * body_class
+     *
+     * @param $classes
+     *
+     * @return string
+     */
     function body_class($classes){
         
         $classes .= ' acfe-screen-layouts';
@@ -43,6 +60,12 @@ class acfe_pro_screen_layouts{
         
     }
     
+    
+    /**
+     * postbox
+     *
+     * @param $post
+     */
     function postbox($post){
         
         echo '<div id="postbox-container-3" class="postbox-container">';

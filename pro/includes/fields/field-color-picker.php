@@ -594,6 +594,22 @@ class acfe_field_color_picker extends acfe_field_extend{
         
     }
     
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['button_label'] = acf_translate($field['button_label']);
+        
+        return $field;
+        
+    }
+    
 }
 
 acf_new_instance('acfe_field_color_picker');

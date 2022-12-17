@@ -8,33 +8,38 @@ if(!class_exists('acfe_field_visibility')):
 
 class acfe_field_visibility{
     
+    /**
+     * construct
+     */
     function __construct(){
         
-        // Actions
         add_action('acf/field_group/admin_head', array($this, 'admin_head'));
         
     }
- 
-    /*
-     * Admin Head
+    
+    
+    /**
+     * admin_head
      */
     function admin_head(){
         
         global $field_group;
         
-        if(!acf_maybe_get($field_group, 'acfe_form'))
-            return;
-    
-        add_action('acf/render_field_settings', array($this, 'render_field_visibility_settings'), 15);
+        if(acf_maybe_get($field_group, 'acfe_form')){
+            add_action('acf/render_field_settings', array($this, 'render_field_visibility_settings'), 15);
+        }
         
     }
     
-    /*
-     * Render Field Visibility Settings
+    
+    /**
+     * render_field_visibility_settings
+     *
+     * @param $field
      */
     function render_field_visibility_settings($field){
         
-        // Hide Field
+        // hide Field
         acf_render_field_setting($field, array(
             'label'         => __('Field Visibility', 'acfe'),
             'instructions'  => '',
@@ -55,7 +60,7 @@ class acfe_field_visibility{
             )
         ), true);
         
-        // Hide Label
+        // hide Label
         acf_render_field_setting($field, array(
             'label'         => '',
             'instructions'  => '',
@@ -76,7 +81,7 @@ class acfe_field_visibility{
             '_append' => 'hide_field'
         ), true);
         
-        // Hide Instructions
+        // hide instructions
         acf_render_field_setting($field, array(
             'label'         => '',
             'instructions'  => '',
@@ -97,7 +102,7 @@ class acfe_field_visibility{
             '_append' => 'hide_field'
         ), true);
     
-        // Hide Required
+        // hide required
         acf_render_field_setting($field, array(
             'label'         => '',
             'instructions'  => '',

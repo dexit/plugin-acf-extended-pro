@@ -731,6 +731,23 @@ class acfe_pro_field_file extends acfe_field_extend{
         
     }
     
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['placeholder'] = acf_translate($field['placeholder']);
+        $field['button_label'] = acf_translate($field['button_label']);
+        
+        return $field;
+        
+    }
+    
 }
 
 acf_new_instance('acfe_pro_field_file');

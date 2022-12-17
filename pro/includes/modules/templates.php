@@ -852,19 +852,19 @@ class acfe_dynamic_templates extends acfe_dynamic_module{
         // get screen
         $screen = acf_get_form_data('location');
         
-        // Loop
+        // loop
         foreach($templates as $template){
     
-            // Check active
+            // check active
             if(!$template['active']) continue;
             
-            // Check setting
+            // check setting
             if(!$template['location']) continue;
             
-            // Match screen
+            // match screen
             if(!acfe_match_location_rules($template['location'], $screen)) continue;
             
-            // Apply
+            // apply
             $this->apply_values($template['values']);
             
         }

@@ -293,6 +293,23 @@ class acfe_payment_selector extends acf_field{
         
     }
     
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['credit_card_label'] = acf_translate($field['credit_card_label']);
+        $field['paypal_label'] = acf_translate($field['paypal_label']);
+        
+        return $field;
+        
+    }
+    
 }
 
 // initialize

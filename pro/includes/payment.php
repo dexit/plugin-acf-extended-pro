@@ -8,8 +8,8 @@ if(!class_exists('acfe_payment_hooks')):
 
 class acfe_payment_hooks{
     
-    /*
-     * Construct
+    /**
+     * construct
      */
     function __construct(){
 

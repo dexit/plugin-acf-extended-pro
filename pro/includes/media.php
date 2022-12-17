@@ -14,13 +14,9 @@ class acfe_pro_media{
      * construct
      */
     function __construct(){
-    
-        // media instance
-        $media = acf_get_instance('ACF_Media');
-    
-        // hooks
-        remove_action('acf/save_post', array($media, 'save_files'), 5);
-        add_action('acf/save_post',    array($this, 'save_files'), 5);
+        
+        // replace action
+        acfe_replace_action('acf/save_post', array('ACF_Media', 'save_files'), array($this, 'save_files'), 5);
         
     }
     

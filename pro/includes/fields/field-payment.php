@@ -469,8 +469,8 @@ class acfe_payment extends acf_field{
             </div>
             
             <div class="object">
-                <strong><?php _e('Payment Object', 'acfe'); ?>:</strong> <a href="#" data-acfe-modal data-acfe-modal-title="<?php _e('Payment Object', 'acfe'); ?>" data-acfe-modal-size="large" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
-                <div class="acfe-modal">
+                <strong><?php _e('Payment Object', 'acfe'); ?>:</strong> <a href="#" data-modal><?php _e('View', 'acfe'); ?></a>
+                <div class="acfe-modal" data-title="<?php _e('Payment Object', 'acfe'); ?>" data-size="large" data-footer="<?php _e('Close', 'acfe'); ?>">
                     <div class="acfe-modal-spacer">
                         <pre><?php print_r($value['object']); ?></pre>
                     </div>
@@ -1629,6 +1629,22 @@ class acfe_payment extends acf_field{
         }
         
         return false;
+        
+    }
+    
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['button_value'] = acf_translate($field['button_value']);
+        
+        return $field;
         
     }
     

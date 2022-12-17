@@ -4,7 +4,7 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-/*
+/**
  * PHP: https://gist.github.com/grexlort/00cd35c9e6f6e5d2c6f2?permalink_comment_id=3734962#gistcomment-3734962
  * JS (with priority): https://github.com/jackocnr/intl-tel-input/blob/master/src/js/data.js
  */

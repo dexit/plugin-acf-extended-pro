@@ -4,19 +4,21 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-// Check setting
-if(!acf_get_setting('acfe/modules/rewrite_rules'))
+// check setting
+if(!acf_get_setting('acfe/modules/rewrite_rules')){
     return;
+}
 
 if(!class_exists('acfe_pro_rewrite_rules')):
 
 class acfe_pro_rewrite_rules{
     
+    // vars
     var $rewrite_rules;
     var $rewrite_rules_ui;
     
-    /*
-     * Construct
+    /**
+     * construct
      */
     function __construct(){
         
@@ -24,35 +26,37 @@ class acfe_pro_rewrite_rules{
         
     }
     
-    /*
-     * Admin Menu
+    
+    /**
+     * admin_menu
      */
     function admin_menu(){
     
-        if(!acf_get_setting('show_admin')){
-            return;
-        }
-        
-        // add page
-        $page = add_management_page(__('Rewrite Rules'), __('Rewrite Rules'), acf_get_setting('capability'), 'acfe-rewrite-rules', array($this, 'html'));
+        if(acf_get_setting('show_admin')){
+            
+            $page = add_management_page(__('Rewrite Rules'), __('Rewrite Rules'), acf_get_setting('capability'), 'acfe-rewrite-rules', array($this, 'html'));
     
-        add_action("load-{$page}", array($this, 'load'));
+            add_action("load-{$page}", array($this, 'load'));
+            
+        }
     
     }
     
-    /*
-     * Load
+    
+    /**
+     * load
      */
     function load(){
     
-        // Submit
+        // submit
         if(acf_verify_nonce('acfe_rewrite_rules')){
     
             if(acf_maybe_get_POST('flush_permalinks')){
-        
+                
+                // flush rewrite rules
                 flush_rewrite_rules();
         
-                // Redirect
+                // redirect
                 wp_redirect(add_query_arg(array('message' => 'flush_permalinks')));
                 exit;
                 
@@ -60,14 +64,12 @@ class acfe_pro_rewrite_rules{
         
         }
     
-        // Success message
+        // success message
         if(acf_maybe_get_GET('message') === 'flush_permalinks'){
-        
             acf_add_admin_notice('Permalinks flushed.', 'success');
-        
         }
         
-        // Preload
+        // preload
         $rewrite_rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
         $rewrite_rules_ui = array();
         $public_query_vars = apply_filters('query_vars', $GLOBALS['wp']->public_query_vars);
@@ -107,8 +109,8 @@ class acfe_pro_rewrite_rules{
                     );
                     $query_value_ui = $query_value;
                 
-                    // Replace `$matches[DD]` with URL regex part
-                    // This is so complicated to handle situations where `$query_value` contains multiple `$matches[DD]`
+                    // replace `$matches[DD]` with URL regex part
+                    // this is so complicated to handle situations where `$query_value` contains multiple `$matches[DD]`
                     $query_value_replacements = array();
                 
                     if(preg_match_all('/\$matches\[(\d+)\]/', $query_value, $matches, PREG_OFFSET_CAPTURE)){
@@ -137,7 +139,7 @@ class acfe_pro_rewrite_rules{
                     
                     $substitution_part_ui['query_value_ui'] = $query_value_ui;
                 
-                    // Highlight non-public query vars
+                    // highlight non-public query vars
                     $substitution_part_ui['is_public'] = in_array($query_var, $public_query_vars);
                     $substitution_parts_ui[] = $substitution_part_ui;
                 
@@ -152,18 +154,19 @@ class acfe_pro_rewrite_rules{
         
         }
     
-        // Localize data
+        // localize data
         acf_localize_data(array(
             'rewrite_rules' => $rewrite_patterns
         ));
     
-        // Enqueue
+        // enqueue
         acf_enqueue_scripts();
     
     }
     
-    /*
-     * HTML
+    
+    /**
+     * html
      */
     function html(){
     
@@ -188,7 +191,7 @@ class acfe_pro_rewrite_rules{
                 <form method="post" class="heading">
                     
                     <?php
-                    // Set form data
+                    // set form data
                     acf_form_data(array(
                         'screen'        => 'acfe_rewrite_rules',
                         'validation'    => false,
@@ -269,8 +272,15 @@ class acfe_pro_rewrite_rules{
     
     }
     
-    /*
-     * Print Regex
+    
+    /**
+     * print_regex
+     *
+     * @param $regex
+     * @param $idx
+     * @param $is_target
+     *
+     * @return mixed|string
      */
     function print_regex($regex, $idx, $is_target = false){
         
@@ -318,8 +328,14 @@ class acfe_pro_rewrite_rules{
         
     }
     
-    /*
-     * Wrap Repeater
+    
+    /**
+     * wrap_repeater
+     *
+     * @param $regex
+     * @param $value
+     *
+     * @return mixed
      */
     function wrap_repeater($regex, $value){
         
@@ -332,8 +348,8 @@ class acfe_pro_rewrite_rules{
                      '</span>' .
                      '</span>';
             
-            // Can a repeater have a repeater?
-            // Probably not, '?' is a greedy modifier
+            // can a repeater have a repeater?
+            // probably not, '?' is a greedy modifier
             $value = $this->wrap_repeater( $regex->repeater, $value );
             
         }
@@ -342,8 +358,13 @@ class acfe_pro_rewrite_rules{
         
     }
     
-    /*
-     * Collect Groups
+    
+    /**
+     * collect_groups
+     *
+     * @param $regex_tree
+     *
+     * @return array
      */
     function collect_groups($regex_tree){
         
@@ -363,8 +384,13 @@ class acfe_pro_rewrite_rules{
         
     }
     
-    /*
-     * Parse Substitution
+    
+    /**
+     * parse_substitution
+     *
+     * @param $substitution
+     *
+     * @return array
      */
     function parse_substitution($substitution){
         
@@ -405,21 +431,27 @@ class acfe_pro_rewrite_rules{
         
     }
     
-    /*
-     * Parse
+    
+    /**
+     * parse
+     *
+     * @param $regex
+     *
+     * @return ACFE_Regex_Group|array|mixed
+     * @throws ACFE_Regex_Exception
      */
     function parse($regex){
         
-        // Groups
+        // groups
         $group_counter = 0;
         $current_group = new ACFE_Regex_Group( $group_counter );
         $group_stack = array();
         
-        // Ranges
+        // ranges
         $is_in_range = false;
         $range = '';
         
-        // Repeaters
+        // repeaters
         $repeat_target = $current_group;
         
         $regex_len = strlen( $regex );
@@ -435,14 +467,14 @@ class acfe_pro_rewrite_rules{
                     $repeat_target = new ACFE_Regex_End();
                     $current_group[] = $repeat_target;
                     break;
-                // Escaping
+                // escaping
                 case '\\':
                     $idx++;
                     $repeat_target = new ACFE_Regex_Escape( $regex[$idx] );
                     $current_group[] = $repeat_target;
                     break;
                 
-                // Repeaters
+                // repeaters
                 case '?':
                     if ( $idx + 1 < $regex_len && '?' == $regex[$idx + 1] ) {
                         $is_greedy_switched = true;
@@ -490,7 +522,7 @@ class acfe_pro_rewrite_rules{
                     }
                     break;
                 
-                // Grouping
+                // grouping
                 case '(':
                     $group_counter++;
                     array_push( $group_stack, $current_group );
@@ -506,13 +538,13 @@ class acfe_pro_rewrite_rules{
                     }
                     break;
                 
-                // Or-group
+                // or-group
                 /*case '|':
                     $current_group->nextOrGroup();
                     break;
                 */
                 
-                // Ranges
+                // ranges
                 case '[':
                     if ( $is_in_range ) {
                         throw new ACFE_Regex_Exception( 'Unexpected "["', $idx, $regex );
@@ -560,20 +592,30 @@ acf_new_instance('acfe_pro_rewrite_rules');
 
 endif;
 
-/*
- * ACFE Regex Exception
- */
 class ACFE_Regex_Exception extends Exception{
     
+    // vars
     protected $idx = null;
     protected $regex = null;
     
+    /**
+     * construct
+     *
+     * @param $message
+     * @param $idx
+     * @param $regex
+     */
     public function __construct( $message, $idx, $regex ){
         parent::__construct( $message );
         $this->idx = $idx;
         $this->regex = $regex;
     }
     
+    /**
+     * __toString
+     *
+     * @return string
+     */
     public function __toString(){
         $regex_pieces = sprintf( '"%s"', substr( $this->regex, 0, $this->idx ) );
         if ( $this->idx < strlen( $this->regex ) ) {
@@ -588,18 +630,27 @@ class ACFE_Regex_Exception extends Exception{
     
 }
 
-/*
- * ACFE Regex Group
- */
+
 class ACFE_Regex_Group extends ArrayObject{
     
+    // vars
     public $counter = null;
     public $repeater = null;
     
+    /**
+     * construct
+     *
+     * @param $counter
+     */
     public function __construct( $counter = 0 ){
         $this->counter = $counter;
     }
     
+    /**
+     * __toString
+     *
+     * @return string
+     */
     public function __toString()
     {
         $output = '';
@@ -618,64 +669,87 @@ class ACFE_Regex_Group extends ArrayObject{
     
 }
 
-/*
- * ACFE Regex Price
- */
+
 class ACFE_Regex_Piece{
     
+    // vars
     public $repeater = null;
     public $value = null;
     
+    /**
+     * __toString
+     *
+     * @return string
+     */
     public function __toString(){
         return $this->value . $this->repeater;
     }
     
 }
 
-/*
- * ACFE Regex String
- */
+
 class ACFE_Regex_String extends ACFE_Regex_Piece{
     
+    /**
+     * construct
+     *
+     * @param $value
+     */
     public function __construct( $value = '' ){
         $this->value = $value;
     }
     
 }
 
-/*
- * ACFE Regex Char
- */
+
 class ACFE_Regex_Char extends ACFE_Regex_Piece{
     
+    /**
+     * construct
+     *
+     * @param $value
+     */
     public function __construct( $value = '' ){
         $this->value = $value;
     }
     
 }
 
-/*
- * ACFE Regex Escape
- */
+
 class ACFE_Regex_Escape extends ACFE_Regex_Piece{
     
+    /**
+     * construct
+     *
+     * @param $value
+     */
     public function __construct( $value = '' ){
         $this->value = $value;
     }
     
+    /**
+     * __toString
+     *
+     * @return string
+     */
     public function __toString(){
         return '\\' . $this->value . $this->repeater;
     }
     
 }
 
-/*
- * ACFE Regex Special
- */
+
 class ACFE_Regex_Special extends ACFE_Regex_Piece{
     
+    // vars
     public $desc = null;
     
+    /**
+     * construct
+     *
+     * @param $value
+     * @param $desc
+     */
     public function __construct( $value = '', $desc = '' ){
         $this->value = $value;
         $this->desc = $desc;
@@ -683,37 +757,46 @@ class ACFE_Regex_Special extends ACFE_Regex_Piece{
     
 }
 
-/*
- * ACFE Regex Any
- */
+
 class ACFE_Regex_Any extends ACFE_Regex_Special{
     
+    /**
+     * construct
+     */
     public function __construct(){
         parent::__construct( '.', 'any' );
     }
     
 }
 
-/*
- * ACFE Regex End
- */
+
 class ACFE_Regex_End extends ACFE_Regex_Special{
     
+    /**
+     * construct
+     */
     public function __construct(){
         parent::__construct( '$', 'end' );
     }
     
 }
 
-/*
- * ACFE Regex Repeater
- */
+
 class ACFE_Regex_Repeater extends ACFE_Regex_Piece{
     
+    // vars
     public $min_len = null;
     public $max_len = null;
     public $is_greedy_switched = null;
     
+    /**
+     * construct
+     *
+     * @param $value
+     * @param $min_len
+     * @param $max_len
+     * @param $is_greedy_switched
+     */
     public function __construct( $value = '', $min_len = null, $max_len = null, $is_greedy_switched = false ){
         $this->value = $value;
         $this->min_len = $min_len;
@@ -723,11 +806,14 @@ class ACFE_Regex_Repeater extends ACFE_Regex_Piece{
     
 }
 
-/*
- * ACFE Regex Range
- */
+
 class ACFE_Regex_Range extends ACFE_Regex_Piece{
     
+    /**
+     * construct
+     *
+     * @param $value
+     */
     public function __construct( $value = '' ){
         $this->value = $value;
     }

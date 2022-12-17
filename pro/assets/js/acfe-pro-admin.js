@@ -506,15 +506,15 @@
                 message: '',
                 status: '',
                 link: false,
-                debug: false,
+                debug: '',
             });
 
             // Debug
-            if (args.debug) {
+            if (!acfe.isEmpty(args.debug)) {
 
                 details += '' +
-                    '<a href="#" data-acfe-modal data-acfe-modal-title="' + acf.__('Debug') + '" data-acfe-modal-footer="' + acf.__('Close') + '" data-acfe-modal-size="large">' + acf.__('Debug') + '</a>\n' +
-                    '<div class="acfe-modal">\n' +
+                    '<a href="#" data-modal>' + acf.__('Debug') + '</a>\n' +
+                    '<div class="acfe-modal" data-title="' + acf.__('Debug') + '" data-footer="' + acf.__('Close') + '" data-size="large">\n' +
                     '    <div class="acfe-modal-spacer"><pre>' + args.debug + '</pre></div>\n' +
                     '</div>';
 

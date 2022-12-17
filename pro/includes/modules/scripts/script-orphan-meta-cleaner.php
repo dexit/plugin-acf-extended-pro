@@ -8,8 +8,8 @@ if(!class_exists('acfe_script_orphan_meta_cleaner')):
 
 class acfe_script_orphan_meta_cleaner extends acfe_script{
     
-    /*
-     * Init
+    /**
+     * initialize
      */
     function initialize(){
         
@@ -20,7 +20,7 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         $this->category     = 'Maintenance';
         $this->author       = 'ACF Extended';
         $this->link         = 'https://www.acf-extended.com';
-        $this->version      = '1.0';
+        $this->version      = '1.1';
         
         $this->field_groups = array(
     
@@ -176,8 +176,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Admin Head
+    
+    /**
+     * admin_head
      */
     function admin_head(){
     
@@ -195,8 +196,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
     
     }
     
-    /*
-     * Validate
+    
+    /**
+     * validate
      */
     function validate(){
         
@@ -216,8 +218,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
     
     }
     
-    /*
-     * Start
+    
+    /**
+     * start
      */
     function start(){
     
@@ -285,8 +288,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
     
     }
     
-    /*
-     * Stop
+    
+    /**
+     * stop
      */
     function stop(){
     
@@ -302,8 +306,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Request
+    
+    /**
+     * request
      */
     function request(){
         
@@ -339,8 +344,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
     
     }
     
-    /*
-     * Process: Post Types
+    
+    /**
+     * process_post_types
      */
     function process_post_types(){
         
@@ -460,8 +466,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Process: Taxonomies
+    
+    /**
+     * process_taxonomies
      */
     function process_taxonomies(){
     
@@ -582,8 +589,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Process: Users
+    
+    /**
+     * process_users
      */
     function process_users(){
     
@@ -704,8 +712,9 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Process: Options Pages
+    
+    /**
+     * process_options_pages
      */
     function process_options_pages(){
     
@@ -817,8 +826,14 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Clean Meta
+    
+    /**
+     * clean_meta
+     *
+     * @param $post_id
+     * @param $confirm
+     *
+     * @return array
      */
     function clean_meta($post_id, $confirm = false){
         
@@ -829,8 +844,13 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Count Posts
+    
+    /**
+     * count_posts
+     *
+     * @param $post_type
+     *
+     * @return int
      */
     function count_posts($post_type){
     
@@ -844,8 +864,13 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Count Terms
+    
+    /**
+     * count_terms
+     *
+     * @param $taxonomy
+     *
+     * @return int[]|string|string[]|WP_Error|WP_Term[]
      */
     function count_terms($taxonomy){
     
@@ -857,8 +882,13 @@ class acfe_script_orphan_meta_cleaner extends acfe_script{
         
     }
     
-    /*
-     * Count Users
+    
+    /**
+     * count_users
+     *
+     * @param $user_role
+     *
+     * @return int|mixed
      */
     function count_users($user_role){
         

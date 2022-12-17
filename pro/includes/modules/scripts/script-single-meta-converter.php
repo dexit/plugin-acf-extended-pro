@@ -8,8 +8,8 @@ if(!class_exists('acfe_script_single_meta_converter')):
 
 class acfe_script_single_meta_converter extends acfe_script{
     
-    /*
-     * Init
+    /**
+     * initialize
      */
     function initialize(){
         
@@ -218,8 +218,9 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Admin Head
+    
+    /**
+     * admin_head
      */
     function admin_head(){
         
@@ -237,8 +238,10 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Validate
+    /**
+     * validate
+     *
+     * @return false|mixed|void
      */
     function validate(){
         /*
@@ -276,8 +279,9 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Start
+    
+    /**
+     * start
      */
     function start(){
     
@@ -345,8 +349,9 @@ class acfe_script_single_meta_converter extends acfe_script{
     
     }
     
-    /*
-     *
+    
+    /**
+     * stop
      */
     function stop(){
     
@@ -361,8 +366,9 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Request
+    
+    /**
+     * request
      */
     function request(){
     
@@ -398,8 +404,9 @@ class acfe_script_single_meta_converter extends acfe_script{
     
     }
     
-    /*
-     * Process: Post Types
+    
+    /**
+     * process_post_types
      */
     function process_post_types(){
         
@@ -552,8 +559,9 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Process: Taxonomies
+    
+    /**
+     * process_taxonomies
      */
     function process_taxonomies(){
         
@@ -707,8 +715,9 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Process: Users
+    
+    /**
+     * process_users
      */
     function process_users(){
         
@@ -864,8 +873,9 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Process: Options Pages
+    
+    /**
+     * process_options_pages
      */
     function process_options_pages(){
         
@@ -1014,8 +1024,14 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Convert Meta
+    
+    /**
+     * convert_meta
+     *
+     * @param $post_id
+     * @param $confirm
+     *
+     * @return array
      */
     function convert_meta($post_id, $confirm = false){
         
@@ -1039,8 +1055,13 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Convert: Normal > Single
+    /**
+     * convert_to_single
+     *
+     * @param $post_id
+     * @param $confirm
+     *
+     * @return array
      */
     function convert_to_single($post_id, $confirm){
     
@@ -1098,8 +1119,14 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Convert: Single > Normal
+    
+    /**
+     * convert_to_normal
+     *
+     * @param $post_id
+     * @param $confirm
+     *
+     * @return array
      */
     function convert_to_normal($post_id, $confirm){
     
@@ -1161,8 +1188,13 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Count Posts
+    
+    /**
+     * count_posts
+     *
+     * @param $post_type
+     *
+     * @return int
      */
     function count_posts($post_type){
         
@@ -1176,8 +1208,13 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Count Terms
+    
+    /**
+     * count_terms
+     *
+     * @param $taxonomy
+     *
+     * @return int[]|string|string[]|WP_Error|WP_Term[]
      */
     function count_terms($taxonomy){
         
@@ -1189,8 +1226,13 @@ class acfe_script_single_meta_converter extends acfe_script{
         
     }
     
-    /*
-     * Count Users
+    
+    /**
+     * count_users
+     *
+     * @param $user_role
+     *
+     * @return int|mixed
      */
     function count_users($user_role){
         

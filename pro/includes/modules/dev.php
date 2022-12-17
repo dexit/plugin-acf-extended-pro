@@ -4,7 +4,7 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-// Check settings
+// check settings
 if((!acfe_is_dev() && !acfe_is_super_dev()) || !acf_current_user_can_admin()){
     return;
 }
@@ -85,7 +85,7 @@ class acfe_pro_dev{
         </div>
         <div class="misc-pub-section misc-pub-acfe-object-data">
             <?php _e('Object data', 'acfe'); ?>:
-            <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('Post Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+            <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
         </div>
         <div class="misc-pub-section misc-pub-acfe-object-meta">
             <?php _e('Meta count', 'acfe'); ?>:
@@ -119,7 +119,7 @@ class acfe_pro_dev{
             $post->post_content = @map_deep($post->post_content, '_wp_specialchars');
             
             ?>
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('Post Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($post); ?></pre>
                 </div>
@@ -175,7 +175,7 @@ class acfe_pro_dev{
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-data">
                 <?php _e('Object data', 'acfe'); ?>:
-                <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('Term Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+                <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-meta">
                 <?php _e('Meta count', 'acfe'); ?>:
@@ -192,7 +192,7 @@ class acfe_pro_dev{
                 </div>
             <?php endif; ?>
 
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('Term Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($term); ?></pre>
                 </div>
@@ -242,7 +242,7 @@ class acfe_pro_dev{
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-data">
                 <?php _e('Object data', 'acfe'); ?>:
-                <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('User Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+                <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-meta">
                 <?php _e('Meta count', 'acfe'); ?>:
@@ -259,7 +259,7 @@ class acfe_pro_dev{
                 </div>
             <?php endif; ?>
 
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('User Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($user); ?></pre>
                 </div>
@@ -342,7 +342,7 @@ class acfe_pro_dev{
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-data">
                 <?php _e('Object data', 'acfe'); ?>:
-                <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('Options Page Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+                <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-meta">
                 <?php _e('Meta count', 'acfe'); ?>:
@@ -359,7 +359,7 @@ class acfe_pro_dev{
                 </div>
             <?php endif; ?>
 
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('Options Page Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($page); ?></pre>
                 </div>
@@ -398,7 +398,7 @@ class acfe_pro_dev{
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-data">
                 <?php _e('Object data', 'acfe'); ?>:
-                <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('Post Type Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+                <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-meta">
                 <?php _e('Meta count', 'acfe'); ?>:
@@ -415,7 +415,7 @@ class acfe_pro_dev{
                 </div>
             <?php endif; ?>
 
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('Post Type Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($object); ?></pre>
                 </div>
@@ -454,7 +454,7 @@ class acfe_pro_dev{
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-data">
                 <?php _e('Object data', 'acfe'); ?>:
-                <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('Taxonomy Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+                <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-meta">
                 <?php _e('Meta count', 'acfe'); ?>:
@@ -471,7 +471,7 @@ class acfe_pro_dev{
                 </div>
             <?php endif; ?>
 
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('Taxonomy Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($object); ?></pre>
                 </div>
@@ -508,7 +508,7 @@ class acfe_pro_dev{
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-data">
                 <?php _e('Object data', 'acfe'); ?>:
-                <a href="#" data-acfe-modal="acfe-wp-object" data-acfe-modal-title="<?php _e('Post Type Object', 'acfe'); ?>" data-acfe-modal-footer="<?php _e('Close', 'acfe'); ?>"><?php _e('View', 'acfe'); ?></a>
+                <a href="#" data-modal="acfe-wp-object"><?php _e('View', 'acfe'); ?></a>
             </div>
             <div class="misc-pub-section misc-pub-acfe-object-meta">
                 <?php _e('Meta count', 'acfe'); ?>:
@@ -525,7 +525,7 @@ class acfe_pro_dev{
                 </div>
             <?php endif; ?>
 
-            <div class="acfe-modal" data-acfe-modal="acfe-wp-object">
+            <div class="acfe-modal" data-modal="acfe-wp-object" data-title="<?php _e('Post Type Object', 'acfe'); ?>" data-footer="<?php _e('Close', 'acfe'); ?>">
                 <div class="acfe-modal-spacer">
                     <pre><?php print_r($object); ?></pre>
                 </div>

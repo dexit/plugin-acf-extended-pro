@@ -497,6 +497,14 @@ class acfe_field_google_map extends acfe_field_extend{
             return $value;
         }
         
+        // decode json if needed
+        if(acfe_is_json($value)){
+            $value = json_decode($value, true);
+        }
+        
+        // force array
+        $value = acf_get_array($value);
+        
         $value['height'] = (int) $field['height'];
         $value['min_zoom'] = (int) $field['acfe_google_map_zooms']['min_zoom'];
         $value['max_zoom'] = (int) $field['acfe_google_map_zooms']['max_zoom'];

@@ -4,17 +4,22 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-// Check setting
-if(!acfe_get_setting('modules/global_field_condition'))
+// check setting
+if(!acfe_get_setting('modules/global_field_condition')){
     return;
+}
 
 if(!class_exists('acfe_pro_global_field_condition')):
 
 class acfe_pro_global_field_condition{
     
+    // vars
     public $fields = false;
     public $match = false;
     
+    /**
+     * construct
+     */
     function __construct(){
         
         add_action('acf/render_field_settings', array($this, 'field_settings'), 999);
@@ -30,6 +35,10 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * admin_footer
+     */
     function admin_footer(){
         
         $fields = $this->get_fields();
@@ -54,6 +63,12 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * field_settings
+     *
+     * @param $field
+     */
     function field_settings($field){
     
         acf_render_field_setting($field, array(
@@ -75,6 +90,15 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * get_any_fields
+     *
+     * @param $fields
+     * @param $field
+     *
+     * @return mixed
+     */
     function get_any_fields(&$fields, $field){
         
         // vars
@@ -122,6 +146,12 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * get_fields
+     *
+     * @return array|bool|mixed
+     */
     function get_fields(){
         
         if($this->fields !== false){
@@ -174,6 +204,14 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * rule_types
+     *
+     * @param $choices
+     *
+     * @return array|mixed
+     */
     function rule_types($choices){
         
         if(!acf_is_screen('acf-field-group') && !acf_is_ajax()){
@@ -196,6 +234,15 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * rule_values
+     *
+     * @param $choices
+     * @param $rule
+     *
+     * @return false|mixed|string
+     */
     function rule_values($choices, $rule){
         
         if(!acf_is_field_key($rule['param']) || (!acf_is_screen('acf-field-group') && !acf_is_ajax())){
@@ -216,6 +263,15 @@ class acfe_pro_global_field_condition{
     }
     
     
+    /**
+     * rule_match
+     *
+     * @param $match
+     * @param $rule
+     * @param $screen
+     *
+     * @return bool|mixed
+     */
     function rule_match($match, $rule, $screen){
         
         // bail early if not global field
@@ -235,19 +291,26 @@ class acfe_pro_global_field_condition{
     }
     
     
+    /**
+     * validate_field_group
+     *
+     * @param $field_group
+     *
+     * @return mixed
+     */
     function validate_field_group($field_group){
         
         if(!$field_group['location']){
             return $field_group;
         }
         
-        // Loop through location groups.
+        // loop through location groups.
         foreach($field_group['location'] as $k => $group){
             
             // ignore group if no rules.
             if(empty($group)) continue;
             
-            // Do not allow field condition as single location (only use in combination with another rule)
+            // do not allow field condition as single location (only use in combination with another rule)
             if(count($group) !== 1) continue;
             
             foreach($group as $_k => $rule){
@@ -264,6 +327,15 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * load_fields
+     *
+     * @param $fields
+     * @param $parent
+     *
+     * @return mixed
+     */
     function load_fields($fields, $parent){
         
         if(!$this->match){
@@ -290,7 +362,7 @@ class acfe_pro_global_field_condition{
     
         global $pagenow;
         
-        // Add Term screen
+        // add term screen
         if($pagenow === 'edit-tags.php'){
     
             foreach($fields as &$field){
@@ -323,7 +395,7 @@ class acfe_pro_global_field_condition{
         
             }
             
-        // Others screens
+        // others screens
         }else{
     
             $field = array(
@@ -347,6 +419,14 @@ class acfe_pro_global_field_condition{
         
     }
     
+    
+    /**
+     * get_field_group_conditions
+     *
+     * @param $field_group
+     *
+     * @return array
+     */
     function get_field_group_conditions($field_group){
     
         $groups = array();

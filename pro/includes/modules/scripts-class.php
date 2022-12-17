@@ -8,6 +8,7 @@ if(!class_exists('acfe_script')):
 
 class acfe_script{
     
+    // defaults
     var $active         = true,
         $name           = '',
         $title          = '',
@@ -29,102 +30,67 @@ class acfe_script{
             'left'  => 0
         );
     
-    /*
-     * Construct
+    
+    /**
+     * construct
      */
     function __construct(){
-        
-        // initialize
         $this->initialize();
-    
-        // set default capability
-        if($this->capability === null){
-            $this->capability = acf_get_setting('capability');
-        }
-    
-        // set default title
-        if(empty($this->title)){
-            $this->title = $this->name;
-        }
-    
-        // validate field groups fields
-        foreach($this->field_groups as &$field_group){
-        
-            if(isset($field_group['fields'])){
-            
-                foreach($field_group['fields'] as &$field){
-                
-                    // Generate key if only name is provided. This is done within acf_add_local_field() but not in acf_add_local_fields()
-                    if(!acf_maybe_get($field, 'key')){
-                        $field['key'] = 'field_' . $field['name'];
-                    }
-                
-                }
-            
-            }
-        
-        }
-        
     }
     
-    /*
-     * Initialize
+    
+    /**
+     * initialize
      */
-    function initialize(){
+    function initialize(){}
     
-    }
     
-    /*
-     * Validate
+    /**
+     * validate
      */
-    function validate(){
+    function validate(){}
     
-    }
     
-    /*
-     * Start
+    /**
+     * start
      */
-    function start(){
+    function start(){}
     
-    }
     
-    /*
-     * Request
+    /**
+     * request
      */
-    function request(){
+    function request(){}
     
-    }
     
-    /*
-     * Stop
+    /**
+     * stop
      */
-    function stop(){
+    function stop(){}
     
-    }
     
-    /*
-     * Admin Load
+    /**
+     * admin_load
      */
-    function admin_load(){
+    function admin_load(){}
     
-    }
     
-    /*
-     * Admin Head
+    /**
+     * admin_head
      */
-    function admin_head(){
+    function admin_head(){}
     
-    }
     
-    /*
-     * Admin Enqueue Scripts
+    /**
+     * admin_enqueue_scripts
      */
-    function admin_enqueue_scripts(){
+    function admin_enqueue_scripts(){}
     
-    }
     
-    /*
-     * Send Response
+    /**
+     * send_response
+     *
+     * @param $args
      */
     function send_response($args = array()){
         
@@ -135,7 +101,7 @@ class acfe_script{
         
         // default args
         $args = wp_parse_args($args, array(
-            'status'  => 'info',
+            'status' => 'info',
         ));
     
         // inject data & type
@@ -161,16 +127,23 @@ class acfe_script{
         
     }
     
-    /*
-     * Parse Message
+    
+    /**
+     * parse_message
+     *
+     * @param $args
      */
     function parse_message(&$args){
         
         // bail early
-        if(!isset($args['message'])) return;
+        if(!isset($args['message'])){
+            return;
+        }
         
         // message not array
-        if(!is_array($args['message'])) return;
+        if(!is_array($args['message'])){
+            return;
+        }
         
         // buffer
         ob_start();
@@ -187,12 +160,17 @@ class acfe_script{
         
     }
     
-    /*
-     * Parse Link
+    
+    /**
+     * parse_link
+     *
+     * @param $args
      */
     function parse_link(&$args){
     
-        if(!isset($args['link'])) return;
+        if(!isset($args['link'])){
+            return;
+        }
         
         $links = array();
         $link = acf_get_array($args['link']);
@@ -236,13 +214,18 @@ class acfe_script{
         
     }
     
-    /*
-     * Parse Debug
+    
+    /**
+     * parse_debug
+     *
+     * @param $args
      */
     function parse_debug(&$args){
         
         // bail early
-        if(!isset($args['debug'])) return;
+        if(!isset($args['debug'])){
+            return;
+        }
         
         // vars
         $debug = $args['debug'];
@@ -269,8 +252,11 @@ class acfe_script{
         
     }
     
-    /*
-     * Parse Event
+    
+    /**
+     * parse_event
+     *
+     * @param $args
      */
     function parse_event(&$args){
     
@@ -282,7 +268,7 @@ class acfe_script{
     
             $default = 'request';
         
-            // default: request
+        // default: request
         }elseif($this->type === 'request'){
     
             $default = 'request';
@@ -298,7 +284,6 @@ class acfe_script{
     
         // fallback to default
         if(empty($args['event'])){
-        
             $args['event'] = $default;
         
         // effect: pause/clear

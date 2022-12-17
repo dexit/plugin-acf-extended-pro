@@ -51,6 +51,7 @@ class ACFE_Pro{
             'modules/rewrite_rules'             => true,
             'modules/screen_layouts'            => true,
             'modules/scripts'                   => true,
+            'modules/scripts/demo'              => false,
             'modules/templates'                 => true,
         ));
         
@@ -161,7 +162,7 @@ class ACFE_Pro{
         acfe_include('pro/includes/modules/global-field-condition.php');
         acfe_include('pro/includes/modules/rewrite-rules.php');
         acfe_include('pro/includes/modules/scripts.php');
-        acfe_include('pro/includes/modules/scripts-list.php');
+        acfe_include('pro/includes/modules/scripts-table.php');
         acfe_include('pro/includes/modules/screen-layouts.php');
         acfe_include('pro/includes/modules/templates.php');
         

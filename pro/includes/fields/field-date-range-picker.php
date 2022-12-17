@@ -8,6 +8,7 @@ if(!class_exists('acfe_field_date_range_picker')):
 
 class acfe_field_date_range_picker extends acf_field{
     
+    // vars
     var $sub_fields;
     
     /**
@@ -114,7 +115,7 @@ class acfe_field_date_range_picker extends acf_field{
             'type'          => 'text',
         ));
         
-        // Default Start
+        // default Start
         acf_render_field_setting($field, array(
             'label'         => __('Default Date', 'acfe'),
             'name'          => 'default_start',
@@ -127,7 +128,7 @@ class acfe_field_date_range_picker extends acf_field{
             'append'        => 'date',
         ));
         
-        // Default End
+        // default end
         acf_render_field_setting($field, array(
             'label'         => '',
             'name'          => 'default_end',
@@ -141,7 +142,7 @@ class acfe_field_date_range_picker extends acf_field{
             '_append'       => 'default_start'
         ));
         
-        // Min Days
+        // min Days
         acf_render_field_setting($field, array(
             'label'         => __('Range Restriction', 'acfe'),
             'name'          => 'min_days',
@@ -154,7 +155,7 @@ class acfe_field_date_range_picker extends acf_field{
             'append'        => 'days',
         ));
         
-        // Max Days
+        // max Days
         acf_render_field_setting($field, array(
             'label'         => '',
             'name'          => 'max_days',
@@ -168,7 +169,7 @@ class acfe_field_date_range_picker extends acf_field{
             '_append'       => 'min_days'
         ));
         
-        // Min Date
+        // min Date
         acf_render_field_setting($field, array(
             'label'         => __('Date Restriction', 'acfe'),
             'name'          => 'min_date',
@@ -181,6 +182,7 @@ class acfe_field_date_range_picker extends acf_field{
             'default_value' => '',
             'prepend'       => 'Min Date',
             'append'        => 'date',
+            '_appended'     => true
         ));
         
         // max Date
@@ -197,7 +199,7 @@ class acfe_field_date_range_picker extends acf_field{
             '_append'       => 'min_date'
         ));
     
-        // Custom Ranges
+        // custom ranges
         acf_render_field_setting($field, array(
             'label'         => __('Custom Ranges','acfe'),
             'instructions'  => '',
@@ -214,7 +216,7 @@ class acfe_field_date_range_picker extends acf_field{
             )
         ));
         
-        // Show dropdowns
+        // show dropdowns
         acf_render_field_setting($field, array(
             'label'         => __('Show Dropdowns', 'acfe'),
             'name'          => 'show_dropdowns',
@@ -224,7 +226,7 @@ class acfe_field_date_range_picker extends acf_field{
             'ui'            => true,
         ));
         
-        // No weekends
+        // no weekends
         acf_render_field_setting($field, array(
             'label'         => __('No Weekends', 'acfe'),
             'name'          => 'no_weekends',
@@ -234,7 +236,7 @@ class acfe_field_date_range_picker extends acf_field{
             'ui'            => true,
         ));
         
-        // Auto Close
+        // auto Close
         acf_render_field_setting($field, array(
             'label'         => __('Auto Close on Selection', 'acfe'),
             'name'          => 'auto_close',
@@ -244,7 +246,7 @@ class acfe_field_date_range_picker extends acf_field{
             'ui'            => true,
         ));
     
-        // Allow null
+        // allow null
         acf_render_field_setting($field, array(
             'label'         => __('Allow null', 'acf'),
             'name'          => 'allow_null',
@@ -287,16 +289,16 @@ class acfe_field_date_range_picker extends acf_field{
      */
     function render_field($field){
         
-        // Enqueue
+        // enqueue
         wp_enqueue_script('moment');
         wp_enqueue_script('acfe-date-range-picker');
         wp_enqueue_style('acfe-date-range-picker');
         
-        // Vars
+        // vars
         $value = $field['value'];
         $separator = $field['separator'] ? ' ' . $field['separator'] . ' ' : ' ';
         
-        // Input
+        // input
         $hidden_value = '';
         $display_value = '';
         
@@ -311,7 +313,7 @@ class acfe_field_date_range_picker extends acf_field{
         
         }
         
-        // Elements
+        // elements
         $div = array(
             'class'                 => "acfe-date-range-picker acf-input-wrap {$field['class']}",
             'data-display_format'   => $this->convert_php_to_momentjs_format($field['display_format']),
@@ -571,8 +573,8 @@ class acfe_field_date_range_picker extends acf_field{
         
     }
     
-    /*
-     * Convert PHP Date to MomentJS format
+    /**
+     * convert PHP Date to MomentJS format
      * https://stackoverflow.com/a/55173613
      */
     function convert_php_to_momentjs_format($php_date){
@@ -653,6 +655,22 @@ class acfe_field_date_range_picker extends acf_field{
         }
         
         return false;
+        
+    }
+    
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['placeholder'] = acf_translate($field['placeholder']);
+        
+        return $field;
         
     }
     

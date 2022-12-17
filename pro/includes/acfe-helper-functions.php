@@ -4,8 +4,13 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-/*
- * Has Flexible Grid
+/**
+ * has_flexible_grid
+ *
+ * @param $name
+ * @param $post_id
+ *
+ * @return bool
  */
 if(!function_exists('has_flexible_grid')){
 
@@ -15,16 +20,18 @@ function has_flexible_grid($name, $post_id = false){
     $field = acf_maybe_get_field($name, $post_id);
     
     // bail early
-    if(!$field)
+    if(!$field){
         return false;
+    }
     
     // vars
     $flexible_grid = acf_maybe_get($field, 'acfe_flexible_grid');
     $flexible_grid_enabled = acf_maybe_get($flexible_grid, 'acfe_flexible_grid_enabled');
     
     // not enabled
-    if(!$flexible_grid_enabled)
+    if(!$flexible_grid_enabled){
         return false;
+    }
     
     // return
     return true;
@@ -33,16 +40,23 @@ function has_flexible_grid($name, $post_id = false){
 
 }
 
-/*
- * Get Flexible Grid
+
+/**
+ * get_flexible_grid
+ *
+ * @param $name
+ * @param $post_id
+ *
+ * @return array|false
  */
 if(!function_exists('get_flexible_grid')){
 
 function get_flexible_grid($name, $post_id = false){
     
     // bail early
-    if(!has_flexible_grid($name, $post_id))
+    if(!has_flexible_grid($name, $post_id)){
         return false;
+    }
     
     // vars
     $field = acf_maybe_get_field($name, $post_id);
@@ -65,8 +79,14 @@ function get_flexible_grid($name, $post_id = false){
 
 }
 
-/*
- * Get Flexible Grid Class
+
+/**
+ * get_flexible_grid_class
+ *
+ * @param $name
+ * @param $post_id
+ *
+ * @return false|string
  */
 if(!function_exists('get_flexible_grid_class')){
 
@@ -90,8 +110,11 @@ function get_flexible_grid_class($name, $post_id = false){
 
 }
 
-/*
- * Get Layout Col
+
+/**
+ * get_layout_col
+ *
+ * @return false|mixed
  */
 if(!function_exists('get_layout_col')){
 

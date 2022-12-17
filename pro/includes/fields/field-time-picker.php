@@ -54,7 +54,8 @@ class acfe_field_time_picker extends acfe_field_extend{
             'type'          => 'text',
             'default_value' => '',
             'prepend'       => 'Min Time',
-            'placeholder'   => '09:00'
+            'placeholder'   => '09:00',
+            '_appended'     => true
         ));
         
         // Max Time
@@ -206,6 +207,22 @@ class acfe_field_time_picker extends acfe_field_extend{
         }
         
         return $wrapper;
+        
+    }
+    
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['placeholder'] = acf_translate($field['placeholder']);
+        
+        return $field;
         
     }
     

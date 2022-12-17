@@ -74,6 +74,23 @@ class acfe_pro_field_select extends acfe_field_extend{
         
     }
     
+    
+    /**
+     * translate_field
+     *
+     * @param $field
+     *
+     * @return mixed
+     */
+    function translate_field($field){
+        
+        $field['prepend'] = acf_translate($field['prepend']);
+        $field['append'] = acf_translate($field['append']);
+        
+        return $field;
+        
+    }
+    
 }
 
 acf_new_instance('acfe_pro_field_select');
