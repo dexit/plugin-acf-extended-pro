@@ -127,6 +127,115 @@
         wait: 'prepare',
         priority: 1,
         initialize: function() {
+            if (acfe.get('module')) {
+                new module(acfe.get('module'));
+            }
+        }
+    });
+
+    var module = acf.Model.extend({
+
+        events: {
+            'click a[data-event="review-sync"]': 'onClickReview',
+        },
+
+        actions: {
+            'validation_success': 'onValidationSuccess',
+        },
+
+        setup: function(props) {
+            this.inherit(props);
+        },
+
+        onValidationSuccess: function($form, validator) {
+
+            if (this.get('screen') === 'post') {
+
+                // todo: use acfe.get() to check if sync is available instead
+                var $reviewSync = $('[data-event="review-sync"]');
+
+                if ($reviewSync.length) {
+
+                    // todo: localize text
+                    if (!confirm('Local json file is different from the version in database.' + "\n" + 'Do you want to replace the local file with the current settings?')) {
+                        this.preventSubmit($form, validator);
+                    }
+                }
+
+            }
+
+        },
+
+        preventSubmit: function($form, validator) {
+
+            var preventDefault = function(e) {
+                e.preventDefault();
+            }
+
+            $form.on('submit', preventDefault);
+
+            this.setTimeout(function() {
+                $form.off('submit', preventDefault);
+                validator.reset();
+            }, 50);
+
+        },
+
+        onClickReview: function(e, $el) {
+
+            e.preventDefault();
+            this.reviewSync($el.data());
+
+        },
+
+        reviewSync: function(props) {
+
+            var title = acf.__('Review local changes');
+
+            var modal = acf.newModal({
+                title: title,
+                content: '<p class="acf-modal-feedback"><i class="acf-loading"></i> ' + acf.__('Loading diff') + '</p>',
+                //toolbar: '<a href="' + props.href + '" class="button button-primary button-sync-changes disabled">' + acf.__('Sync changes') + '</a>',
+            });
+
+            // call ajax
+            var xhr = $.ajax({
+                    url: acf.get('ajaxurl'),
+                    method: 'POST',
+                    dataType: 'json',
+                    data: acf.prepareForAjax({
+                        action: 'acfe/ajax/module_local_diff',
+                        module: props.module,
+                        id: props.id,
+                        _nonce: props.nonce,
+                    })
+                })
+                .done(function(data, textStatus, jqXHR) {
+                    modal.content(data.content);
+                    modal.toolbar(data.toolbar);
+                    //modal.$('.button-sync-changes').removeClass('disabled');
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    if (error = acf.getXhrError(jqXHR)) {
+                        modal.content('<p class="acf-modal-feedback error">' + error + '</p>');
+                    }
+                });
+
+        }
+
+    });
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    var moduleManager = new acf.Model({
+        wait: 'prepare',
+        priority: 1,
+        initialize: function() {
             if (acf.get('screen') === 'acfe_rewrite_rules') {
                 new module();
             }

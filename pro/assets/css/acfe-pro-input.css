@@ -1,3 +1,7 @@
+.acfe-block-editor-wrapper>.editor.no-toolbar .interface-interface-skeleton__header {
+    display: none
+}
+
 .acf-color-picker .wp-picker-active {
     z-index: 2
 }

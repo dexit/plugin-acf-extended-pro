@@ -511,6 +511,181 @@ class acfe_pro_admin_settings{
      * register_fields
      */
     function register_fields(){
+        
+        // block types
+        $this->fields['autosync'][] = array(
+            'label'         => 'Block Types Json: Load',
+            'name'          => 'acfe/json_load/block_types',
+            'type'          => 'text',
+            'description'   => 'Block Types Json AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Block Types Json: Save',
+            'name'          => 'acfe/json_save/block_types',
+            'type'          => 'text',
+            'description'   => 'Block Types Json AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Block Types PHP: Load',
+            'name'          => 'acfe/php_load/block_types',
+            'type'          => 'text',
+            'description'   => 'Block Types PHP AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Block Types PHP: Save',
+            'name'          => 'acfe/php_save/block_types',
+            'type'          => 'text',
+            'description'   => 'Block Types PHP AutoSync saving path',
+            'category'      => 'autosync',
+        );
+        
+        // options pages
+        $this->fields['autosync'][] = array(
+            'label'         => 'Options Pages Json: Load',
+            'name'          => 'acfe/json_load/options_pages',
+            'type'          => 'text',
+            'description'   => 'Options Pages Json AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Options Pages Json: Save',
+            'name'          => 'acfe/json_save/options_pages',
+            'type'          => 'text',
+            'description'   => 'Options Pages Json AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Options Pages PHP: Load',
+            'name'          => 'acfe/php_load/options_pages',
+            'type'          => 'text',
+            'description'   => 'Options Pages PHP AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Options Pages PHP: Save',
+            'name'          => 'acfe/php_save/options_pages',
+            'type'          => 'text',
+            'description'   => 'Options Pages PHP AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        // post types
+        $this->fields['autosync'][] = array(
+            'label'         => 'Post Types Json: Load',
+            'name'          => 'acfe/json_load/post_types',
+            'type'          => 'text',
+            'description'   => 'Post Types Json AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Post Types Json: Save',
+            'name'          => 'acfe/json_save/post_types',
+            'type'          => 'text',
+            'description'   => 'Post Types Json AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Post Types PHP: Load',
+            'name'          => 'acfe/php_load/post_types',
+            'type'          => 'text',
+            'description'   => 'Post Types PHP AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Post Types PHP: Save',
+            'name'          => 'acfe/php_save/post_types',
+            'type'          => 'text',
+            'description'   => 'Post Types PHP AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        // taxonomies
+        $this->fields['autosync'][] = array(
+            'label'         => 'Taxonomies Json: Load',
+            'name'          => 'acfe/json_load/taxonomies',
+            'type'          => 'text',
+            'description'   => 'Taxonomies Json AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Taxonomies Json: Save',
+            'name'          => 'acfe/json_save/taxonomies',
+            'type'          => 'text',
+            'description'   => 'Taxonomies Json AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Taxonomies PHP: Load',
+            'name'          => 'acfe/php_load/taxonomies',
+            'type'          => 'text',
+            'description'   => 'Taxonomies PHP AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Taxonomies PHP: Save',
+            'name'          => 'acfe/php_save/taxonomies',
+            'type'          => 'text',
+            'description'   => 'Taxonomies PHP AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        // templates
+        $this->fields['autosync'][] = array(
+            'label'         => 'Templates Json: Load',
+            'name'          => 'acfe/json_load/templates',
+            'type'          => 'text',
+            'description'   => 'Templates Json AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Templates Json: Save',
+            'name'          => 'acfe/json_save/templates',
+            'type'          => 'text',
+            'description'   => 'Templates Json AutoSync saving path',
+            'category'      => 'autosync',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Templates PHP: Load',
+            'name'          => 'acfe/php_load/templates',
+            'type'          => 'text',
+            'description'   => 'Templates PHP AutoSync load paths (array)',
+            'category'      => 'autosync',
+            'format'        => 'array',
+        );
+    
+        $this->fields['autosync'][] = array(
+            'label'         => 'Templates PHP: Save',
+            'name'          => 'acfe/php_save/templates',
+            'type'          => 'text',
+            'description'   => 'Templates PHP AutoSync saving path',
+            'category'      => 'autosync',
+        );
     
         $this->fields['modules'][] = array(
             'label'         => 'Classic Editor',

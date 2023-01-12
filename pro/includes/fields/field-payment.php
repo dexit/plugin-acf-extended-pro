@@ -227,6 +227,7 @@ class acfe_payment extends acf_field{
             'name'          => 'stripe_test_secret_key',
             'type'          => 'text',
             'prepend'       => __('Secret key', 'acfe'),
+            '_appended'     => true,
         ));
         
         // Stripe Test: Public Key
@@ -246,6 +247,7 @@ class acfe_payment extends acf_field{
             'name'          => 'stripe_secret_key',
             'type'          => 'text',
             'prepend'       => __('Secret key', 'acfe'),
+            '_appended'     => true,
         ));
         
         // Stripe Prod: Public Key
@@ -265,6 +267,7 @@ class acfe_payment extends acf_field{
             'name'          => 'paypal_test_username',
             'type'          => 'text',
             'prepend'       => __('Username', 'acfe'),
+            '_appended'     => true,
         ));
     
         // PayPal Test: Password
@@ -304,6 +307,7 @@ class acfe_payment extends acf_field{
             'name'          => 'paypal_username',
             'type'          => 'text',
             'prepend'       => __('Username', 'acfe'),
+            '_appended'     => true,
         ));
     
         // PayPal Prod: Password

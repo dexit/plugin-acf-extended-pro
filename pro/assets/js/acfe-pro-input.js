@@ -107,6 +107,34 @@
     }
 
     /**
+     * Field: Block Editor
+     */
+    var Block_Editor = acf.Field.extend({
+
+        type: 'acfe_block_editor',
+
+        $control: function() {
+            return this.$('.acfe-block-editor-wrapper');
+        },
+
+        initialize: function() {
+
+            wp.attachEditor(this.$('textarea').get(0), this.get('settings'));
+
+        }
+
+    });
+
+    acf.registerFieldType(Block_Editor);
+
+})(jQuery);
+(function($) {
+
+    if (typeof acf === 'undefined' || typeof acfe === 'undefined') {
+        return;
+    }
+
+    /**
      * Field: Color Picker
      */
     var ColorPicker = acf.models.ColorPickerField;

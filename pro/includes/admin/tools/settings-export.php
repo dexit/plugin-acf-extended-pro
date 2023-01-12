@@ -70,17 +70,25 @@ class acfe_settings_export extends ACF_Admin_Tool{
     }
     
     function html_single(){
+    
+        // enqueue
+        wp_enqueue_script('code-editor');
+        wp_enqueue_style('code-editor');
         
         ?>
-        <div class="acf-postbox-columns">
+        
+        <?php if(acfe_is_acf_6()): ?>
+            <div class="acf-postbox-header">
+                <h2 class="acf-postbox-title"><?php _e('Export ACF Settings', 'acfe'); ?></h2>
+            </div>
+        <?php endif; ?>
+        
+        <div class="acf-postbox-columns" style="margin-top: 0;margin-right: 0;margin-bottom: 0;margin-left: 0;padding: 0;">
             <div class="acf-postbox-main">
                 
                 <p><?php _e("You can copy and paste the following code to your theme's functions.php file or include it within an external file.", 'acf'); ?></p>
                 
                 <?php
-
-                // prevent default translation and fake __() within string
-                acf_update_setting('l10n_var_export', true);
 
                 $str_replace = array(
                     "  "            => "\t",
@@ -104,6 +112,8 @@ class acfe_settings_export extends ACF_Admin_Tool{
 
                     foreach($this->data as $name => $value){
     
+                        acf_update_setting('l10n_var_export', true);
+    
                         // code
                         $code = var_export($value, true);
     
@@ -125,6 +135,8 @@ class acfe_settings_export extends ACF_Admin_Tool{
                         // echo
                         echo "    acf_update_setting('{$name}', {$esc_code});" . "\r\n";
     
+                        acf_update_setting('l10n_var_export', false);
+    
                     }
 
                     echo "\r\n" . "}";
@@ -134,43 +146,71 @@ class acfe_settings_export extends ACF_Admin_Tool{
                 <p class="acf-submit">
                     <a class="button" id="acf-export-copy"><?php _e( 'Copy to clipboard', 'acf' ); ?></a>
                 </p>
-                
+
                 <script type="text/javascript">
                 (function($){
-                    
-                    var $a = $('#acf-export-copy');
-                    var $textarea = $('#acf-export-textarea');
-                    
-                    if(!document.queryCommandSupported('copy')){
-                        return $a.remove();
+
+                    if(typeof acf === 'undefined'){
+                        return;
                     }
-                    
-                    $a.on('click', function(e){
-                        
-                        e.preventDefault();
-                        
-                        $textarea.get(0).select();
-                        
-                        try{
-                            
-                            // copy
-                            var copy = document.execCommand('copy');
-                            if(!copy)
-                                return;
-                            
-                            // tooltip
-                            acf.newTooltip({
-                                text:       "<?php _e('Copied', 'acf' ); ?>",
-                                timeout:    250,
-                                target:     $(this),
-                            });
-                            
-                        }catch(err){
-                            // do nothing
+
+                    // acf 6.0 add display block;
+                    $('#acf-admin-tools #normal-sortables').css('display', 'block');
+
+                    acf.addAction('ready', function(){
+
+                        // elements
+                        var $a = $('#acf-export-copy');
+                        var $textarea = $('#acf-export-textarea');
+
+                        // initialize code mirror
+                        var edit = wp.codeEditor.initialize($textarea.get(0), {
+
+                            codemirror: $.extend(wp.codeEditor.defaultSettings.codemirror, {
+                                lineNumbers:      true,
+                                lineWrapping:     true,
+                                styleActiveLine:  false,
+                                continueComments: true,
+                                indentUnit:       4,
+                                tabSize:          1,
+                                indentWithTabs:   false,
+                                mode:             'text/x-php',
+                                extraKeys:        {
+                                    'Tab':       function(cm){cm.execCommand('indentMore')},
+                                    'Shift-Tab': function(cm){cm.execCommand('indentLess')},
+                                },
+                            })
+
+                        });
+
+                        // set height
+                        edit.codemirror.getScrollerElement().style.minHeight = 15 * 18.5 + 'px';
+
+                        if(!document.queryCommandSupported('copy')){
+                            return $a.remove();
                         }
-                        
+
+                        $a.on('click', function(e){
+
+                            e.preventDefault();
+                            var $this = $(this);
+
+                            // copy
+                            navigator.clipboard.writeText(edit.codemirror.getValue()).then(function(){
+
+                                // tooltip
+                                acf.newTooltip({
+                                    text:       "<?php _e('Copied', 'acf'); ?>",
+                                    timeout:    250,
+                                    target:     $this,
+                                });
+
+                            });
+
+                        });
+
                     });
-                
+
                 })(jQuery);
                 </script>
             </div>
