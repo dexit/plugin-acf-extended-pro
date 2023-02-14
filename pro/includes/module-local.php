@@ -673,7 +673,7 @@ class acfe_module_local{
                         'message_posts' => __('Sync available', 'acfe') . '. ' . $file,
                         'message_post'  => $file,
                         'icon'          => 'update',
-                        'wrapper_start' => '<a ' . acf_esc_attrs($attrs) . '>',
+                        'wrapper_start' => '<a ' . acf_esc_atts($attrs) . '>',
                         'wrapper_end'   => '<div class="row-actions"><span class="review" style="color:#006799;">' . __('Review', 'acfe') . '</span></div></a>',
                     );
                     
@@ -687,7 +687,7 @@ class acfe_module_local{
                         'message_posts' => __('Import available', 'acfe') . '. ' . $file,
                         'message_post'  => $file,
                         'icon'          => 'download',
-                        'wrapper_start' => '<a ' . acf_esc_attrs($attrs) . '>',
+                        'wrapper_start' => '<a ' . acf_esc_atts($attrs) . '>',
                         'wrapper_end'   => '<div class="row-actions"><span class="review" style="color:#006799;">' . __('Review', 'acfe') . '</span></div></a>',
                     );
                     

@@ -2056,7 +2056,7 @@ return array(
     ),
     'USD' => array(
         'code' => 'USD',
-        'name' => 'United State Dollar',
+        'name' => 'United States Dollar',
         'symbol' => '$',
         'flag' => 'us',
         'continent' => 'America',

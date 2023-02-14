@@ -249,7 +249,7 @@ class acfe_field_image_selector extends acf_field{
                 );
                 
                 // Choice
-                $choices[$value] = '<div ' . acf_esc_attrs($atts) . '></div>';
+                $choices[$value] = '<div ' . acf_esc_atts($atts) . '></div>';
                 
             }
             
@@ -264,7 +264,7 @@ class acfe_field_image_selector extends acf_field{
         );
         
         ?>
-        <div <?php echo acf_esc_attrs($atts); ?>>
+        <div <?php echo acf_esc_atts($atts); ?>>
             <?php acf_render_field($field); ?>
         </div>
         <?php

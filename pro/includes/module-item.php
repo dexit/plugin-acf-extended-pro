@@ -155,7 +155,7 @@ class acfe_pro_module_item{
                                 'data-nonce'  => wp_create_nonce('bulk-posts'),
                             );
                         
-                            ?><a <?php echo acf_esc_attrs($attrs); ?>><?php _e('Review changes', 'acf'); ?></a><?php
+                            ?><a <?php echo acf_esc_atts($attrs); ?>><?php _e('Review changes', 'acf'); ?></a><?php
                         
                         }
                         

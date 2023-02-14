@@ -369,7 +369,7 @@ class acfe_field_date_range_picker extends acf_field{
         
         // html
         ?>
-        <div <?php echo acf_esc_attrs($div); ?>>
+        <div <?php echo acf_esc_atts($div); ?>>
             
             <?php acf_hidden_input($hidden_input); ?>
             <?php acf_text_input($text_input); ?>
@@ -528,9 +528,22 @@ class acfe_field_date_range_picker extends acf_field{
     
         // format sub field value
         if($this->is_sub_field($field)){
-            
             return acf_format_date($value, $field['return_format']);
-            
+        }
+    
+        // string value
+        // ie: 20231020-20231024
+        if(is_string($value)){
+        
+            // explode string value
+            $explode = explode('-', $value);
+        
+            // value array
+            $value = array(
+                'start' => $explode[0],
+                'end'   => $explode[1],
+            );
+        
         }
         
         // format parent value

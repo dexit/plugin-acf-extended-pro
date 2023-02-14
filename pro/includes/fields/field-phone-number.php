@@ -293,7 +293,7 @@ class acfe_field_phone_number extends acf_field{
         
         // Render
         ?>
-        <div <?php echo acf_esc_attrs($div); ?>>
+        <div <?php echo acf_esc_atts($div); ?>>
             <?php acf_hidden_input($hidden_input); ?>
             <?php acf_text_input($text_input); ?>
         </div>

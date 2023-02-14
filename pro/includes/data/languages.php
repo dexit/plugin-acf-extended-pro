@@ -19,9 +19,8 @@ return array(
             'za',
         ),
         'currencies' => array(
-            'af',
-            'en_US',
-            'en_ZA',
+            'NAD',
+            'ZAR',
         ),
     ),
     'ar' => array(
@@ -60,12 +59,29 @@ return array(
             'ye',
         ),
         'currencies' => array(
-            'ar',
-            'ckb',
-            'en_US',
-            'fr_FR',
-            'he_IL',
-            'kab',
+            'AED',
+            'BHD',
+            'DJF',
+            'DZD',
+            'EGP',
+            'ERN',
+            'ILS',
+            'IQD',
+            'JOD',
+            'KMF',
+            'KWD',
+            'LBP',
+            'LYD',
+            'MRO',
+            'OMR',
+            'QAR',
+            'SAR',
+            'SDG',
+            'SOS',
+            'SYP',
+            'TND',
+            'XAF',
+            'YER',
         ),
     ),
     'ary' => array(
@@ -81,7 +97,7 @@ return array(
             'ma',
         ),
         'currencies' => array(
-            'ary',
+            'MAD',
         ),
     ),
     'as' => array(
@@ -97,16 +113,7 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'INR',
         ),
     ),
     'az' => array(
@@ -122,8 +129,7 @@ return array(
             'az',
         ),
         'currencies' => array(
-            'az',
-            'azb',
+            'AZN',
         ),
     ),
     'azb' => array(
@@ -139,8 +145,7 @@ return array(
             'az',
         ),
         'currencies' => array(
-            'az',
-            'azb',
+            'AZN',
         ),
     ),
     'bel' => array(
@@ -156,8 +161,8 @@ return array(
             'by',
         ),
         'currencies' => array(
-            'bel',
-            'ru_RU',
+            'BYN',
+            'BYR',
         ),
     ),
     'bg_BG' => array(
@@ -173,7 +178,7 @@ return array(
             'bg',
         ),
         'currencies' => array(
-            'bg_BG',
+            'BGN',
         ),
     ),
     'bn_BD' => array(
@@ -189,7 +194,7 @@ return array(
             'bd',
         ),
         'currencies' => array(
-            'bn_BD',
+            'BDT',
         ),
     ),
     'bo' => array(
@@ -205,9 +210,7 @@ return array(
             'cn',
         ),
         'currencies' => array(
-            'bo',
-            'ug_CN',
-            'zh_CN',
+            'CNY',
         ),
     ),
     'bs_BA' => array(
@@ -224,10 +227,8 @@ return array(
             'me',
         ),
         'currencies' => array(
-            'bs_BA',
-            'hr',
-            'sq',
-            'sr_RS',
+            'BAM',
+            'EUR',
         ),
     ),
     'ca' => array(
@@ -244,9 +245,7 @@ return array(
             'es',
         ),
         'currencies' => array(
-            'ca',
-            'es_ES',
-            'gl_ES',
+            'EUR',
         ),
     ),
     'ceb' => array(
@@ -262,9 +261,25 @@ return array(
             'ph',
         ),
         'currencies' => array(
-            'ceb',
-            'en_US',
-            'tl',
+            'PHP',
+        ),
+    ),
+    'ckb' => array(
+        'code' => 'ku',
+        'locale' => 'ckb',
+        'alt' => 'cb_IQ',
+        'name' => 'Kurdish',
+        'native' => 'کوردی',
+        'dir' => 'rtl',
+        'flag' => 'ir',
+        'continent' => 'Asia',
+        'countries' => array(
+            'iq',
+            'ir',
+        ),
+        'currencies' => array(
+            'IQD',
+            'IRR',
         ),
     ),
     'cs_CZ' => array(
@@ -280,8 +295,7 @@ return array(
             'cz',
         ),
         'currencies' => array(
-            'cs_CZ',
-            'sk_SK',
+            'CZK',
         ),
     ),
     'cy' => array(
@@ -297,9 +311,7 @@ return array(
             'gb',
         ),
         'currencies' => array(
-            'cy',
-            'en_GB',
-            'gd',
+            'GBP',
         ),
     ),
     'da_DK' => array(
@@ -315,7 +327,55 @@ return array(
             'dk',
         ),
         'currencies' => array(
-            'da_DK',
+            'DKK',
+        ),
+    ),
+    'de_AT' => array(
+        'code' => 'de',
+        'locale' => 'de_AT',
+        'alt' => 'de_DE',
+        'name' => 'German',
+        'native' => 'Deutsch',
+        'dir' => 'ltr',
+        'flag' => 'at',
+        'continent' => 'Europe',
+        'countries' => array(
+            'at',
+        ),
+        'currencies' => array(
+            'EUR',
+        ),
+    ),
+    'de_CH' => array(
+        'code' => 'de',
+        'locale' => 'de_CH',
+        'alt' => 'de_DE',
+        'name' => 'German',
+        'native' => 'Deutsch',
+        'dir' => 'ltr',
+        'flag' => 'ch',
+        'continent' => 'Europe',
+        'countries' => array(
+            'ch',
+        ),
+        'currencies' => array(
+            'CHF',
+        ),
+    ),
+    'de_CH_informal' => array(
+        'code' => 'de',
+        'locale' => 'de_CH_informal',
+        'alt' => 'de_DE',
+        'name' => 'German',
+        'native' => 'Deutsch',
+        'dir' => 'ltr',
+        'flag' => 'ch',
+        'continent' => 'Europe',
+        'countries' => array(
+            'ch',
+        ),
+        'currencies' => array(
+            'CHF',
         ),
     ),
     'de_DE' => array(
@@ -335,14 +395,8 @@ return array(
             'va',
         ),
         'currencies' => array(
-            'de_DE',
-            'de_DE_formal',
-            'dsb',
-            'fr_BE',
-            'fr_FR',
-            'hsb',
-            'it_IT',
-            'nl_BE',
+            'CHF',
+            'EUR',
         ),
     ),
     'de_DE_formal' => array(
@@ -358,64 +412,7 @@ return array(
             'de',
         ),
         'currencies' => array(
-            'de_DE',
-            'de_DE_formal',
-            'dsb',
-            'hsb',
-        ),
-    ),
-    'de_CH' => array(
-        'code' => 'de',
-        'locale' => 'de_CH',
-        'alt' => 'de_DE',
-        'name' => 'German',
-        'native' => 'Deutsch',
-        'dir' => 'ltr',
-        'flag' => 'ch',
-        'continent' => 'Europe',
-        'countries' => array(
-            'ch',
-        ),
-        'currencies' => array(
-            'de_CH',
-            'de_CH_informal',
-            'fr_FR',
-            'it_IT',
-        ),
-    ),
-    'de_CH_informal' => array(
-        'code' => 'de',
-        'locale' => 'de_CH_informal',
-        'alt' => 'de_DE',
-        'name' => 'German',
-        'native' => 'Deutsch',
-        'dir' => 'ltr',
-        'flag' => 'ch',
-        'continent' => 'Europe',
-        'countries' => array(
-            'ch',
-        ),
-        'currencies' => array(
-            'de_CH',
-            'de_CH_informal',
-            'fr_FR',
-            'it_IT',
-        ),
-    ),
-    'de_AT' => array(
-        'code' => 'de',
-        'locale' => 'de_AT',
-        'alt' => 'de_DE',
-        'name' => 'German',
-        'native' => 'Deutsch',
-        'dir' => 'ltr',
-        'flag' => 'at',
-        'continent' => 'Europe',
-        'countries' => array(
-            'at',
-        ),
-        'currencies' => array(
-            'de_AT',
+            'EUR',
         ),
     ),
     'dsb' => array(
@@ -431,10 +428,7 @@ return array(
             'de',
         ),
         'currencies' => array(
-            'de_DE',
-            'de_DE_formal',
-            'dsb',
-            'hsb',
+            'EUR',
         ),
     ),
     'dzo' => array(
@@ -450,7 +444,8 @@ return array(
             'bt',
         ),
         'currencies' => array(
-            'dzo',
+            'BTN',
+            'INR',
         ),
     ),
     'el' => array(
@@ -467,9 +462,55 @@ return array(
             'gr',
         ),
         'currencies' => array(
-            'el',
-            'hy',
-            'tr_TR',
+            'EUR',
+        ),
+    ),
+    'en_AU' => array(
+        'code' => 'en',
+        'locale' => 'en_AU',
+        'alt' => 'en_US',
+        'name' => 'English',
+        'native' => 'English',
+        'dir' => 'ltr',
+        'flag' => 'au',
+        'continent' => 'Oceania',
+        'countries' => array(
+            'au',
+        ),
+        'currencies' => array(
+            'AUD',
+        ),
+    ),
+    'en_CA' => array(
+        'code' => 'en',
+        'locale' => 'en_CA',
+        'alt' => 'en_US',
+        'name' => 'English',
+        'native' => 'English',
+        'dir' => 'ltr',
+        'flag' => 'ca',
+        'continent' => 'America',
+        'countries' => array(
+            'ca',
+        ),
+        'currencies' => array(
+            'CAD',
+        ),
+    ),
+    'en_GB' => array(
+        'code' => 'en',
+        'locale' => 'en_GB',
+        'alt' => 'en_GB',
+        'name' => 'English',
+        'native' => 'English',
+        'dir' => 'ltr',
+        'flag' => 'gb',
+        'continent' => 'Europe',
+        'countries' => array(
+            'gb',
+        ),
+        'currencies' => array(
+            'GBP',
         ),
     ),
     'en_NZ' => array(
@@ -485,24 +526,7 @@ return array(
             'nz',
         ),
         'currencies' => array(
-            'en_NZ',
-        ),
-    ),
-    'en_ZA' => array(
-        'code' => 'en',
-        'locale' => 'en_ZA',
-        'alt' => 'en_US',
-        'name' => 'English',
-        'native' => 'English',
-        'dir' => 'ltr',
-        'flag' => 'za',
-        'continent' => 'Africa',
-        'countries' => array(
-            'za',
-        ),
-        'currencies' => array(
-            'af',
-            'en_ZA',
+            'NZD',
         ),
     ),
     'en_US' => array(
@@ -596,180 +620,81 @@ return array(
             'zw',
         ),
         'currencies' => array(
-            'af',
-            'ar',
-            'as',
-            'ceb',
-            'en_US',
-            'es_ES',
-            'es_PR',
-            'fr_FR',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'ms_MY',
-            'pa_IN',
-            'skr',
-            'snd',
-            'sw',
-            'ta_IN',
-            'ta_LK',
-            'te',
-            'tl',
-            'ur',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'AUD',
+            'BBD',
+            'BMD',
+            'BND',
+            'BSD',
+            'BWP',
+            'BZD',
+            'CKD',
+            'CNY',
+            'DKK',
+            'ERN',
+            'ETB',
+            'EUR',
+            'FJD',
+            'FKP',
+            'GBP',
+            'GHS',
+            'GIP',
+            'GMD',
+            'GYD',
+            'HKD',
+            'IMP[G]',
+            'INR',
+            'JEP[G]',
+            'JMD',
+            'JPY',
+            'KES',
+            'KYD',
+            'LRD',
+            'LSL',
+            'MUR',
+            'MVR',
+            'MWK',
+            'NAD',
+            'NGN',
+            'NZD',
+            'PGK',
+            'PHP',
+            'PKR',
+            'RWF',
+            'SBD',
+            'SCR',
+            'SDG',
+            'SGD',
+            'SHP',
+            'SLL',
+            'SZL',
+            'TOP',
+            'TTD',
+            'TVD[G]',
+            'TZS',
+            'UGX',
+            'USD',
+            'VUV',
+            'WST',
+            'XAF',
+            'XCD',
+            'ZAR',
+            'ZMW',
         ),
     ),
-    'en_GB' => array(
+    'en_ZA' => array(
         'code' => 'en',
-        'locale' => 'en_GB',
-        'alt' => 'en_GB',
-        'name' => 'English',
-        'native' => 'English',
-        'dir' => 'ltr',
-        'flag' => 'gb',
-        'continent' => 'Europe',
-        'countries' => array(
-            'gb',
-        ),
-        'currencies' => array(
-            'cy',
-            'en_GB',
-            'gd',
-        ),
-    ),
-    'en_CA' => array(
-        'code' => 'en',
-        'locale' => 'en_CA',
+        'locale' => 'en_ZA',
         'alt' => 'en_US',
         'name' => 'English',
         'native' => 'English',
         'dir' => 'ltr',
-        'flag' => 'ca',
-        'continent' => 'America',
+        'flag' => 'za',
+        'continent' => 'Africa',
         'countries' => array(
-            'ca',
+            'za',
         ),
         'currencies' => array(
-            'en_CA',
-            'fr_CA',
-        ),
-    ),
-    'en_AU' => array(
-        'code' => 'en',
-        'locale' => 'en_AU',
-        'alt' => 'en_US',
-        'name' => 'English',
-        'native' => 'English',
-        'dir' => 'ltr',
-        'flag' => 'au',
-        'continent' => 'Oceania',
-        'countries' => array(
-            'au',
-        ),
-        'currencies' => array(
-            'en_AU',
-        ),
-    ),
-    'es_GT' => array(
-        'code' => 'es',
-        'locale' => 'es_GT',
-        'alt' => 'es_LA',
-        'name' => 'Spanish',
-        'native' => 'Español',
-        'dir' => 'ltr',
-        'flag' => 'gt',
-        'continent' => 'America',
-        'countries' => array(
-            'gt',
-        ),
-        'currencies' => array(
-            'es_GT',
-        ),
-    ),
-    'es_VE' => array(
-        'code' => 'es',
-        'locale' => 'es_VE',
-        'alt' => 'es_VE',
-        'name' => 'Spanish',
-        'native' => 'Español',
-        'dir' => 'ltr',
-        'flag' => 've',
-        'continent' => 'America',
-        'countries' => array(
-            've',
-        ),
-        'currencies' => array(
-            'es_VE',
-        ),
-    ),
-    'es_UY' => array(
-        'code' => 'es',
-        'locale' => 'es_UY',
-        'alt' => 'es_LA',
-        'name' => 'Spanish',
-        'native' => 'Español',
-        'dir' => 'ltr',
-        'flag' => 'uy',
-        'continent' => 'America',
-        'countries' => array(
-            'uy',
-        ),
-        'currencies' => array(
-            'es_UY',
-        ),
-    ),
-    'es_PR' => array(
-        'code' => 'es',
-        'locale' => 'es_PR',
-        'alt' => 'es_LA',
-        'name' => 'Spanish',
-        'native' => 'Español',
-        'dir' => 'ltr',
-        'flag' => 'pr',
-        'continent' => 'America',
-        'countries' => array(
-            'pr',
-        ),
-        'currencies' => array(
-            'en_US',
-            'es_PR',
-        ),
-    ),
-    'es_PE' => array(
-        'code' => 'es',
-        'locale' => 'es_PE',
-        'alt' => 'es_LA',
-        'name' => 'Spanish',
-        'native' => 'Español',
-        'dir' => 'ltr',
-        'flag' => 'pe',
-        'continent' => 'America',
-        'countries' => array(
-            'pe',
-        ),
-        'currencies' => array(
-            'es_PE',
-        ),
-    ),
-    'es_MX' => array(
-        'code' => 'es',
-        'locale' => 'es_MX',
-        'alt' => 'es_MX',
-        'name' => 'Spanish',
-        'native' => 'Español',
-        'dir' => 'ltr',
-        'flag' => 'mx',
-        'continent' => 'America',
-        'countries' => array(
-            'mx',
-        ),
-        'currencies' => array(
-            'es_MX',
+            'ZAR',
         ),
     ),
     'es_AR' => array(
@@ -785,7 +710,71 @@ return array(
             'ar',
         ),
         'currencies' => array(
-            'es_AR',
+            'ARS',
+        ),
+    ),
+    'es_CL' => array(
+        'code' => 'es',
+        'locale' => 'es_CL',
+        'alt' => 'es_CL',
+        'name' => 'Spanish',
+        'native' => 'Español',
+        'dir' => 'ltr',
+        'flag' => 'cl',
+        'continent' => 'America',
+        'countries' => array(
+            'cl',
+        ),
+        'currencies' => array(
+            'CLP',
+        ),
+    ),
+    'es_CO' => array(
+        'code' => 'es',
+        'locale' => 'es_CO',
+        'alt' => 'es_CO',
+        'name' => 'Spanish',
+        'native' => 'Español',
+        'dir' => 'ltr',
+        'flag' => 'co',
+        'continent' => 'America',
+        'countries' => array(
+            'co',
+        ),
+        'currencies' => array(
+            'COP',
+        ),
+    ),
+    'es_CR' => array(
+        'code' => 'es',
+        'locale' => 'es_CR',
+        'alt' => 'es_LA',
+        'name' => 'Spanish',
+        'native' => 'Español',
+        'dir' => 'ltr',
+        'flag' => 'cr',
+        'continent' => 'America',
+        'countries' => array(
+            'cr',
+        ),
+        'currencies' => array(
+            'CRC',
+        ),
+    ),
+    'es_EC' => array(
+        'code' => 'es',
+        'locale' => 'es_EC',
+        'alt' => 'es_LA',
+        'name' => 'Spanish',
+        'native' => 'Español',
+        'dir' => 'ltr',
+        'flag' => 'ec',
+        'continent' => 'America',
+        'countries' => array(
+            'ec',
+        ),
+        'currencies' => array(
+            'USD',
         ),
     ),
     'es_ES' => array(
@@ -813,75 +802,116 @@ return array(
             'sv',
         ),
         'currencies' => array(
-            'ca',
-            'en_US',
-            'es_ES',
-            'fr_FR',
-            'gl_ES',
+            'BOB',
+            'BZD',
+            'CUC',
+            'CUP',
+            'DOP',
+            'DZD',
+            'EUR',
+            'HNL',
+            'MAD',
+            'NIO',
+            'PAB',
+            'PYG',
+            'USD',
+            'XAF',
         ),
     ),
-    'es_EC' => array(
+    'es_GT' => array(
         'code' => 'es',
-        'locale' => 'es_EC',
+        'locale' => 'es_GT',
         'alt' => 'es_LA',
         'name' => 'Spanish',
         'native' => 'Español',
         'dir' => 'ltr',
-        'flag' => 'ec',
+        'flag' => 'gt',
         'continent' => 'America',
         'countries' => array(
-            'ec',
+            'gt',
         ),
         'currencies' => array(
-            'es_EC',
+            'GTQ',
         ),
     ),
-    'es_CR' => array(
+    'es_MX' => array(
         'code' => 'es',
-        'locale' => 'es_CR',
+        'locale' => 'es_MX',
+        'alt' => 'es_MX',
+        'name' => 'Spanish',
+        'native' => 'Español',
+        'dir' => 'ltr',
+        'flag' => 'mx',
+        'continent' => 'America',
+        'countries' => array(
+            'mx',
+        ),
+        'currencies' => array(
+            'MXN',
+        ),
+    ),
+    'es_PE' => array(
+        'code' => 'es',
+        'locale' => 'es_PE',
         'alt' => 'es_LA',
         'name' => 'Spanish',
         'native' => 'Español',
         'dir' => 'ltr',
-        'flag' => 'cr',
+        'flag' => 'pe',
         'continent' => 'America',
         'countries' => array(
-            'cr',
+            'pe',
         ),
         'currencies' => array(
-            'es_CR',
+            'PEN',
         ),
     ),
-    'es_CO' => array(
+    'es_PR' => array(
         'code' => 'es',
-        'locale' => 'es_CO',
-        'alt' => 'es_CO',
+        'locale' => 'es_PR',
+        'alt' => 'es_LA',
         'name' => 'Spanish',
         'native' => 'Español',
         'dir' => 'ltr',
-        'flag' => 'co',
+        'flag' => 'pr',
         'continent' => 'America',
         'countries' => array(
-            'co',
+            'pr',
         ),
         'currencies' => array(
-            'es_CO',
+            'USD',
         ),
     ),
-    'es_CL' => array(
+    'es_UY' => array(
         'code' => 'es',
-        'locale' => 'es_CL',
-        'alt' => 'es_CL',
+        'locale' => 'es_UY',
+        'alt' => 'es_LA',
         'name' => 'Spanish',
         'native' => 'Español',
         'dir' => 'ltr',
-        'flag' => 'cl',
+        'flag' => 'uy',
         'continent' => 'America',
         'countries' => array(
-            'cl',
+            'uy',
         ),
         'currencies' => array(
-            'es_CL',
+            'UYU',
+        ),
+    ),
+    'es_VE' => array(
+        'code' => 'es',
+        'locale' => 'es_VE',
+        'alt' => 'es_VE',
+        'name' => 'Spanish',
+        'native' => 'Español',
+        'dir' => 'ltr',
+        'flag' => 've',
+        'continent' => 'America',
+        'countries' => array(
+            've',
+        ),
+        'currencies' => array(
+            'VEF',
         ),
     ),
     'et' => array(
@@ -897,7 +927,7 @@ return array(
             'ee',
         ),
         'currencies' => array(
-            'et',
+            'EUR',
         ),
     ),
     'eu' => array(
@@ -913,9 +943,7 @@ return array(
             'fr',
         ),
         'currencies' => array(
-            'eu',
-            'fr_FR',
-            'oci',
+            'EUR',
         ),
     ),
     'fa_AF' => array(
@@ -931,10 +959,7 @@ return array(
             'af',
         ),
         'currencies' => array(
-            'fa_AF',
-            'haz',
-            'ps',
-            'uz_UZ',
+            'AFN',
         ),
     ),
     'fa_IR' => array(
@@ -950,8 +975,7 @@ return array(
             'ir',
         ),
         'currencies' => array(
-            'ckb',
-            'fa_IR',
+            'IRR',
         ),
     ),
     'fi' => array(
@@ -967,8 +991,39 @@ return array(
             'fi',
         ),
         'currencies' => array(
-            'fi',
-            'sv_SE',
+            'EUR',
+        ),
+    ),
+    'fr_BE' => array(
+        'code' => 'fr',
+        'locale' => 'fr_BE',
+        'alt' => 'fr_FR',
+        'name' => 'French',
+        'native' => 'Français',
+        'dir' => 'ltr',
+        'flag' => 'be',
+        'continent' => 'Europe',
+        'countries' => array(
+            'be',
+        ),
+        'currencies' => array(
+            'EUR',
+        ),
+    ),
+    'fr_CA' => array(
+        'code' => 'fr',
+        'locale' => 'fr_CA',
+        'alt' => 'fr_CA',
+        'name' => 'French',
+        'native' => 'Français',
+        'dir' => 'ltr',
+        'flag' => 'ca',
+        'continent' => 'America',
+        'countries' => array(
+            'ca',
+        ),
+        'currencies' => array(
+            'CAD',
         ),
     ),
     'fr_FR' => array(
@@ -1023,53 +1078,24 @@ return array(
             'yt',
         ),
         'currencies' => array(
-            'ar',
-            'de_CH',
-            'de_CH_informal',
-            'de_DE',
-            'en_US',
-            'es_ES',
-            'eu',
-            'fr_FR',
-            'it_IT',
-            'oci',
-            'sw',
-            'tah',
-        ),
-    ),
-    'fr_CA' => array(
-        'code' => 'fr',
-        'locale' => 'fr_CA',
-        'alt' => 'fr_CA',
-        'name' => 'French',
-        'native' => 'Français',
-        'dir' => 'ltr',
-        'flag' => 'ca',
-        'continent' => 'America',
-        'countries' => array(
-            'ca',
-        ),
-        'currencies' => array(
-            'en_CA',
-            'fr_CA',
-        ),
-    ),
-    'fr_BE' => array(
-        'code' => 'fr',
-        'locale' => 'fr_BE',
-        'alt' => 'fr_FR',
-        'name' => 'French',
-        'native' => 'Français',
-        'dir' => 'ltr',
-        'flag' => 'be',
-        'continent' => 'Europe',
-        'countries' => array(
-            'be',
-        ),
-        'currencies' => array(
-            'de_DE',
-            'fr_BE',
-            'nl_BE',
+            'BIF',
+            'CDF',
+            'CHF',
+            'DJF',
+            'EUR',
+            'GBP',
+            'GNF',
+            'HTG',
+            'JEP[G]',
+            'KMF',
+            'LBP',
+            'MGA',
+            'RWF',
+            'SCR',
+            'VUV',
+            'XAF',
+            'XOF',
+            'XPF',
         ),
     ),
     'fur' => array(
@@ -1085,8 +1111,7 @@ return array(
             'it',
         ),
         'currencies' => array(
-            'fur',
-            'it_IT',
+            'EUR',
         ),
     ),
     'gd' => array(
@@ -1102,9 +1127,7 @@ return array(
             'gb',
         ),
         'currencies' => array(
-            'cy',
-            'en_GB',
-            'gd',
+            'GBP',
         ),
     ),
     'gl_ES' => array(
@@ -1120,9 +1143,7 @@ return array(
             'es',
         ),
         'currencies' => array(
-            'ca',
-            'es_ES',
-            'gl_ES',
+            'EUR',
         ),
     ),
     'gu' => array(
@@ -1138,16 +1159,7 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'INR',
         ),
     ),
     'haz' => array(
@@ -1163,10 +1175,7 @@ return array(
             'af',
         ),
         'currencies' => array(
-            'fa_AF',
-            'haz',
-            'ps',
-            'uz_UZ',
+            'AFN',
         ),
     ),
     'he_IL' => array(
@@ -1182,8 +1191,7 @@ return array(
             'il',
         ),
         'currencies' => array(
-            'ar',
-            'he_IL',
+            'ILS',
         ),
     ),
     'hi_IN' => array(
@@ -1200,17 +1208,8 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
-            'ur',
+            'FJD',
+            'INR',
         ),
     ),
     'hr' => array(
@@ -1228,10 +1227,9 @@ return array(
             'me',
         ),
         'currencies' => array(
-            'bs_BA',
-            'hr',
-            'sq',
-            'sr_RS',
+            'BAM',
+            'EUR',
+            'HRK',
         ),
     ),
     'hsb' => array(
@@ -1247,10 +1245,7 @@ return array(
             'de',
         ),
         'currencies' => array(
-            'de_DE',
-            'de_DE_formal',
-            'dsb',
-            'hsb',
+            'EUR',
         ),
     ),
     'hu_HU' => array(
@@ -1266,7 +1261,7 @@ return array(
             'hu',
         ),
         'currencies' => array(
-            'hu_HU',
+            'HUF',
         ),
     ),
     'hy' => array(
@@ -1283,10 +1278,8 @@ return array(
             'cy',
         ),
         'currencies' => array(
-            'el',
-            'hy',
-            'ru_RU',
-            'tr_TR',
+            'AMD',
+            'EUR',
         ),
     ),
     'id_ID' => array(
@@ -1302,8 +1295,7 @@ return array(
             'id',
         ),
         'currencies' => array(
-            'id_ID',
-            'jv_ID',
+            'IDR',
         ),
     ),
     'is_IS' => array(
@@ -1319,7 +1311,7 @@ return array(
             'is',
         ),
         'currencies' => array(
-            'is_IS',
+            'ISK',
         ),
     ),
     'it_IT' => array(
@@ -1338,12 +1330,8 @@ return array(
             'va',
         ),
         'currencies' => array(
-            'de_CH',
-            'de_CH_informal',
-            'de_DE',
-            'fr_FR',
-            'fur',
-            'it_IT',
+            'CHF',
+            'EUR',
         ),
     ),
     'ja' => array(
@@ -1359,7 +1347,7 @@ return array(
             'jp',
         ),
         'currencies' => array(
-            'ja',
+            'JPY',
         ),
     ),
     'jv_ID' => array(
@@ -1375,8 +1363,7 @@ return array(
             'id',
         ),
         'currencies' => array(
-            'id_ID',
-            'jv_ID',
+            'IDR',
         ),
     ),
     'ka_GE' => array(
@@ -1392,7 +1379,7 @@ return array(
             'ge',
         ),
         'currencies' => array(
-            'ka_GE',
+            'GEL',
         ),
     ),
     'kab' => array(
@@ -1408,8 +1395,7 @@ return array(
             'dz',
         ),
         'currencies' => array(
-            'ar',
-            'kab',
+            'DZD',
         ),
     ),
     'kk' => array(
@@ -1425,8 +1411,7 @@ return array(
             'kz',
         ),
         'currencies' => array(
-            'kk',
-            'ru_RU',
+            'KZT',
         ),
     ),
     'km' => array(
@@ -1442,7 +1427,8 @@ return array(
             'kh',
         ),
         'currencies' => array(
-            'km',
+            'KHR',
+            'USD',
         ),
     ),
     'kn' => array(
@@ -1458,16 +1444,7 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'INR',
         ),
     ),
     'ko_KR' => array(
@@ -1484,26 +1461,8 @@ return array(
             'kr',
         ),
         'currencies' => array(
-            'ko_KR',
-        ),
-    ),
-    'ckb' => array(
-        'code' => 'ku',
-        'locale' => 'ckb',
-        'alt' => 'cb_IQ',
-        'name' => 'Kurdish',
-        'native' => 'کوردی',
-        'dir' => 'rtl',
-        'flag' => 'ir',
-        'continent' => 'Asia',
-        'countries' => array(
-            'iq',
-            'ir',
-        ),
-        'currencies' => array(
-            'ar',
-            'ckb',
-            'fa_IR',
+            'KPW',
+            'KRW',
         ),
     ),
     'lo' => array(
@@ -1519,7 +1478,7 @@ return array(
             'la',
         ),
         'currencies' => array(
-            'lo',
+            'LAK',
         ),
     ),
     'lt_LT' => array(
@@ -1535,7 +1494,7 @@ return array(
             'lt',
         ),
         'currencies' => array(
-            'lt_LT',
+            'EUR',
         ),
     ),
     'lv' => array(
@@ -1551,7 +1510,7 @@ return array(
             'lv',
         ),
         'currencies' => array(
-            'lv',
+            'EUR',
         ),
     ),
     'mk_MK' => array(
@@ -1567,7 +1526,7 @@ return array(
             'mk',
         ),
         'currencies' => array(
-            'mk_MK',
+            'MKD',
         ),
     ),
     'ml_IN' => array(
@@ -1583,16 +1542,7 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'INR',
         ),
     ),
     'mn' => array(
@@ -1608,7 +1558,7 @@ return array(
             'mn',
         ),
         'currencies' => array(
-            'mn',
+            'MNT',
         ),
     ),
     'mr' => array(
@@ -1624,16 +1574,7 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'INR',
         ),
     ),
     'ms_MY' => array(
@@ -1651,13 +1592,9 @@ return array(
             'sg',
         ),
         'currencies' => array(
-            'en_US',
-            'ms_MY',
-            'ta_IN',
-            'ta_LK',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'BND',
+            'MYR',
+            'SGD',
         ),
     ),
     'my_MM' => array(
@@ -1673,8 +1610,7 @@ return array(
             'mm',
         ),
         'currencies' => array(
-            'my_MM',
-            'rhg',
+            'MMK',
         ),
     ),
     'nb_NO' => array(
@@ -1690,8 +1626,7 @@ return array(
             'no',
         ),
         'currencies' => array(
-            'nb_NO',
-            'nn_NO',
+            'NOK',
         ),
     ),
     'ne_NP' => array(
@@ -1707,7 +1642,7 @@ return array(
             'np',
         ),
         'currencies' => array(
-            'ne_NP',
+            'NPR',
         ),
     ),
     'nl_BE' => array(
@@ -1723,9 +1658,7 @@ return array(
             'be',
         ),
         'currencies' => array(
-            'de_DE',
-            'fr_BE',
-            'nl_BE',
+            'EUR',
         ),
     ),
     'nl_NL' => array(
@@ -1743,9 +1676,9 @@ return array(
             'sr',
         ),
         'currencies' => array(
-            'nl_NL',
-            'nl_NL_formal',
-            'pa_IN',
+            'AWG',
+            'EUR',
+            'SRD',
         ),
     ),
     'nl_NL_formal' => array(
@@ -1761,8 +1694,7 @@ return array(
             'nl',
         ),
         'currencies' => array(
-            'nl_NL',
-            'nl_NL_formal',
+            'EUR',
         ),
     ),
     'nn_NO' => array(
@@ -1778,8 +1710,7 @@ return array(
             'no',
         ),
         'currencies' => array(
-            'nb_NO',
-            'nn_NO',
+            'NOK',
         ),
     ),
     'oci' => array(
@@ -1795,9 +1726,7 @@ return array(
             'fr',
         ),
         'currencies' => array(
-            'eu',
-            'fr_FR',
-            'oci',
+            'EUR',
         ),
     ),
     'pa_IN' => array(
@@ -1814,17 +1743,8 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'nl_NL',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'AWG',
+            'INR',
         ),
     ),
     'pl_PL' => array(
@@ -1840,8 +1760,7 @@ return array(
             'pl',
         ),
         'currencies' => array(
-            'pl_PL',
-            'szl',
+            'PLN',
         ),
     ),
     'ps' => array(
@@ -1857,27 +1776,39 @@ return array(
             'af',
         ),
         'currencies' => array(
-            'fa_AF',
-            'haz',
-            'ps',
-            'uz_UZ',
+            'AFN',
         ),
     ),
-    'pt_PT_ao90' => array(
+    'pt_AO' => array(
         'code' => 'pt',
-        'locale' => 'pt_PT_ao90',
+        'locale' => 'pt_AO',
         'alt' => 'pt_PT',
         'name' => 'Portuguese',
         'native' => 'Português',
         'dir' => 'ltr',
-        'flag' => 'pt',
-        'continent' => 'Europe',
+        'flag' => 'ao',
+        'continent' => 'Africa',
         'countries' => array(
-            'pt',
+            'ao',
         ),
         'currencies' => array(
-            'pt_PT',
-            'pt_PT_ao90',
+            'AOA',
+        ),
+    ),
+    'pt_BR' => array(
+        'code' => 'pt',
+        'locale' => 'pt_BR',
+        'alt' => 'pt_BR',
+        'name' => 'Portuguese',
+        'native' => 'Português',
+        'dir' => 'ltr',
+        'flag' => 'br',
+        'continent' => 'America',
+        'countries' => array(
+            'br',
+        ),
+        'currencies' => array(
+            'BRL',
         ),
     ),
     'pt_PT' => array(
@@ -1899,43 +1830,29 @@ return array(
             'tl',
         ),
         'currencies' => array(
-            'pt_PT',
-            'pt_PT_ao90',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'CVE',
+            'EUR',
+            'MOP',
+            'MZN',
+            'STD',
+            'USD',
+            'XOF',
         ),
     ),
-    'pt_BR' => array(
+    'pt_PT_ao90' => array(
         'code' => 'pt',
-        'locale' => 'pt_BR',
-        'alt' => 'pt_BR',
-        'name' => 'Portuguese',
-        'native' => 'Português',
-        'dir' => 'ltr',
-        'flag' => 'br',
-        'continent' => 'America',
-        'countries' => array(
-            'br',
-        ),
-        'currencies' => array(
-            'pt_BR',
-        ),
-    ),
-    'pt_AO' => array(
-        'code' => 'pt',
-        'locale' => 'pt_AO',
+        'locale' => 'pt_PT_ao90',
         'alt' => 'pt_PT',
         'name' => 'Portuguese',
         'native' => 'Português',
         'dir' => 'ltr',
-        'flag' => 'ao',
-        'continent' => 'Africa',
+        'flag' => 'pt',
+        'continent' => 'Europe',
         'countries' => array(
-            'ao',
+            'pt',
         ),
         'currencies' => array(
-            'pt_AO',
+            'EUR',
         ),
     ),
     'rhg' => array(
@@ -1951,8 +1868,7 @@ return array(
             'mm',
         ),
         'currencies' => array(
-            'my_MM',
-            'rhg',
+            'MMK',
         ),
     ),
     'ro_RO' => array(
@@ -1969,7 +1885,8 @@ return array(
             'ro',
         ),
         'currencies' => array(
-            'ro_RO',
+            'MDL',
+            'RON',
         ),
     ),
     'ru_RU' => array(
@@ -1992,13 +1909,15 @@ return array(
             'uz',
         ),
         'currencies' => array(
-            'bel',
-            'hy',
-            'kk',
-            'ru_RU',
-            'sah',
-            'tt_RU',
-            'uz_UZ',
+            'AMD',
+            'BYN',
+            'BYR',
+            'KGS',
+            'KZT',
+            'RUB',
+            'TJS',
+            'TMT',
+            'UZS',
         ),
     ),
     'sah' => array(
@@ -2014,28 +1933,7 @@ return array(
             'ru',
         ),
         'currencies' => array(
-            'ru_RU',
-            'sah',
-            'tt_RU',
-        ),
-    ),
-    'snd' => array(
-        'code' => 'sd',
-        'locale' => 'snd',
-        'alt' => 'snd',
-        'name' => 'Sindhi',
-        'native' => 'سنڌي',
-        'dir' => 'rtl',
-        'flag' => 'pk',
-        'continent' => 'Asia',
-        'countries' => array(
-            'pk',
-        ),
-        'currencies' => array(
-            'en_US',
-            'skr',
-            'snd',
-            'ur',
+            'RUB',
         ),
     ),
     'si_LK' => array(
@@ -2051,8 +1949,7 @@ return array(
             'lk',
         ),
         'currencies' => array(
-            'si_LK',
-            'ta_LK',
+            'LKR',
         ),
     ),
     'sk_SK' => array(
@@ -2069,8 +1966,8 @@ return array(
             'sk',
         ),
         'currencies' => array(
-            'cs_CZ',
-            'sk_SK',
+            'CZK',
+            'EUR',
         ),
     ),
     'skr' => array(
@@ -2086,10 +1983,7 @@ return array(
             'pk',
         ),
         'currencies' => array(
-            'en_US',
-            'skr',
-            'snd',
-            'ur',
+            'PKR',
         ),
     ),
     'sl_SI' => array(
@@ -2105,7 +1999,23 @@ return array(
             'si',
         ),
         'currencies' => array(
-            'sl_SI',
+            'EUR',
+        ),
+    ),
+    'snd' => array(
+        'code' => 'sd',
+        'locale' => 'snd',
+        'alt' => 'snd',
+        'name' => 'Sindhi',
+        'native' => 'سنڌي',
+        'dir' => 'rtl',
+        'flag' => 'pk',
+        'continent' => 'Asia',
+        'countries' => array(
+            'pk',
+        ),
+        'currencies' => array(
+            'PKR',
         ),
     ),
     'sq' => array(
@@ -2122,10 +2032,8 @@ return array(
             'me',
         ),
         'currencies' => array(
-            'bs_BA',
-            'hr',
-            'sq',
-            'sr_RS',
+            'ALL',
+            'EUR',
         ),
     ),
     'sr_RS' => array(
@@ -2143,10 +2051,9 @@ return array(
             'rs',
         ),
         'currencies' => array(
-            'bs_BA',
-            'hr',
-            'sq',
-            'sr_RS',
+            'BAM',
+            'EUR',
+            'RSD',
         ),
     ),
     'sv_SE' => array(
@@ -2163,8 +2070,8 @@ return array(
             'se',
         ),
         'currencies' => array(
-            'fi',
-            'sv_SE',
+            'EUR',
+            'SEK',
         ),
     ),
     'sw' => array(
@@ -2183,9 +2090,10 @@ return array(
             'ug',
         ),
         'currencies' => array(
-            'en_US',
-            'fr_FR',
-            'sw',
+            'CDF',
+            'KES',
+            'TZS',
+            'UGX',
         ),
     ),
     'szl' => array(
@@ -2201,8 +2109,7 @@ return array(
             'pl',
         ),
         'currencies' => array(
-            'pl_PL',
-            'szl',
+            'PLN',
         ),
     ),
     'ta_IN' => array(
@@ -2219,21 +2126,9 @@ return array(
             'sg',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'ms_MY',
-            'pa_IN',
-            'ta_IN',
-            'ta_LK',
-            'te',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'BND',
+            'INR',
+            'SGD',
         ),
     ),
     'ta_LK' => array(
@@ -2250,14 +2145,25 @@ return array(
             'sg',
         ),
         'currencies' => array(
-            'en_US',
-            'ms_MY',
-            'si_LK',
-            'ta_IN',
-            'ta_LK',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'BND',
+            'LKR',
+            'SGD',
+        ),
+    ),
+    'tah' => array(
+        'code' => 'ty',
+        'locale' => 'tah',
+        'alt' => 'tah',
+        'name' => 'Tahitian',
+        'native' => 'Reo Tahiti',
+        'dir' => 'ltr',
+        'flag' => 'pf',
+        'continent' => 'Oceania',
+        'countries' => array(
+            'pf',
+        ),
+        'currencies' => array(
+            'XPF',
         ),
     ),
     'te' => array(
@@ -2273,16 +2179,7 @@ return array(
             'in',
         ),
         'currencies' => array(
-            'as',
-            'en_US',
-            'gu',
-            'hi_IN',
-            'kn',
-            'ml_IN',
-            'mr',
-            'pa_IN',
-            'ta_IN',
-            'te',
+            'INR',
         ),
     ),
     'th' => array(
@@ -2298,7 +2195,7 @@ return array(
             'th',
         ),
         'currencies' => array(
-            'th',
+            'THB',
         ),
     ),
     'tl' => array(
@@ -2314,9 +2211,7 @@ return array(
             'ph',
         ),
         'currencies' => array(
-            'ceb',
-            'en_US',
-            'tl',
+            'PHP',
         ),
     ),
     'tr_TR' => array(
@@ -2333,9 +2228,8 @@ return array(
             'tr',
         ),
         'currencies' => array(
-            'el',
-            'hy',
-            'tr_TR',
+            'EUR',
+            'TRY',
         ),
     ),
     'tt_RU' => array(
@@ -2351,26 +2245,7 @@ return array(
             'ru',
         ),
         'currencies' => array(
-            'ru_RU',
-            'sah',
-            'tt_RU',
-        ),
-    ),
-    'tah' => array(
-        'code' => 'ty',
-        'locale' => 'tah',
-        'alt' => 'tah',
-        'name' => 'Tahitian',
-        'native' => 'Reo Tahiti',
-        'dir' => 'ltr',
-        'flag' => 'pf',
-        'continent' => 'Oceania',
-        'countries' => array(
-            'pf',
-        ),
-        'currencies' => array(
-            'fr_FR',
-            'tah',
+            'RUB',
         ),
     ),
     'ug_CN' => array(
@@ -2386,9 +2261,7 @@ return array(
             'cn',
         ),
         'currencies' => array(
-            'bo',
-            'ug_CN',
-            'zh_CN',
+            'CNY',
         ),
     ),
     'uk' => array(
@@ -2404,7 +2277,7 @@ return array(
             'ua',
         ),
         'currencies' => array(
-            'uk',
+            'UAH',
         ),
     ),
     'ur' => array(
@@ -2421,11 +2294,8 @@ return array(
             'pk',
         ),
         'currencies' => array(
-            'en_US',
-            'hi_IN',
-            'skr',
-            'snd',
-            'ur',
+            'FJD',
+            'PKR',
         ),
     ),
     'uz_UZ' => array(
@@ -2442,11 +2312,8 @@ return array(
             'uz',
         ),
         'currencies' => array(
-            'fa_AF',
-            'haz',
-            'ps',
-            'ru_RU',
-            'uz_UZ',
+            'AFN',
+            'UZS',
         ),
     ),
     'vi' => array(
@@ -2462,7 +2329,7 @@ return array(
             'vn',
         ),
         'currencies' => array(
-            'vi',
+            'VND',
         ),
     ),
     'zh_CN' => array(
@@ -2480,16 +2347,10 @@ return array(
             'sg',
         ),
         'currencies' => array(
-            'bo',
-            'en_US',
-            'ms_MY',
-            'pt_PT',
-            'ta_IN',
-            'ta_LK',
-            'ug_CN',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'BND',
+            'CNY',
+            'MOP',
+            'SGD',
         ),
     ),
     'zh_HK' => array(
@@ -2507,14 +2368,10 @@ return array(
             'sg',
         ),
         'currencies' => array(
-            'en_US',
-            'ms_MY',
-            'pt_PT',
-            'ta_IN',
-            'ta_LK',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'BND',
+            'HKD',
+            'MOP',
+            'SGD',
         ),
     ),
     'zh_TW' => array(
@@ -2532,14 +2389,10 @@ return array(
             'tw',
         ),
         'currencies' => array(
-            'en_US',
-            'ms_MY',
-            'pt_PT',
-            'ta_IN',
-            'ta_LK',
-            'zh_CN',
-            'zh_HK',
-            'zh_TW',
+            'BND',
+            'MOP',
+            'SGD',
+            'TWD',
         ),
     ),
 );

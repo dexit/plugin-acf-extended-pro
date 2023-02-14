@@ -50,7 +50,12 @@ class acfe_options_pages extends acf_field{
         // loop
         foreach($options_pages as $options_page){
             
-            if(!acf_maybe_get($options_page, 'acfe_post_type_archive') && empty($allowed) || in_array($options_page['menu_slug'], $allowed)){
+            // disallow post type archives
+            if(acf_maybe_get($options_page, 'acfe_post_type_archive')){
+                continue;
+            }
+            
+            if(empty($allowed) || in_array($options_page['menu_slug'], $allowed)){
                 $choices[ $options_page['menu_slug'] ] = $options_page['menu_title'];
             }
             

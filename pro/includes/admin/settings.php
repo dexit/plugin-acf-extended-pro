@@ -207,9 +207,16 @@ class acfe_pro_admin_settings{
         
         $name = $setting['name'];
         $type = $setting['type'];
+    
+        // setting doesn't exist in default acf settings
+        // probably an older version of acf
+        if(!isset($this->defaults[ $name ])){
+            return false;
+        }
+        
         $format = $setting['format'];
-        $default = $this->defaults[$name];
-        $updated = $this->updated[$name];
+        $default = $this->defaults[ $name ];
+        $updated = $this->updated[ $name ];
         
         $vars = array(
             'default' => $default,
@@ -409,8 +416,11 @@ class acfe_pro_admin_settings{
                     // prepare
                     $field = $this->validate_setting($field);
                     $field = $this->prepare_setting($field);
-                    
-                    $fields[] = $field;
+    
+                    // make sure the setting exists
+                    if($field){
+                        $fields[] = $field;
+                    }
                     
                 }
                 

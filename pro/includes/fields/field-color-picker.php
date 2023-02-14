@@ -378,7 +378,7 @@ class acfe_field_color_picker extends acfe_field_extend{
         
         // html
         ?>
-        <div <?php echo acf_esc_attrs($atts); ?>>
+        <div <?php echo acf_esc_atts($atts); ?>>
             
             <?php acf_hidden_input($hidden_input); ?>
             

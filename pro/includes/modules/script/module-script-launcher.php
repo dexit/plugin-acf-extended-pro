@@ -80,8 +80,8 @@ class acfe_script_launcher extends acfe_script{
         $this->data['executions'] = $this->get_script_executions($script);
     
         // action
-        do_action("acfe/script_launcher/start",                       $this, $this->index);
-        do_action("acfe/script_launcher/start/name={$script['name']}", $this, $this->index);
+        do_action("acfe/script_launcher/start",                        $this);
+        do_action("acfe/script_launcher/start/name={$script['name']}", $this);
     
         $this->send_response(array(
             'message' => "[{$script['label']}] Starting...",
@@ -98,8 +98,8 @@ class acfe_script_launcher extends acfe_script{
         $script = acfe_get_launcher_script($this->data['script']);
     
         // action
-        do_action("acfe/script_launcher/stop",                        $this, $this->index);
-        do_action("acfe/script_launcher/stop/name={$script['name']}", $this, $this->index);
+        do_action("acfe/script_launcher/stop",                        $this);
+        do_action("acfe/script_launcher/stop/name={$script['name']}", $this);
     
         // send response
         $this->send_response(array(
@@ -115,8 +115,9 @@ class acfe_script_launcher extends acfe_script{
      */
     function request(){
     
-        // script finished
-        if($this->data['executions'] !== 0 && $this->data['executions'] === $this->index){
+        // count executions
+        // finish script if number of executions is reached
+        if($this->data['executions'] >= 0 && $this->data['executions'] === $this->index){
             
             $this->send_response(array(
                 'event' => 'stop',
@@ -127,8 +128,8 @@ class acfe_script_launcher extends acfe_script{
         $script = acfe_get_launcher_script($this->data['script']);
         
         // action
-        do_action("acfe/script_launcher/request",                        $this, $this->index);
-        do_action("acfe/script_launcher/request/name={$script['name']}", $this, $this->index);
+        do_action("acfe/script_launcher/request",                        $this);
+        do_action("acfe/script_launcher/request/name={$script['name']}", $this);
     
     }
     
@@ -143,11 +144,11 @@ class acfe_script_launcher extends acfe_script{
     function get_script_executions($script){
     
         // executions manually set
-        if($script['executions'] !== 0){
-            return $script['executions'];
+        if($script['executions'] === true){
+            return get_field('executions');
         }
-        
-        return get_field('executions');
+    
+        return $script['executions'];
         
     }
     
@@ -171,17 +172,31 @@ class acfe_script_launcher extends acfe_script{
     
         $scripts = acfe_get_launcher_scripts();
     
-        $conditions = array();
-        $conditions[0] = array();
-        $conditions[0][] = array(
-            'field'     => 'field_script',
-            'operator'  => '!=empty',
+        $conditions = array(
+            
+            array(
+                
+                array(
+                    'field'    => 'field_script',
+                    'operator' => '!=empty',
+                )
+                
+                /**
+                 * array(
+                 *     'field'     => 'field_script',
+                 *     'operator'  => '!=',
+                 *     'value'     => $script['name'],
+                 * )
+                 */
+                
+            )
+            
         );
     
         foreach($scripts as $script){
         
-            // executions manually set
-            if($script['executions'] !== 0){
+            // check executions
+            if($script['executions'] !== true){
             
                 $conditions[0][] = array(
                     'field'     => 'field_script',

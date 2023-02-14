@@ -201,7 +201,7 @@ class acfe_script{
             
             $text = acf_extract_var($atts, 'text', 'Link');
             
-            $links[] = '<a ' . acf_esc_attrs($atts) . '>' . $text . '</a>';
+            $links[] = '<a ' . acf_esc_atts($atts) . '>' . $text . '</a>';
             
         }
         

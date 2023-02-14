@@ -31,6 +31,7 @@ class acfe_field_menu_locations extends acf_field{
             'toggle'                => 0,
             'allow_custom'          => 0,
             'other_choice'          => 0,
+            'return_format'         => 'name',
         );
         
     }
@@ -108,6 +109,20 @@ class acfe_field_menu_locations extends acf_field{
             'instructions'  => __('Enter each default value on a new line','acf'),
             'name'          => 'default_value',
             'type'          => 'textarea',
+        ));
+    
+        // return_format
+        acf_render_field_setting($field, array(
+            'label'         => __('Return Value', 'acf'),
+            'instructions'  => '',
+            'type'          => 'radio',
+            'name'          => 'return_format',
+            'choices'       => array(
+                'name'   => __('Name', 'acfe'),
+                'label'  => __('Label', 'acfe'),
+                'object' => __('Both (Array)', 'acfe'),
+            ),
+            'layout'        => 'horizontal',
         ));
         
         // Select + Radio: allow_null
@@ -448,6 +463,59 @@ class acfe_field_menu_locations extends acf_field{
     
         // return
         return $field;
+        
+    }
+    
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|string[]
+     */
+    function format_value($value, $post_id, $field){
+        
+        // bail early
+        if(empty($value)){
+            return $value;
+        }
+        
+        // vars
+        $is_array = is_array($value);
+        $value = acf_get_array($value);
+        
+        // menu locations
+        $objects = get_registered_nav_menus();
+        
+        // loop
+        foreach($value as &$v){
+            
+            if(!$objects || !isset($objects[ $v ])) continue;
+            
+            // return: object
+            if($field['return_format'] === 'object'){
+                $v = array(
+                    'name'  => $v,
+                    'label' => $objects[ $v ]
+                );
+    
+            // return: label
+            }elseif($field['return_format'] === 'label'){
+                $v = $objects[ $v ];
+            }
+            
+        }
+        
+        // check array
+        if(!$is_array){
+            $value = acfe_unarray($value);
+        }
+        
+        // return
+        return $value;
         
     }
     

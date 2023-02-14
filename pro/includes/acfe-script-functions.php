@@ -175,16 +175,19 @@ function acfe_validate_script($instance){
     foreach($instance->field_groups as &$field_group){
         
         if(isset($field_group['fields'])){
-            
-            foreach($field_group['fields'] as &$field){
+    
+            // generate fields key if not provided
+            $field_group['fields'] = acfe_map_fields($field_group['fields'], function($field){
                 
-                // generate key if only name is provided.
                 // this is done within acf_add_local_field() but not in acf_add_local_fields()
                 if(!acf_maybe_get($field, 'key')){
-                    $field['key'] = 'field_' . $field['name'];
+                    $field['key'] = "field_{$field['name']}";
                 }
                 
-            }
+                // return
+                return $field;
+                
+            });
             
         }
         
@@ -236,8 +239,9 @@ function acfe_validate_launcher_script($args){
     $args = wp_parse_args($args, array(
         'name'       => '',
         'label'      => '',
+        'capability' => acf_get_setting('capability'),
         'recursive'  => false,
-        'executions' => 0,
+        'executions' => false, // false | true | [number]
     ));
     
     // missing label
@@ -245,9 +249,19 @@ function acfe_validate_launcher_script($args){
         $args['label'] = $args['name'];
     }
     
-    // simple script
+    // recursive
+    if($args['recursive'] && $args['executions'] === false){
+        $args['executions'] = -1;
+    }
+    
+    // simple
     if(!$args['recursive']){
         $args['executions'] = 1;
+    }
+    
+    // check permission
+    if(!current_user_can($args['capability'])){
+        return false;
     }
     
     // return

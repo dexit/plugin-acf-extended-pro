@@ -467,7 +467,7 @@ class acfe_field_block_editor extends acf_field{
                 <?php echo $css; ?>
             }
         </style>
-        <div <?php echo acf_esc_attrs($wrapper); ?>>
+        <div <?php echo acf_esc_atts($wrapper); ?>>
             <?php acf_textarea_input($textarea); ?>
         </div>
         <?php

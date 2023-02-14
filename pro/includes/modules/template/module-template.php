@@ -84,6 +84,7 @@ class acfe_module_template extends acfe_module{
         
         add_filter('acf/get_field_group_style', '__return_empty_string');
         add_action('edit_form_after_title',     array($this, 'edit_form_after_title'));
+        add_action('acfe/prepare_field_group',  array($this, 'prepare_field_group'));
         add_action('acf/prepare_field',         array($this, 'prepare_field'));
         add_action('acf/add_meta_boxes',        array($this, 'add_metaboxes'), 10, 3);
         add_filter('acf/pre_render_fields',     array($this, 'pre_render_fields'), 10, 2);
@@ -99,6 +100,26 @@ class acfe_module_template extends acfe_module{
      */
     function edit_form_after_title(){
         echo '<div class="notice notice-warning inline"><p>' . __('You are currently editing a Dynamic Template.', 'acfe') . '</p></div>';
+    }
+    
+    
+    /**
+     * prepare_field_group
+     *
+     * acfe/prepare_field_group
+     *
+     * @param $field_group
+     *
+     * @return mixed
+     */
+    function prepare_field_group($field_group){
+    
+        if($field_group['position'] === 'acf_after_title'){
+            $field_group['position'] = 'normal';
+        }
+    
+        return $field_group;
+        
     }
     
     
@@ -182,12 +203,35 @@ class acfe_module_template extends acfe_module{
         global $field_groups;
         $field_group_keys = wp_list_pluck(acf_get_array($field_groups), 'key');
         
-        if(!in_array($fields[0]['parent'], $field_group_keys)){
-            return $fields;
-        }
+        // db field group
+        if(is_numeric($fields[0]['parent'])){
         
-        // prefix fields
-        acf_prefix_fields($fields, 'acf[values]');
+            $field_groups_ids = array();
+        
+            foreach($field_group_keys as $field_group_key){
+            
+                $field_group = acf_get_field_group($field_group_key);
+            
+                if($field_group && $field_group['ID']){
+                    $field_groups_ids[] = $field_group['ID'];
+                }
+            
+            }
+        
+            // prefix fields
+            if(in_array($fields[0]['parent'], $field_groups_ids)){
+                acf_prefix_fields($fields, 'acf[values]');
+            }
+        
+        // local field group
+        }else{
+    
+            // prefix fields
+            if(in_array($fields[0]['parent'], $field_group_keys)){
+                acf_prefix_fields($fields, 'acf[values]');
+            }
+            
+        }
         
         return $fields;
         
@@ -208,9 +252,9 @@ class acfe_module_template extends acfe_module{
     function pre_load_value($null, $post_id, $field){
         
         global $item;
-        
+    
         // check field prefix
-        if($field['prefix'] !== 'acf[values]'){
+        if(!acfe_starts_with($field['prefix'], 'acf[values]')){
             return $null;
         }
         
@@ -221,7 +265,7 @@ class acfe_module_template extends acfe_module{
         if(isset($item['values'][ $field_name ])){
             return $item['values'][ $field_name ];
             
-            // return by key
+        // return by key
         }elseif(isset($item['values'][ $field_key ])){
             return $item['values'][ $field_key ];
         }
@@ -326,7 +370,7 @@ class acfe_module_template extends acfe_module{
                 $instance->render_admin_table_column_locations($field_group);
                 $html = ob_get_clean();
                 
-                if(!empty($html)){
+                if(!empty($html) && !in_array($html, $locations, true)){
                     $locations[] = $html;
                 }
                 

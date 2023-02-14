@@ -410,7 +410,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         }
         
         ?>
-        <div <?php echo acf_esc_attrs($div); ?>>
+        <div <?php echo acf_esc_atts($div); ?>>
             
             <?php
             acf_hidden_input(array(
@@ -441,7 +441,7 @@ class acfe_pro_field_file extends acfe_field_extend{
                     
                     ?>
 
-                    <div <?php echo acf_esc_attrs($wrap); ?>>
+                    <div <?php echo acf_esc_atts($wrap); ?>>
                         
                         <?php
                         acf_hidden_input(array(
@@ -494,7 +494,7 @@ class acfe_pro_field_file extends acfe_field_extend{
             $button_label = $field['button_label'] ? $field['button_label'] : __('Add File','acf');
             ?>
 
-            <div <?php echo acf_esc_attrs($wrapper); ?>>
+            <div <?php echo acf_esc_atts($wrapper); ?>>
                 
                 <?php if($uploader == 'basic'): ?>
 

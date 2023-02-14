@@ -536,7 +536,7 @@ class acfe_payment extends acf_field{
         );
     
         ?>
-        <div <?php echo acf_esc_attrs($div); ?>>
+        <div <?php echo acf_esc_atts($div); ?>>
         
             <?php
         
@@ -603,7 +603,7 @@ class acfe_payment extends acf_field{
             
             <?php echo $field['button_before']; ?>
             
-            <button <?php echo acf_esc_attrs($atts); ?>><?php echo $field['button_value']; ?></button>
+            <button <?php echo acf_esc_atts($atts); ?>><?php echo $field['button_value']; ?></button>
     
             <?php echo $field['button_after']; ?>
             

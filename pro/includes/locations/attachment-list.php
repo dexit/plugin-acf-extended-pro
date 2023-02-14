@@ -182,7 +182,7 @@ class acfe_location_attachment_list{
             );
             
             ?>
-            <div <?php echo acf_esc_attrs($atts); ?>>
+            <div <?php echo acf_esc_atts($atts); ?>>
         
                 <div id="publishing-action">
             

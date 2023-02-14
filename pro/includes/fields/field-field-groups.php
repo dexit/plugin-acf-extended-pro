@@ -54,7 +54,12 @@ class acfe_field_groups_field extends acf_field{
         // loop
         foreach($field_groups as $field_group){
             
-            if(empty($allowed) || in_array($field_group['key'], $allowed) && !in_array($field_group['key'], $hidden)){
+            // disallow hidden field groups
+            if(in_array($field_group['key'], $hidden)){
+                continue;
+            }
+            
+            if(empty($allowed) || in_array($field_group['key'], $allowed)){
                 $choices[ $field_group['key'] ] = $field_group['title'];
             }
             

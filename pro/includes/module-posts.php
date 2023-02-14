@@ -297,7 +297,7 @@ class acfe_pro_module_posts{
                 'class' => $this->view === 'sync' ? 'current' : '',
             );
             
-            $views['sync'] = '<a ' . acf_esc_attrs($link) . '>' . esc_html(__('Sync available', 'acf')) . ' ' . "<span class='count'>({$count})</span>" . '</a>';
+            $views['sync'] = '<a ' . acf_esc_atts($link) . '>' . esc_html(__('Sync available', 'acf')) . ' ' . "<span class='count'>({$count})</span>" . '</a>';
             
         }
     

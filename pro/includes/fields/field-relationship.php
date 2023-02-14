@@ -134,7 +134,7 @@ class acfe_pro_field_relationship extends acfe_field_extend{
         
         ?>
         <div class="filter -add-post">
-            <a <?php echo acf_esc_attrs($button); ?>><?php echo _x('Add New', 'post'); ?></a>
+            <a <?php echo acf_esc_atts($button); ?>><?php echo _x('Add New', 'post'); ?></a>
         </div>
         
         <script type="text-html" class="acfe-relationship-popup">
@@ -150,7 +150,7 @@ class acfe_pro_field_relationship extends acfe_field_extend{
                     $button = array();
                     $button['href'] = $this->get_add_new_button_href($post_type);
                     
-                    ?><li><a <?php echo acf_esc_attrs($button); ?>><?php echo $label; ?></a></li><?php
+                    ?><li><a <?php echo acf_esc_atts($button); ?>><?php echo $label; ?></a></li><?php
                     
                 }
             ?></ul>

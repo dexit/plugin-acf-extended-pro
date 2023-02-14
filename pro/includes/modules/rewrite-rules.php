@@ -496,6 +496,12 @@ class acfe_pro_rewrite_rules{
                     $repeat_target = $repeater;
                     break;
                 case '+':
+                    // fix potentially malformed regex rule ("+" inside a group)
+                    if($repeat_target === null){
+                        $repeat_target = new ACFE_Regex_Char( $letter );
+                        $current_group[] = $repeat_target;
+                        break;
+                    }
                     if ( '?' == $regex[$idx + 1] ) {
                         $is_greedy_switched = true;
                         $idx++;

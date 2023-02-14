@@ -83,7 +83,7 @@ class acfe_pro_field_checkbox extends acfe_field_extend{
         
         
         // return
-        echo '<ul ' . acf_esc_attrs( $ul ) . '>' . "\n" . $li . '</ul>' . "\n";
+        echo '<ul ' . acf_esc_atts( $ul ) . '>' . "\n" . $li . '</ul>' . "\n";
         
     }
     
@@ -277,7 +277,7 @@ class acfe_pro_field_checkbox extends acfe_field_extend{
         $field_key = $field['key'];
         $field_type = $field['type'];
         $field_name = $field['_name'];
-        $field_input = '<input ' . acf_esc_attrs($atts) . '/>';
+        $field_input = '<input ' . acf_esc_atts($atts) . '/>';
         $choice_render = $field_input  . acf_esc_html($label);
     
         // buffer

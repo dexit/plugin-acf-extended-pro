@@ -32,53 +32,59 @@ class acfe_module_template_upgrades{
             return;
         }
         
-        // get templates
-        $posts = get_posts(array(
-            'post_type'      => 'acfe-template',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'post_status'    => 'any',
-        ));
+        // hook on init to load all WP components
+        // post types, post statuses 'acf-disabled' etc...
+        add_action('init', function(){
     
-        $todo = array();
+            // get templates
+            $posts = get_posts(array(
+                'post_type'      => 'acfe-template',
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+                'post_status'    => 'any',
+            ));
     
-        foreach($posts as $post_id){
+            $todo = array();
     
-            if(acfe_is_module_v2_item($post_id)){
-                $todo[] = $post_id;
+            foreach($posts as $post_id){
+        
+                if(acfe_is_module_v2_item($post_id)){
+                    $todo[] = $post_id;
+                }
+        
             }
-        
-        }
     
-        if(!$todo){
-            return;
-        }
-        
-        // get module
-        $module = acfe_get_module('template');
+            if(!$todo){
+                return;
+            }
     
-        // loop
-        foreach($todo as $post_id){
-        
-            $title = get_post_field('post_title', $post_id);
-            $name = get_post_field('post_name', $post_id);
-            $active = (bool) get_post_meta($post_id, 'acfe_template_active', true);
-        
-            $item = array(
-                'ID'     => $post_id,
-                'name'   => $name,
-                'title'  => $title,
-                'active' => $active,
-                'values' => get_fields($post_id, false)
-            );
-        
-            // import item (update db)
-            $module->import_item($item);
-        
-        }
+            // get module
+            $module = acfe_get_module('template');
     
-        // log
-        acf_log('[ACF Extended] 0.8.9 Upgrade: Templates');
+            // loop
+            foreach($todo as $post_id){
+        
+                $title = get_post_field('post_title', $post_id);
+                $name = get_post_field('post_name', $post_id);
+                $active = (bool) get_post_meta($post_id, 'acfe_template_active', true);
+        
+                $item = array(
+                    'ID'     => $post_id,
+                    'name'   => $name,
+                    'title'  => $title,
+                    'active' => $active,
+                    'values' => get_fields($post_id, false)
+                );
+        
+                // import item (update db)
+                $module->import_item($item);
+        
+            }
+    
+            // log
+            acf_log('[ACF Extended] 0.8.9 Upgrade: Templates');
+        
+        });
     
     }
     

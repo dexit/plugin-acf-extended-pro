@@ -104,7 +104,7 @@ class acfe_pro_field_radio extends acfe_field_extend{
             
             
             // append other choice
-            $field['choices']['other'] .= '</label> <input type="text" ' . acf_esc_attrs($input) . ' /><label>';
+            $field['choices']['other'] .= '</label> <input type="text" ' . acf_esc_atts($input) . ' /><label>';
             
         }
         
@@ -118,7 +118,7 @@ class acfe_pro_field_radio extends acfe_field_extend{
         
         
         // open
-        $e .= '<ul ' . acf_esc_attrs($ul) . '>';
+        $e .= '<ul ' . acf_esc_atts($ul) . '>';
         
         
         // foreach choices
@@ -158,7 +158,7 @@ class acfe_pro_field_radio extends acfe_field_extend{
             $field_key = $field['key'];
             $field_type = $field['type'];
             $field_name = $field['_name'];
-            $field_input = '<input ' . acf_esc_attrs($atts) . '/>';
+            $field_input = '<input ' . acf_esc_atts($atts) . '/>';
             $choice_render = $field_input  . $label;
             
             // buffer

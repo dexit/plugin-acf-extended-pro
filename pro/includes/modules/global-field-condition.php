@@ -22,14 +22,15 @@ class acfe_pro_global_field_condition{
      */
     function __construct(){
         
-        add_action('acf/render_field_settings', array($this, 'field_settings'), 999);
+        add_action('acf/render_field_settings',   array($this, 'field_settings'), 999);
         
-        add_filter('acf/location/rule_types',   array($this, 'rule_types'));
-        add_filter('acf/location/rule_values',  array($this, 'rule_values'), 10, 2);
-        add_filter('acf/location/rule_match',   array($this, 'rule_match'), 10, 3);
+        add_filter('acf/location/rule_types',     array($this, 'rule_types'));
+        add_filter('acf/location/rule_operators', array($this, 'rule_operators'), 10, 2);
+        add_filter('acf/location/rule_values',    array($this, 'rule_values'), 10, 2);
+        add_filter('acf/location/rule_match',     array($this, 'rule_match'), 10, 3);
         
-        add_filter('acf/validate_field_group',  array($this, 'validate_field_group'), 20, 1);
-        add_filter('acf/load_fields',           array($this, 'load_fields'), 10, 2);
+        add_filter('acf/validate_field_group',    array($this, 'validate_field_group'), 20, 1);
+        add_filter('acf/load_fields',             array($this, 'load_fields'), 10, 2);
         
         add_action('acf/field_group/admin_footer', array($this, 'admin_footer'));
         
@@ -229,6 +230,30 @@ class acfe_pro_global_field_condition{
             $choices['Global Fields'][$field['key']] = $field['label'] . ' (' . $field['key'] . ')';
             
         }
+        
+        return $choices;
+        
+    }
+    
+    
+    /**
+     * rule_operators
+     *
+     * @param $choices
+     * @param $rule
+     *
+     * @return mixed
+     */
+    function rule_operators($choices, $rule){
+    
+        if(!acf_is_field_key($rule['param']) || (!acf_is_screen('acf-field-group') && !acf_is_ajax())){
+            return $choices;
+        }
+        
+        $choices['<']   = __('is less than', 'acf');
+        $choices['<=']  = __('is less or equal to', 'acf');
+        $choices['>']   = __('is greater than', 'acf');
+        $choices['>=']  = __('is greater or equal to', 'acf');
         
         return $choices;
         

@@ -89,7 +89,7 @@ class acfe_module_template_compat{
     function validate_field_group($field_group){
         
         // loop locations
-        if($field_group['location']){
+        if(acf_maybe_get($field_group, 'location')){
             
             foreach($field_group['location'] as $k => $group){
         
@@ -101,7 +101,8 @@ class acfe_module_template_compat{
                         continue;
                     }
                 
-                    // do not allow template as single location (only use in combination with another rule)
+                    // do not allow template as single location
+                    // only use in combination with another rule
                     if($count === 1){
                         unset($field_group['location'][ $k ]);
                     
