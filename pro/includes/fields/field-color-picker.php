@@ -8,7 +8,7 @@ if(!class_exists('acfe_field_color_picker')):
 
 class acfe_field_color_picker extends acfe_field_extend{
     
-    // ACF 5.10 version
+    // acf 5.10
     var $is_old_acf = false;
     
     /**
@@ -33,7 +33,7 @@ class acfe_field_color_picker extends acfe_field_extend{
             'render_field'
         );
     
-        // check ACF version
+        // check acf version
         if(acf_version_compare(acf_get_setting('version'),  '<', '5.10')){
             $this->is_old_acf = true;
         }
@@ -59,22 +59,17 @@ class acfe_field_color_picker extends acfe_field_extend{
      */
     function prepare_return_format($field){
         
-        if($this->is_old_acf){
-            return $field;
-        }
+        // new acf
+        if(!$this->is_old_acf){
     
-        $wrapper = acf_maybe_get($field, 'wrapper');
-    
-        if(!$wrapper){
-            return $field;
+            if(isset($field['wrapper']['data-setting']) && $field['wrapper']['data-setting'] === 'color_picker'){
+                
+                $field['choices']['label'] = __('Label', 'acf');
+                $field['choices']['color_label'] = __('Color + Label Array', 'acfe');
+                
+            }
+            
         }
-    
-        if(acf_maybe_get($wrapper, 'data-setting') !== 'color_picker'){
-            return $field;
-        }
-        
-        $field['choices']['label'] = __('Label', 'acf');
-        $field['choices']['color_label'] = __('Color + Label Array', 'acfe');
         
         return $field;
         
@@ -86,7 +81,7 @@ class acfe_field_color_picker extends acfe_field_extend{
      */
     function input_admin_enqueue_scripts(){
         
-        // only for older ACF version
+        // old acf
         if($this->is_old_acf){
     
             $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
@@ -113,7 +108,7 @@ class acfe_field_color_picker extends acfe_field_extend{
      */
     function validate_field($field){
     
-        // new ACF version
+        // new acf
         if(!$this->is_old_acf){
     
             // old alpha
@@ -270,42 +265,11 @@ class acfe_field_color_picker extends acfe_field_extend{
         
         acf_render_field_setting($field, array(
             'label'         => __('Custom Colors','acf'),
-            'instructions'  => __('Enter each choice on a new line.','acf') . '<br /><br />' . __('For more control, you may specify both a value and label like this:','acf'). '<br /><br />' . __('#2271b1 : Primary','acf'),
+            'instructions'  => __('Enter each choice on a new line.', 'acf') . '<br /><br />' . "#2271b1 : Primary<br/>#6c757d : Secondary",
             'type'          => 'textarea',
             'name'          => 'colors',
         ));
     
-    }
-    
-    
-    /**
-     * prepare_field
-     *
-     * @param $field
-     *
-     * @return mixed
-     */
-    function prepare_field($field){
-        
-        // old ACF version
-        if($this->is_old_acf){
-            return $field;
-        }
-    
-        $wrapper = acf_maybe_get($field, 'wrapper');
-    
-        if(!$wrapper){
-            return $field;
-        }
-    
-        if(acf_maybe_get($wrapper, 'data-setting') !== 'color_picker'){
-            return $field;
-        }
-        
-        $field['choices']['label'] = __('Label', 'acfe');
-        
-        return $field;
-        
     }
     
     
@@ -332,13 +296,13 @@ class acfe_field_color_picker extends acfe_field_extend{
      */
     function render_field($field){
         
-        // Enqueue Dashicons
+        // enqueue dashicons
         wp_enqueue_style('dashicons');
     
-        // only for older ACF version
+        // old acf
         if($this->is_old_acf){
     
-            // Enqueue Color Picker Alpha
+            // enqueue color picker alpha
             if($field['alpha']){
                 wp_enqueue_script('acfe-color-picker-alpha');
             }
@@ -352,10 +316,10 @@ class acfe_field_color_picker extends acfe_field_extend{
         // hidden input
         $hidden_input = acf_get_sub_array($field, array('name', 'value'));
     
-        // Get Colors
+        // get Colors
         $field['colors'] = $this->get_colors($field);
     
-        // Attributes
+        // attributes
         $atts = array(
             'class'             => "acf-color-picker {$field['class']}",
             'data-display'      => $field['display'],
@@ -367,11 +331,11 @@ class acfe_field_color_picker extends acfe_field_extend{
             'data-colors'       => array_keys($field['colors']),
         );
     
-        // old ACF version
+        // old acf
         if($this->is_old_acf){
             $atts['data-alpha'] = $field['alpha'];
             
-        // new ACF version
+        // new acf
         }else{
             $atts['data-alpha'] = $field['enable_opacity'];
         }
@@ -397,7 +361,7 @@ class acfe_field_color_picker extends acfe_field_extend{
                         $selected = $color === $field['value'] ? 'selected' : false;
                         $border = $color;
                         
-                        // check if gradient
+                        // check gradient
                         if(stripos($border, 'gradient')){
                             
                             preg_match('/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)|#([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?/', $border, $matches);
@@ -409,7 +373,8 @@ class acfe_field_color_picker extends acfe_field_extend{
                             
                         }
                         
-                        // Palette selected, remove value from color picker
+                        // palette selected
+                        // remove value from color picker
                         if($selected){
                             $text_input['value'] = '';
                         }
@@ -439,6 +404,42 @@ class acfe_field_color_picker extends acfe_field_extend{
     
     
     /**
+     * load_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return mixed
+     */
+    function load_value($value, $post_id, $field){
+    
+        // bail early
+        if(empty($value)){
+            return $value;
+        }
+        
+        // check hex value
+        if(is_string($value) && acfe_starts_with($value, '#')){
+    
+            // convert short hex to full
+            // #f00 => #ff0000
+            if(strlen($value) === 4){
+                $value = "#{$value[1]}{$value[1]}{$value[2]}{$value[2]}{$value[3]}{$value[3]}";
+            }
+    
+            // force lowercase
+            $value = strtolower($value);
+    
+        }
+        
+        // return
+        return $value;
+        
+    }
+    
+    
+    /**
      * format_value
      *
      * @param $value
@@ -453,54 +454,40 @@ class acfe_field_color_picker extends acfe_field_extend{
         if(empty($value)){
             return $value;
         }
+    
+        // get colors
+        $field['colors'] = $this->get_colors($field);
+    
+        // get color object
+        $object = $this->get_color_array($value, $field);
         
-        // old ACF version
+        // old acf
         if($this->is_old_acf){
-    
-            // get colors
-            $field['colors'] = $this->get_colors($field);
-    
-            // label
-            $label = acf_maybe_get($field['colors'], $value, $value);
     
             // value
             if($field['return_format'] === 'value'){
-        
                 // do nothing
         
             // label
             }elseif($field['return_format'] === 'label'){
+                $value = $object['label'];
         
-                $value = $label;
-        
-                // array
+            // array
             }elseif($field['return_format'] === 'array'){
-        
-                $value = array(
-                    'value' => $value,
-                    'label' => $label
-                );
+                $value = $object;
         
             }
             
-        // new ACF version
-        }elseif($field['return_format'] === 'label' || $field['return_format'] === 'color_label'){
-    
-            // get colors
-            $field['colors'] = $this->get_colors($field);
-    
+        // new acf
+        }else{
+            
             // label
-            $label = acf_maybe_get($field['colors'], $value, $value);
-    
             if($field['return_format'] === 'label'){
-                $value = $label;
+                $value = $object['label'];
                 
+            // color + label array
             }elseif($field['return_format'] === 'color_label'){
-    
-                $value = array(
-                    'color' => $value,
-                    'label' => $label,
-                );
+                $value = $object;
                 
             }
             
@@ -521,8 +508,10 @@ class acfe_field_color_picker extends acfe_field_extend{
      */
     function get_colors($field){
         
+        // vars
         $colors = array();
         
+        // theme colors settings
         if($field['theme_colors']){
             
             // theme support
@@ -560,7 +549,7 @@ class acfe_field_color_picker extends acfe_field_extend{
         
                 }
     
-                // check palette
+                // check gradients
                 if(isset($theme_settings['color']['gradients']['theme'])){
         
                     // loop
@@ -589,8 +578,69 @@ class acfe_field_color_picker extends acfe_field_extend{
             
         }
         
+        // normalize hex colors
+        foreach(array_keys($colors) as $key){
+            
+            // vars
+            $color = $key;
+            $name = $colors[ $color ];
+            
+            // is hex color
+            if(acfe_starts_with($color, '#')){
+                
+                // convert shorthand hex to full
+                // #000 => #000000
+                if(strlen($color) === 4){
+                    $color = "#{$color[1]}{$color[1]}{$color[2]}{$color[2]}{$color[3]}{$color[3]}";
+                }
+                
+                // force lowercase
+                $color = strtolower($color);
+                
+                // update array
+                unset($colors[ $key ]);
+                $colors[ $color ] = $name;
+                
+            }
+            
+        }
+        
         // return
         return $colors;
+        
+    }
+    
+    
+    /**
+     * get_color_array
+     *
+     * @param $value
+     * @param $field
+     *
+     * @return array
+     */
+    function get_color_array($value, $field){
+        
+        // loop colors
+        foreach($field['colors'] as $color => $name){
+    
+            // find value as key
+            if($color === $value){
+                
+                return array(
+                    'color' => $color,
+                    'label' => $name,
+                );
+                
+            }
+            
+        }
+        
+        // default
+        return array(
+            'color' => $value,
+            'label' => $value,
+        );
         
     }
     

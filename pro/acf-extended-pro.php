@@ -105,6 +105,7 @@ class ACFE_Pro{
         acfe_include('pro/includes/fields/field-date-picker.php');
         acfe_include('pro/includes/fields/field-date-time-picker.php');
         acfe_include('pro/includes/fields/field-file.php');
+        acfe_include('pro/includes/fields/field-image.php');
         acfe_include('pro/includes/fields/field-flexible-content-grid.php');
         acfe_include('pro/includes/fields/field-flexible-content-locations.php');
         acfe_include('pro/includes/fields/field-google-map.php');
@@ -152,8 +153,9 @@ class ACFE_Pro{
         acfe_include('pro/includes/locations/user-list.php');
         
         // modules
+        acfe_include('pro/includes/modules/dev/module-dev-data.php');
+        acfe_include('pro/includes/modules/dev/module-dev-edit-meta.php');
         acfe_include('pro/includes/modules/classic-editor.php');
-        acfe_include('pro/includes/modules/dev.php');
         acfe_include('pro/includes/modules/force-sync.php');
         acfe_include('pro/includes/modules/global-field-condition.php');
         acfe_include('pro/includes/modules/rewrite-rules.php');

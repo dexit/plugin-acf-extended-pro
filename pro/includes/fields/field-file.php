@@ -93,7 +93,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         
         // Preview Style
         acf_render_field_setting($field, array(
-            'label'         => __('Preview Style','acf'),
+            'label'         => __('Preview Style', 'acfe'),
             'instructions'  => '',
             'name'          => 'preview_style',
             'type'          => 'select',
@@ -142,7 +142,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         
         // Placeholder
         acf_render_field_setting($field, array(
-            'label'             => __('Placeholder','acf'),
+            'label'             => __('Placeholder Text', 'acf'),
             'instructions'      => '',
             'name'              => 'placeholder',
             'type'              => 'text',
@@ -171,11 +171,20 @@ class acfe_pro_field_file extends acfe_field_extend{
         $upload_dir = wp_upload_dir();
         $upload_dir_url = $upload_dir['baseurl'];
         $upload_dir_url = trailingslashit(str_replace(home_url(), '', $upload_dir_url));
+    
+        $default_upload_dir_url = $upload_dir['url'];
+        $default_upload_dir_url = trailingslashit(str_replace(home_url(), '', $default_upload_dir_url));
+    
+        $instructions = __('Leave blank to use the default upload folder.', 'acfe') . ' ' . __('Available template tags:', 'acfe') . ' ' . '<code>{year}</code> <code>{month}</code>';
+    
+        if($upload_dir_url !== $default_upload_dir_url){
+            $instructions .= "<br/>" . __('Current default upload folder:', 'acfe') . ' ' . "<code>{$default_upload_dir_url}</code>";
+        }
         
         // Upload folder
         acf_render_field_setting($field, array(
-            'label'         => __('Upload Folder','acf'),
-            'instructions'  => 'Leave blank to use the native upload folder. Available template tags: <code>{year}</code> <code>{month}</code>',
+            'label'         => __('Upload Folder', 'acfe'),
+            'instructions'  => $instructions,
             'name'          => 'upload_folder',
             'type'          => 'text',
             'prepend'       => $upload_dir_url,
@@ -183,7 +192,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         
         // Button Label
         acf_render_field_setting($field, array(
-            'label'             => __('Button Label','acf'),
+            'label'             => __('Button Label', 'acf'),
             'instructions'      => '',
             'name'              => 'button_label',
             'default_value'     => __('Add File','acf'),
@@ -215,7 +224,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         
         // Stylised button
         acf_render_field_setting($field, array(
-            'label'             => __('Stylised Button','acf'),
+            'label'             => __('Stylized Button', 'acfe'),
             'instructions'      => '',
             'name'              => 'stylised_button',
             'type'              => 'true_false',
@@ -238,7 +247,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         
         // File Count
         acf_render_field_setting($field, array(
-            'label'             => __('File Count','acf'),
+            'label'             => __('File Count', 'acfe'),
             'instructions'      => '',
             'name'              => 'file_count',
             'type'              => 'true_false',
@@ -280,7 +289,7 @@ class acfe_pro_field_file extends acfe_field_extend{
         
         // Multiple upload
         acf_render_field_setting($field, array(
-            'label'         => __('Allow multiple files','acf'),
+            'label'         => __('Allow Multiple Files', 'acfe'),
             'instructions'  => '',
             'name'          => 'multiple',
             'type'          => 'true_false',

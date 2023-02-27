@@ -141,6 +141,8 @@
 
     acf.models.ColorPickerField = ColorPicker.extend({
 
+        fixedSaturation: false,
+
         /**
          * Get Palette
          */
@@ -381,6 +383,18 @@
          * Click Color Picker
          */
         onClickColorPicker: function(e, $el) {
+
+            // set saturation to the max
+            // this fix colors not showing by default when empty
+            if (!this.fixedSaturation && !this.val()) {
+
+                acf.val(this.$inputText(), '#ff0000');
+                acf.val(this.$inputText(), '');
+
+                // only once
+                this.fixedSaturation = true;
+
+            }
 
             if (this.get('display') === 'palette' && this.$inputText().val() !== '' && !$el.hasClass('selected')) {
 

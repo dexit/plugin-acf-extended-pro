@@ -12,18 +12,6 @@
             'click .acfe-dev-edit-meta': 'onEdit',
         },
 
-        $acf: function() {
-            return $('#acfe-acf-custom-fields');
-        },
-
-        $wp: function() {
-            return $('#acfe-wp-custom-fields');
-        },
-
-        initialize: function() {
-
-        },
-
         onEdit: function(e, $el) {
 
             e.preventDefault();
@@ -51,24 +39,34 @@
                         return;
                     }
 
-                    // Open
-                    new acfe.Popup({
+                    acfe.newModal({
                         title: 'Edit Meta',
                         size: 'medium',
                         destroy: true,
-                        content: response,
+
                         events: {
-                            'click .save': 'clickSave',
+                            'click .acfe-modal-footer a.update': 'onUpdate',
                         },
+
+                        content: response,
 
                         footer: function() {
-                            return '<button class="button close">Close</button> <a class="button button-primary save">Save</a>';
+                            return '<button class="button close">' + acf.__('Cancel') + '</button> <a class="button button-primary update">' + acf.__('Update') + '</a>';
                         },
 
-                        clickSave: function(e, $el) {
+                        onUpdate: function(e, $el) {
 
+                            // prevent default
+                            e.preventDefault();
+
+                            if (!this.$('form')[0].reportValidity()) {
+                                return;
+                            }
+
+                            // serialize data
                             var data = acf.serialize(this.$content());
 
+                            // close modal
                             this.close();
 
                             $.ajax({
@@ -86,12 +84,12 @@
 
                                     if (response !== '0') {
 
-                                        if (data.value === '') {
-                                            data.value = '(empty)';
-                                        }
+                                        $tr.addClass('updated').delay(350).queue(function() {
+                                            $(this).removeClass('updated').dequeue();
+                                        });
 
-                                        $tr.find('td strong').text(data.name);
-                                        $tr.find('td pre').text(data.value);
+                                        $tr.find('td.col-name strong').text(data.name);
+                                        $tr.find('td.col-value').html(response);
 
                                     }
 
@@ -99,18 +97,10 @@
                             });
 
                         },
-
-                        onClose: function() {
-
-
-
-                        }
                     });
 
                 }
             });
-
-
 
         }
 
