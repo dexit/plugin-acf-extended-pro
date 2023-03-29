@@ -9,17 +9,14 @@ if((!acfe_is_dev() && !acfe_is_super_dev()) || !acf_current_user_can_admin()){
     return;
 }
 
-if(!class_exists('acfe_pro_dev')):
+if(!class_exists('acfe_pro_dev_metabox')):
 
-class acfe_pro_dev{
+class acfe_pro_dev_metabox{
     
     /**
      * construct
      */
     function __construct(){
-        
-        // remove basic clean metabox
-        acf_enable_filter('acfe/dev/clean_metabox');
         
         // wp + acf meta boxes
         add_action('post_submitbox_misc_actions',                       array($this, 'post_submitbox_misc_actions'));
@@ -60,8 +57,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
         
         // post type label
         $post_type_label = $post->post_type;
@@ -95,17 +94,17 @@ class acfe_pro_dev{
             <?php endif; ?>
         </div>
         
-        <?php if($single_meta): ?>
-        <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-            <?php _e('Single meta', 'acfe'); ?>:
-            <strong><?php _e('Enabled', 'acfe'); ?></strong>
+        <?php if($performance): ?>
+        <div class="misc-pub-section misc-pub-acfe-object-performance">
+            <?php _e('Performance', 'acfe'); ?>:
+            <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
         </div>
         <?php endif; ?>
         
         <script type="text/javascript">
             (function($) {
                 $('.misc-pub-acfe-object-id, .misc-pub-acfe-object-type').prependTo('#misc-publishing-actions');
-                $('.misc-pub-acfe-object-data, .misc-pub-acfe-object-meta, .misc-pub-acfe-object-single-meta').insertBefore('.misc-pub-curtime');
+                $('.misc-pub-acfe-object-data, .misc-pub-acfe-object-meta, .misc-pub-acfe-object-performance').insertBefore('.misc-pub-curtime');
             })(jQuery);
         </script>
         <?php
@@ -149,8 +148,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         // taxonomy label
         $taxonomy_label = $term->taxonomy;
@@ -185,10 +186,10 @@ class acfe_pro_dev{
                 <?php endif; ?>
             </div>
     
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
 
@@ -218,9 +219,11 @@ class acfe_pro_dev{
         
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
-        
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+    
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
         
         // user roles
         $user_roles = array_map(function($role){
@@ -251,11 +254,11 @@ class acfe_pro_dev{
                     <a href="<?php echo add_query_arg(array('acfe_dev_clean' => $post_id, 'acfe_dev_clean_nonce' => wp_create_nonce('acfe_dev_clean'))); ?>"><?php _e('Clean', 'acfe'); ?></a>
                 <?php endif; ?>
             </div>
-            
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+    
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
 
@@ -286,8 +289,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         ?>
         <div id="misc-publishing-actions" style="border-bottom:1px solid #dcdcde;">
@@ -302,11 +307,11 @@ class acfe_pro_dev{
                     <a href="<?php echo add_query_arg(array('acfe_dev_clean' => $post_id, 'acfe_dev_clean_nonce' => wp_create_nonce('acfe_dev_clean'))); ?>"><?php _e('Clean', 'acfe'); ?></a>
                 <?php endif; ?>
             </div>
-            
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+    
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -331,8 +336,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         ?>
         <div id="misc-publishing-actions">
@@ -352,10 +359,10 @@ class acfe_pro_dev{
                 <?php endif; ?>
             </div>
     
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
 
@@ -387,8 +394,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         ?>
         <div id="misc-publishing-actions">
@@ -407,11 +416,11 @@ class acfe_pro_dev{
                     <a href="<?php echo add_query_arg(array('acfe_dev_clean' => $post_id, 'acfe_dev_clean_nonce' => wp_create_nonce('acfe_dev_clean'))); ?>"><?php _e('Clean', 'acfe'); ?></a>
                 <?php endif; ?>
             </div>
-        
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+    
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
 
@@ -443,8 +452,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         ?>
         <div id="misc-publishing-actions">
@@ -463,11 +474,11 @@ class acfe_pro_dev{
                     <a href="<?php echo add_query_arg(array('acfe_dev_clean' => $post_id, 'acfe_dev_clean_nonce' => wp_create_nonce('acfe_dev_clean'))); ?>"><?php _e('Clean', 'acfe'); ?></a>
                 <?php endif; ?>
             </div>
-        
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+    
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
 
@@ -497,8 +508,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         ?>
         <div id="misc-publishing-actions">
@@ -517,11 +530,11 @@ class acfe_pro_dev{
                     <a href="<?php echo add_query_arg(array('acfe_dev_clean' => $post_id, 'acfe_dev_clean_nonce' => wp_create_nonce('acfe_dev_clean'))); ?>"><?php _e('Clean', 'acfe'); ?></a>
                 <?php endif; ?>
             </div>
-        
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+    
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
 
@@ -550,8 +563,10 @@ class acfe_pro_dev{
         $meta_count = acfe_dev_count_meta();
         $clean = $meta_count > 0;
     
-        // single meta
-        $single_meta = acfe_is_single_meta_enabled($acf_post_id);
+        // performance
+        $performance = acfe_get_object_performance_engine_name($acf_post_id);
+        $mode = acfe_get_object_performance_mode($acf_post_id);
+        $mode_text = $mode === 'test' || $mode === 'rollback' ? ' (' . ucfirst($mode) . ')' : '';
     
         ?>
         <div id="misc-publishing-actions">
@@ -566,11 +581,11 @@ class acfe_pro_dev{
                     <a href="<?php echo add_query_arg(array('acfe_dev_clean' => $post_id, 'acfe_dev_clean_nonce' => wp_create_nonce('acfe_dev_clean'))); ?>"><?php _e('Clean', 'acfe'); ?></a>
                 <?php endif; ?>
             </div>
-        
-            <?php if($single_meta): ?>
-                <div class="misc-pub-section misc-pub-acfe-object-single-meta">
-                    <?php _e('Single meta', 'acfe'); ?>:
-                    <strong><?php _e('Enabled', 'acfe'); ?></strong>
+    
+            <?php if($performance): ?>
+                <div class="misc-pub-section misc-pub-acfe-object-performance">
+                    <?php _e('Performance', 'acfe'); ?>:
+                    <strong><?php echo ucfirst($performance); ?></strong><?php echo $mode_text; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -638,7 +653,7 @@ class acfe_pro_dev{
                 acf_enable_filter("acfe/{$screen['filter']}/side");
                 acf_enable_filter("acfe/{$screen['filter']}/submitdiv");
     
-                // Sidebar submit
+                // sidebar submit
                 add_meta_box('submitdiv', $object_label, array($this, 'render_metabox_submit'), 'edit', 'side', 'high', array('screen' => $screen['name'], 'submit' => $submit));
                 
             }, 20);
@@ -683,6 +698,6 @@ class acfe_pro_dev{
     
 }
 
-acf_new_instance('acfe_pro_dev');
+acf_new_instance('acfe_pro_dev_metabox');
 
 endif;

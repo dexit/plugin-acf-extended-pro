@@ -153,8 +153,11 @@ class ACFE_Pro{
         acfe_include('pro/includes/locations/user-list.php');
         
         // modules
-        acfe_include('pro/includes/modules/dev/module-dev-data.php');
+        acfe_include('pro/includes/modules/dev/module-dev-clean-meta.php');
         acfe_include('pro/includes/modules/dev/module-dev-edit-meta.php');
+        acfe_include('pro/includes/modules/dev/module-dev-metabox.php');
+        acfe_include('pro/includes/modules/performance/module-performance-hybrid.php');
+        acfe_include('pro/includes/modules/performance/module-performance-hybrid-revisions.php');
         acfe_include('pro/includes/modules/classic-editor.php');
         acfe_include('pro/includes/modules/force-sync.php');
         acfe_include('pro/includes/modules/global-field-condition.php');

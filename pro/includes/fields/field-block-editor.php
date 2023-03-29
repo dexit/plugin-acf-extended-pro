@@ -617,8 +617,13 @@ class acfe_field_block_editor extends acf_field{
      */
     function get_allowed_blocks($field){
         
+        // vars
         $allowed = array();
         
+        // force array
+        $field['allowed_blocks'] = acf_get_array($field['allowed_blocks']);
+        
+        // loop
         foreach($field['allowed_blocks'] as $row){
             if(!empty($row['block'])){
                 $allowed[] = $row['block'];

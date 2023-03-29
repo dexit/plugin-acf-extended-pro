@@ -8,6 +8,9 @@ if(!class_exists('acfe_field_post_field')):
 
 class acfe_field_post_field extends acfe_field{
     
+    // vars
+    var $rendered = array();
+    
     /**
      * initialize
      */
@@ -19,6 +22,8 @@ class acfe_field_post_field extends acfe_field{
         $this->defaults = array(
             'field_type' => 'title'
         );
+        
+        $this->add_action('acf/input/admin_print_footer_scripts', array($this, 'admin_print_footer_scripts'));
         
     }
     
@@ -129,6 +134,7 @@ class acfe_field_post_field extends acfe_field{
         
     }
     
+    
     /**
      * prepare_field
      *
@@ -137,6 +143,11 @@ class acfe_field_post_field extends acfe_field{
      * @return false
      */
     function prepare_field($field){
+        
+        // admin only
+        if(!is_admin()){
+            return false;
+        }
         
         // get post id
         $post_id = acf_get_valid_post_id();
@@ -155,6 +166,59 @@ class acfe_field_post_field extends acfe_field{
         
         // return
         return $field;
+        
+    }
+    
+    
+    /**
+     * render_field
+     *
+     * @param $field
+     */
+    function render_field($field){
+        
+        if(!in_array($field['field_type'], $this->rendered)){
+            $this->rendered[] = $field['field_type'];
+        }
+    
+        global $pagenow;
+        
+        // fix placeholder css glitch
+        if($pagenow === 'post-new.php' && $field['field_type'] === 'title'){
+            ?>
+            <style>
+            #titlewrap{
+                display: none;
+            }
+            </style>
+            <?php
+        }
+    
+    }
+    
+    
+    /**
+     * admin_print_footer_scripts
+     */
+    function admin_print_footer_scripts(){
+        
+        if(empty($this->rendered)){
+            return;
+        }
+        
+        if(in_array('title', $this->rendered) && in_array('permalink', $this->rendered)){
+            ?>
+            <style>
+            #post-body-content{
+               margin-bottom:0;
+            }
+
+            #post-body-content #acf_after_title-sortables{
+                margin:0;
+            }
+            </style>
+            <?php
+        }
         
     }
     

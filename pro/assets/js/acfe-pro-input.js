@@ -386,13 +386,17 @@
 
             // set saturation to the max
             // this fix colors not showing by default when empty
-            if (!this.fixedSaturation && !this.val()) {
+            if (!this.fixedSaturation) {
 
-                acf.val(this.$inputText(), '#ff0000');
-                acf.val(this.$inputText(), '');
+                if (!this.val() || (this.get('display') === 'palette' && !this.$inputText().val())) {
 
-                // only once
-                this.fixedSaturation = true;
+                    acf.val(this.$inputText(), '#ff0000');
+                    acf.val(this.$inputText(), '');
+
+                    // only once
+                    this.fixedSaturation = true;
+
+                }
 
             }
 
@@ -1863,7 +1867,13 @@
                     var realCol = attr === 'auto' ? 'auto' : parseInt(attr);
                     var allowedCol = target.data('allowed-col');
 
+                    // fix for 1 column only (auto)
+                    if (allowedCol.length === 1) {
+                        return false;
+                    }
+
                     if (realCol === 'auto') {
+
                         to = 12 - (count - 1);
                         count = 12;
 
@@ -3078,17 +3088,17 @@
 
         setValue: function(val, silent) {
 
-            // Update value
+            // update value
             acf.val(this.$input(), val, silent);
 
-            // Bail early if silent
+            // bail early if silent
             if (silent) {
                 return;
             }
 
             this.busy = true;
 
-            // Render value
+            // render value
             this.renderValue(val);
 
             this.busy = false;
@@ -3097,15 +3107,15 @@
 
         renderValue: function(val) {
 
-            // Input value
+            // input value
             acf.val(this.$tel(), val, true);
 
-            // Bail early
+            // bail early
             if (typeof intlTelInputUtils === 'undefined') {
                 return;
             }
 
-            // Iti value
+            // iti value
             var iti = this.get('iti');
             var itiVal = iti.getNumber(intlTelInputUtils.numberFormat.E164);
 
@@ -3145,6 +3155,11 @@
             // classic editor init
             if (acf.get('editor') === 'classic') {
                 this.render(this);
+
+                // gutenberg init
+                // this is required to init phone number in repeater on gutenberg
+            } else if (acf.get('editor') === 'block' && acf.didAction('load')) {
+                this.render(this);
             }
 
         },
@@ -3161,28 +3176,24 @@
 
         render: function(self) {
 
-            // Vars
+            // vars
             var onlyCountries = this.get('countries') || [];
             var preferredCountries = this.get('preferred_countries') || [];
             var defaultCountry = this.get('default_country') || '';
             var placeholder = this.get('placeholder') || '';
 
-            // Add preferred countries to allowed countries
+            // add preferred countries to allowed countries
             if (preferredCountries.length && onlyCountries.length) {
 
                 preferredCountries.map(function(country) {
-
-                    if (acfe.inArray(country, onlyCountries)) {
-                        return;
+                    if (!acfe.inArray(country, onlyCountries)) {
+                        onlyCountries.push(country);
                     }
-
-                    onlyCountries.push(country);
-
                 });
 
             }
 
-            // Check default value exists in allowed countries
+            // check default value exists in allowed countries
             if (defaultCountry && onlyCountries.length && !acfe.inArray(defaultCountry, onlyCountries)) {
 
                 defaultCountry = onlyCountries[0];
@@ -3195,11 +3206,11 @@
 
             var args = {};
 
-            // Default Settings
+            // default Settings
             args.excludeCountries = ['ac', 'io', 'gg', 'mf', 'sj', 'ax'];
             args.utilsScript = 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/utils.min.js';
 
-            // Settings
+            // settings
             args.onlyCountries = onlyCountries;
             args.initialCountry = defaultCountry;
             args.preferredCountries = preferredCountries;
@@ -3212,21 +3223,19 @@
                 return acf.strReplace('{placeholder}', countryPlaceholder, placeholder);
             }
 
-            // Native Names
+            // native Names
             if (this.get('native')) {
 
                 var countries = window.intlTelInputGlobals.getCountryData();
 
                 for (var i = 0; i < countries.length; i++) {
-
                     var country = countries[i];
                     args.localizedCountries[country.iso2] = country.name.replace(/.+\((.+)\)/, "$1");
-
                 }
 
             }
 
-            // Geolocation
+            // geolocation
             if (this.get('geolocation')) {
 
                 // default country to auto
@@ -3253,7 +3262,7 @@
 
                         var countryCode = (response && response.country) ? response.country.toLowerCase() : '';
 
-                        // Country found
+                        // country found
                         if (countryCode) {
 
                             if (onlyCountries.length && !acfe.inArray(countryCode, onlyCountries)) {
@@ -3266,7 +3275,7 @@
 
                             }
 
-                            // Country not found
+                            // country not found
                         } else {
 
                             countryCode = 'us';
@@ -3291,7 +3300,7 @@
             var input = this.$tel()[0];
             var iti = window.intlTelInput(input, args);
 
-            // Save iti instance
+            // save iti instance
             this.set('iti', iti);
 
             // iti initialize
@@ -3313,12 +3322,12 @@
 
         itiInitialize: function() {
 
-            // Bail early if no value
+            // bail early if no value
             if (!this.$tel().val()) {
                 return;
             }
 
-            // Default Value
+            // default Value
             this.setValue(this.getItiData(), true);
 
         },
@@ -3341,6 +3350,7 @@
 
     acf.registerFieldType(PhoneNumber);
 
+    // validation
     new acf.Model({
 
         filters: {
@@ -3349,6 +3359,7 @@
 
         validationComplete: function(data, $form, validator) {
 
+            // get phone number fields
             var fields = acf.getFields({
                 type: 'acfe_phone_number',
                 parent: $form
@@ -3358,6 +3369,7 @@
                 return data;
             }
 
+            // error map
             var errorMap = [
                 acf.get('phoneNumberL10n').invalidPhoneNumber,
                 acf.get('phoneNumberL10n').invalidCountry,
@@ -3366,27 +3378,28 @@
                 acf.get('phoneNumberL10n').invalidPhoneNumber
             ];
 
-            $.each(fields, function() {
+            // loop fields
+            fields.map(function(field) {
 
-                // Get iti
-                var iti = this.get('iti');
+                // get iti
+                var iti = field.get('iti');
                 var country = iti.getSelectedCountryData();
 
-                // Bail early if empty value of valid number
-                if (!this.val() || (iti.isValidNumber() && country.iso2)) {
+                // bail early if empty value of valid number
+                if (!field.val() || (iti.isValidNumber() && country.iso2)) {
                     return;
                 }
 
-                // Vars
+                // vars
                 var errorCode = iti.getValidationError();
-                var input = this.getInputName();
+                var input = field.getInputName();
                 var message = errorMap[errorCode] || acf.get('phoneNumberL10n').invalidPhoneNumber;
 
-                // Data
+                // data
                 data.valid = 0;
                 data.errors = data.errors || [];
 
-                // Push error
+                // push error
                 data.errors.push({
                     input: input,
                     message: message
@@ -3407,12 +3420,21 @@
         return;
     }
 
+    // vars
+    var wait = false;
+
+    // bricks compatibility
+    // this fix the content field not being moved
+    if ($('#bricks-admin-css').length) {
+        wait = 'ready';
+    }
+
     /**
      * Field: Post Field
      */
     var Post_Field = acf.Field.extend({
 
-        wait: false,
+        wait: wait,
 
         type: 'acfe_post_field',
 

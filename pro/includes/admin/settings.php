@@ -245,7 +245,12 @@ class acfe_pro_admin_settings{
                     }
         
                     foreach($var as &$r){
-                        $r = '<div class="acf-js-tooltip acfe-settings-text" title="' . $r . '"><code>' . $r . '</code></div>';
+                        if(is_array($r)){
+                            $encode = json_encode($r);
+                            $r = '<div class="acfe-settings-text"><code>' . $encode . '</code></div>';
+                        }else{
+                            $r = '<div class="acf-js-tooltip acfe-settings-text" title="' . $r . '"><code>' . $r . '</code></div>';
+                        }
                     }
     
                     $result = implode('', $var);

@@ -9,6 +9,8 @@ if(!class_exists('acfe_module_template_features')):
 
 class acfe_module_template_features{
     
+    public $bypass = false;
+    public $items = array();
     public $module;
     public $allowed_pages = array('post.php', 'post-new.php', 'profile.php', 'user-edit.php', 'user-new.php', 'edit-tags.php', 'term.php');
     
@@ -25,6 +27,7 @@ class acfe_module_template_features{
         add_filter('acf/location/rule_values/acfe_template',    array($this, 'rule_values'));
         add_filter('acf/location/rule_match',                   array($this, 'rule_match_template'), 10, 4);
         add_filter('acf/location/rule_match/acfe_template',     array($this, 'rule_match_post'), 10, 4);
+        add_action('acfe/pre_render_field_group',               array($this, 'pre_render_field_group'), 10, 3);
     
     }
     
@@ -187,14 +190,93 @@ class acfe_module_template_features{
             // check active
             if($item && $item['active']){
                 
-                // apply values
-                $this->apply_values($item['values']);
+                if(!$this->bypass){
+                    
+                    $item['field_group'] = $field_group;
+                    $this->items[] = $item;
+                    
+                }
             
             }
         
         }
         
+        // always return true
+        // field group is always displayed
+        // even if template is disabled
         return true;
+        
+    }
+    
+    
+    /**
+     * pre_render_field_group
+     *
+     * @param $field_group
+     * @param $fields
+     * @param $post_id
+     */
+    function pre_render_field_group($field_group, $fields, $post_id){
+        
+        if(empty($this->items)){
+            return;
+        }
+    
+        // get screen
+        $screen = acf_get_form_data('location');
+        $screen = acf_get_location_screen($screen);
+    
+        // Loop
+        foreach($this->items as $item){
+            
+            // bail early if not current field group
+            if(empty($item['field_group']['key']) || $item['field_group']['key'] !== $field_group['key']){
+                continue;
+            }
+            
+            // loop locations
+            foreach($item['field_group']['location'] as $group){
+            
+                // ignore group if no rules.
+                if(empty($group)){
+                    continue;
+                }
+            
+                // loop over rules and determine if all rules match.
+                $match_group = true;
+                $this->bypass = true;
+            
+                foreach($group as $rule){
+                
+                    if(!acf_match_location_rule($rule, $screen, array())){
+                        $match_group = false;
+                        break;
+                    }
+                
+                }
+            
+                $this->bypass = false;
+            
+                // show the field group
+                if($match_group){
+                
+                    $found_template = false;
+                    foreach($group as $rule){
+                        if($rule['param'] === 'acfe_template' && $rule['value'] === $item['name']){
+                            $found_template = true;
+                            break;
+                        }
+                    }
+                
+                    if($found_template){
+                        $this->apply_values($item['values']);
+                    }
+                
+                }
+            
+            }
+        
+        }
         
     }
     

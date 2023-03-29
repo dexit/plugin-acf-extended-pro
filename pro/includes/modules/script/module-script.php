@@ -30,7 +30,7 @@ class acfe_pro_scripts{
         // scripts
         acfe_include('pro/includes/modules/script/module-script-launcher.php');
         acfe_include('pro/includes/modules/script/module-script-orphan-meta-cleaner.php');
-        acfe_include('pro/includes/modules/script/module-script-single-meta-converter.php');
+        acfe_include('pro/includes/modules/script/module-script-performance-converter.php');
         
         // scripts demo
         if(acfe_get_setting('modules/scripts/demo')){

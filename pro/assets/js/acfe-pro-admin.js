@@ -700,6 +700,14 @@
             // events scroll
             this.on(this.$events(), 'scroll', 'onScroll');
 
+            // fix acf 6.0.6 where submit attribute disabled is hijacked by acf
+            acf.enableSubmit = function($submit) {
+                return $submit.removeClass('disabled');
+            };
+            acf.disableSubmit = function($submit) {
+                return $submit.addClass('disabled');
+            };
+
         },
 
         start: function() {

@@ -4,29 +4,31 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-if(!class_exists('acfe_script_single_meta_converter')):
+if(!class_exists('acfe_script_performance_converter')):
 
-class acfe_script_single_meta_converter extends acfe_script{
+class acfe_script_performance_converter extends acfe_script{
     
     /**
      * initialize
      */
     function initialize(){
         
-        $this->name         = 'single_meta_converter';
-        $this->title        = 'Single Meta Converter';
-        $this->description  = 'Convert posts, users, taxonomies & options pages meta to Single Meta or back to normal';
+        $this->name         = 'performance_converter';
+        $this->title        = 'Performance Converter';
+        $this->description  = 'Convert posts, users, taxonomies & options pages meta to Performance Mode or back to normal';
         $this->recursive    = true;
         $this->category     = 'Maintenance';
         $this->author       = 'ACF Extended';
         $this->link         = 'https://www.acf-extended.com';
         $this->version      = '1.0';
+    
+        $config = acfe_get_performance_config();
         
         $this->field_groups = array(
     
             array(
                 'title'             => 'Objects Settings',
-                'key'               => 'group_acfe_single_meta_converter_top',
+                'key'               => 'group_acfe_performance_converter_top',
                 'position'          => 'acf_after_title',
                 'label_placement'   => 'top',
                 'fields'            => array(
@@ -72,7 +74,7 @@ class acfe_script_single_meta_converter extends acfe_script{
                         'callback'      => array(
                             'prepare_field' => function($field){
                                 
-                                // Exclude post format
+                                // exclude post format
                                 unset($field['choices']['post_format']);
                                 return $field;
                                 
@@ -136,52 +138,32 @@ class acfe_script_single_meta_converter extends acfe_script{
             ),
     
             array(
-                'title'             => 'Single Meta Status',
-                'key'               => 'group_acfe_single_meta_converter_side_status',
+                'title'             => 'Conversion Settings',
+                'key'               => 'group_acfe_performance_converter_side',
                 'position'          => 'side',
                 'label_placement'   => 'top',
                 'fields'            => array(
     
                     array(
-                        'label'         => '',
-                        'name'          => 'single_meta_status',
+                        'label'         => 'Engine',
+                        'name'          => 'engine',
                         'type'          => 'acfe_dynamic_render',
                         'render'        => function(){
-                            
-                            ?>
-                            
-                            <?php if(acf_get_setting('acfe/modules/single_meta')): ?>
-                                <span style="color:#468847;"><span class="dashicons dashicons-yes"></span> Enabled</span>
-                            <?php else: ?>
-                                <span style="color:#B94835;"><span class="dashicons dashicons-no-alt"></span> Disabled</span>
-                            <?php endif; ?>
-                            
-                            (<a href="<?php echo admin_url('edit.php?post_type=acf-field-group&page=acfe-settings'); ?>" target="_blank">Switch</a>)
-                            
-                            <?php
-            
+                            $config = acfe_get_performance_config();
+                            ?><?php echo ucfirst($config['engine']); ?><?php
                         }
                     ),
-        
-                ),
-    
-            ),
-    
-            array(
-                'title'             => 'Conversion Settings',
-                'key'               => 'group_acfe_single_meta_converter_side',
-                'position'          => 'side',
-                'label_placement'   => 'top',
-                'fields'            => array(
     
                     array(
-                        'label'         => 'Conversion Type',
-                        'name'          => 'conversion',
-                        'type'          => 'select',
-                        'instructions'  => 'Choose the conversion mode',
-                        'choices'       => array(
-                            'normal_to_single' => 'Normal Meta > Single Meta',
-                            'single_to_normal' => 'Single Meta > Normal Meta',
+                        'label'         => 'Mode',
+                        'name'          => 'mode',
+                        'type'          => 'radio',
+                        'instructions'  => '',
+                        'default_value' => $config['mode'],
+                        'choices' => array(
+                            'test'       => __('Test Drive', 'acfe'),
+                            'production' => __('Production', 'acfe'),
+                            'rollback'   => __('Rollback', 'acfe'),
                         ),
                     ),
             
@@ -244,37 +226,21 @@ class acfe_script_single_meta_converter extends acfe_script{
      * @return false|mixed|void
      */
     function validate(){
-        /*
-        // Vars
-        $conversion = get_field('conversion');
-        $single_meta = acfe_is_single_meta_enabled();
         
-        // Normal > Single
-        if($conversion === 'normal_to_single' && !$single_meta){
-    
-            return acfe_add_validation_error('conversion', 'Single Meta module must be enabled to use this conversion');
-            
+        // check module
+        if(!acfe_is_performance_enabled()){
+            return acfe_add_validation_error('', 'Performance module is disabled');
         }
     
-        // Single > Normal
-        if($conversion === 'single_to_normal' && $single_meta){
-        
-            return acfe_add_validation_error('conversion', 'Single Meta module must be disabled to use this conversion');
-        
-        }*/
-    
-        // Get fields
+        // get fields
         $post_types     = get_field('post_types');
         $taxonomies     = get_field('taxonomies');
         $users          = get_field('users');
         $options_pages  = get_field('options_pages');
     
-        // Check not empty
+        // check not empty
         if(empty($post_types) && empty($taxonomies) && empty($users) && empty($options_pages)){
-        
-            // Add global error
             return acfe_add_validation_error('', 'Select at least one object type to convert: Post Type, Taxonomy, User or Options Page');
-        
         }
         
     }
@@ -421,41 +387,18 @@ class acfe_script_single_meta_converter extends acfe_script{
         $object = get_post_type_object($post_type);
         $count = $this->count_posts($post_type);
     
-        // Normal > Single
-        if(get_field('conversion') === 'normal_to_single'){
+        // not allowed
+        if(!acfe_is_object_type_performance_enabled('post', $post_type)){
         
-            // Check rule
-            $rule = apply_filters('acfe/modules/single_meta/post_types', array());
+            // Update data
+            $this->data['offset'] = -1;
+            $this->data['tasks']['post_types'] = $post_types; // array_shift() already removed current object
         
-            // All post types disabled
-            if($rule === false){
-            
-                // Update data
-                $this->data['offset'] = -1;
-                unset($this->data['tasks']['post_types']); // Remove all post types from data
-            
-                // Send response
-                $this->send_response(array(
-                    'message'   => "<strong>All Post Types</strong> are excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-            
-            }
-        
-            // Not in allowed rule
-            if(!empty($rule) && !in_array($post_type, $rule)){
-            
-                // Update data
-                $this->data['offset'] = -1;
-                $this->data['tasks']['post_types'] = $post_types; // array_shift() already removed current object
-            
-                // Send response
-                $this->send_response(array(
-                    'message'   => "Processing: <strong>{$object->label}</strong>. This post type is excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-            
-            }
+            // Send response
+            $this->send_response(array(
+                'message'   => "Processing: <strong>{$object->label}</strong>. This post type is excluded from Performance Mode",
+                'status'    => 'error',
+            ));
         
         }
         
@@ -575,43 +518,20 @@ class acfe_script_single_meta_converter extends acfe_script{
         // Get object
         $object = get_taxonomy($taxonomy);
         $count = $this->count_terms($taxonomy);
+    
+        // not allowed
+        if(!acfe_is_object_type_performance_enabled('term', $taxonomy)){
         
-        // Normal > Single
-        if(get_field('conversion') === 'normal_to_single'){
-            
-            // Check rule
-            $rule = apply_filters('acfe/modules/single_meta/taxonomies', array());
-            
-            // All taxonomies disabled
-            if($rule === false){
-                
-                // Update data
-                $this->data['offset'] = -1;
-                unset($this->data['tasks']['taxonomies']); // Remove all taxonomies from data
-                
-                // Send response
-                $this->send_response(array(
-                    'message'   => "<strong>All Taxonomies</strong> are excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-                
-            }
-            
-            // Not in allowed rule
-            if(!empty($rule) && !in_array($taxonomy, $rule)){
-                
-                // Update data
-                $this->data['offset'] = -1;
-                $this->data['tasks']['taxonomies'] = $taxonomies; // array_shift() already removed current object
-                
-                // Send response
-                $this->send_response(array(
-                    'message'   => "Processing: <strong>{$object->label}</strong>. This taxonomy is excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-                
-            }
-            
+            // Update data
+            $this->data['offset'] = -1;
+            $this->data['tasks']['taxonomies'] = $taxonomies; // array_shift() already removed current object
+        
+            // Send response
+            $this->send_response(array(
+                'message'   => "Processing: <strong>{$object->label}</strong>. This taxonomy is excluded from Performance module",
+                'status'    => 'error',
+            ));
+        
         }
         
         // Processing
@@ -731,43 +651,20 @@ class acfe_script_single_meta_converter extends acfe_script{
         // Get object
         global $wp_roles;
         $object = $wp_roles->roles[ $user_role ];
+    
+        // not allowed
+        if(!acfe_is_object_type_performance_enabled('user', $user_role)){
         
-        // Normal > Single
-        if(get_field('conversion') === 'normal_to_single'){
-            
-            // Check rule
-            $rule = apply_filters('acfe/modules/single_meta/users', false);
-            
-            // All users disabled
-            if($rule === false){
-                
-                // Update data
-                $this->data['offset'] = -1;
-                unset($this->data['tasks']['users']); // Remove all users from data
-                
-                // Send response
-                $this->send_response(array(
-                    'message'   => "<strong>All User Roles</strong> are excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-                
-            }
-            
-            // Not in allowed rule
-            if(!empty($rule) && !in_array($user_role, $rule)){
-                
-                // Update data
-                $this->data['offset'] = -1;
-                $this->data['tasks']['users'] = $user_roles; // array_shift() already removed current object
-                
-                // Send response
-                $this->send_response(array(
-                    'message'   => "Processing: <strong>{$object['name']}</strong>. This user role is excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-                
-            }
-            
+            // Update data
+            $this->data['offset'] = -1;
+            $this->data['tasks']['users'] = $user_roles; // array_shift() already removed current object
+        
+            // Send response
+            $this->send_response(array(
+                'message'   => "Processing: <strong>{$object['name']}</strong>. This user role is excluded from Performance module",
+                'status'    => 'error',
+            ));
+        
         }
         
         // Processing
@@ -885,29 +782,6 @@ class acfe_script_single_meta_converter extends acfe_script{
         // No taxonomy to process
         if(!$options_pages) return;
         
-        // Normal > Single
-        if(get_field('conversion') === 'normal_to_single'){
-            
-            // Check rule
-            $rule = apply_filters('acfe/modules/single_meta/options', false);
-            
-            // All options disabled
-            if($rule === false){
-                
-                // Update data
-                $this->data['offset'] = -1;
-                unset($this->data['tasks']['options_pages']); // Remove all options from data
-                
-                // Send response
-                $this->send_response(array(
-                    'message'   => "<strong>All Options Pages</strong> are excluded from Single Meta module",
-                    'status'    => 'error',
-                ));
-                
-            }
-            
-        }
-        
         // Processing
         if($this->data['offset'] === -1){
             
@@ -945,32 +819,24 @@ class acfe_script_single_meta_converter extends acfe_script{
         // Loop items
         foreach($items as $item){
             
-            // Vars
+            // vars
             $object = acf_get_options_page($item);
             $item_id = $object['post_id'];
             $title = $object['page_title'];
             $link = admin_url("admin.php?page={$object['menu_slug']}");
     
-            // Normal > Single
-            if(get_field('conversion') === 'normal_to_single'){
+            // not allowed
+            if(!acfe_is_object_type_performance_enabled('option', $item_id)){
         
-                // Check rule
-                $rule = apply_filters('acfe/modules/single_meta/options', false);
+                // Update data
+                $this->data['offset'] = -1;
+                $this->data['tasks']['options_pages'] = array_diff($options_pages, array($item)); // Remove current object
         
-                // Not in allowed rule
-                if(!empty($rule) && !in_array($item_id, $rule)){
-            
-                    // Update data
-                    $this->data['offset'] = -1;
-                    $this->data['tasks']['options_pages'] = array_diff($options_pages, array($item)); // Remove current object
-            
-                    // Send response
-                    $this->send_response(array(
-                        'message'   => "Processing: <strong>{$title}</strong>. This options page is excluded from Single Meta module",
-                        'status'    => 'error',
-                    ));
-            
-                }
+                // Send response
+                $this->send_response(array(
+                    'message'   => "Processing: <strong>{$title}</strong>. This options page is excluded from Performance module",
+                    'status'    => 'error',
+                ));
         
             }
             
@@ -1034,138 +900,93 @@ class acfe_script_single_meta_converter extends acfe_script{
      * @return array
      */
     function convert_meta($post_id, $confirm = false){
-        
-        // Vars
+    
+        // inject mode
+        add_filter('acfe/modules/performance/config', array($this, 'get_config'), 99);
+    
+        // vars
         $data = array();
-        $conversion = get_field('conversion');
         
-        // Normal > Single
-        if($conversion === 'normal_to_single'){
+        // update normal meta to performance
+        $meta = acfe_do_performance_bypass(function($post_id){
+            return acfe_get_meta($post_id);
+        }, array($post_id));
+        $update = $this->update_meta($meta, $post_id, $confirm);
+        $data = array_merge($data, $update);
+        
+        // update compressed meta to performance
+        // this trigger conversion from other engines too
+        $meta = acfe_get_meta($post_id);
+        $update = $this->update_meta($meta, $post_id, $confirm);
+        $data = array_merge($data, $update);
+        
+        // other actions
+        if($confirm){
     
-            $data = $this->convert_to_single($post_id, $confirm);
-            
-        // Single > Normal
-        }elseif($conversion === 'single_to_normal'){
+            // convert engines meta
+            acfe_do_performance_convert($post_id);
     
-            $data = $this->convert_to_normal($post_id, $confirm);
+            // rollback
+            if(get_field('mode') === 'rollback'){
+                acfe_do_performance_rollback($post_id);
+            }
             
         }
-        
+    
+        remove_filter('acfe/modules/performance/config', array($this, 'get_config'), 99);
+    
         return $data;
         
     }
     
+    
     /**
-     * convert_to_single
+     * update_meta
      *
+     * @param $meta
      * @param $post_id
      * @param $confirm
      *
      * @return array
      */
-    function convert_to_single($post_id, $confirm){
+    function update_meta($meta, $post_id, $confirm = false){
     
-        // Vars
+        // vars
         $data = array();
     
-        // Load normal meta
-        acf_disable_filter('acfe/single_meta');
-    
-            $meta = acfe_get_meta($post_id);
-    
-        acf_enable_filter('acfe/single_meta');
-    
-        // Loop
+        // loop
         foreach($meta as $row){
         
-            // Vars
+            // vars
             $field = $row['field'];
             $key = $row['key'];
             $name = $row['name'];
             $value = $row['value'];
-            
-            // Field not found
-            if(!$field) continue;
         
-            // Field exists & confirmed conversion
-            if($confirm){
-    
-                // Check Save as individual meta
-                $save_as_meta = acf_maybe_get($field, 'acfe_save_meta');
-    
-                // Enable filter to also save individually
-                if($save_as_meta){
-                    acf_enable_filter('acfe/single_meta/normal_save');
-                }
-    
-                // Update to single meta and clean normal meta
-                acf_update_metadata($post_id, $name, $key, true);
-                acf_update_metadata($post_id, $name, $value);
-    
-                // Disable filter
-                if($save_as_meta){
-                    acf_disable_filter('acfe/single_meta/normal_save');
-                }
-            
+            // field not found
+            if(!$field){
+                continue;
             }
         
-            // Add to data
-            $data[ "_$name" ] = $key;
-            $data[ $name ] = $value;
-        
-        }
-        
-        return $data;
-        
-    }
-    
-    
-    /**
-     * convert_to_normal
-     *
-     * @param $post_id
-     * @param $confirm
-     *
-     * @return array
-     */
-    function convert_to_normal($post_id, $confirm){
-    
-        // vars
-        $data = array();
-        $acf = array();
-        
-        // load 'acf' meta
-        $meta = acf_get_array(acfe_get_single_meta($post_id));
-        
-        foreach($meta as $key => $value){
-    
-            // bail early
-            if(!isset($meta["_$key"])) continue;
-            
-            // add to collection
-            $acf[] = array(
-                'key'   => $meta["_$key"],
-                'name'  => $key,
-                'value' => $value,
-            );
-            
-        }
-    
-        acf_disable_filter('acfe/single_meta');
-    
-        // loop collection
-        foreach($acf as $row){
-            
-            // vars
-            $key = $row['key'];
-            $name = $row['name'];
-            $value = $row['value'];
-        
-            // convert to normal meta
+            // field exists & confirmed conversion
             if($confirm){
-                
+            
+                // check Save as individual meta
+                $save_as_meta = acf_maybe_get($field, 'acfe_save_meta');
+            
+                // enable filter to also save individually
+                if($save_as_meta){
+                    acf_enable_filter('acfe/performance_ultra/normal_save');
+                }
+            
+                // update
                 acf_update_metadata($post_id, $name, $key, true);
                 acf_update_metadata($post_id, $name, $value);
+            
+                // disable filter
+                if($save_as_meta){
+                    acf_disable_filter('acfe/performance_ultra/normal_save');
+                }
             
             }
         
@@ -1174,17 +995,23 @@ class acfe_script_single_meta_converter extends acfe_script{
             $data[ $name ] = $value;
         
         }
-    
-        acf_enable_filter('acfe/single_meta');
-    
-        // delete 'acf' meta
-        /*
-        if($confirm){
-            acfe_delete_single_meta($post_id);
-        }
-        */
         
         return $data;
+        
+    }
+    
+    
+    /**
+     * get_config
+     *
+     * @param $config
+     *
+     * @return mixed
+     */
+    function get_config($config){
+    
+        $config['mode'] = get_field('mode');
+        return $config;
         
     }
     
@@ -1253,6 +1080,6 @@ class acfe_script_single_meta_converter extends acfe_script{
     
 }
 
-acfe_register_script('acfe_script_single_meta_converter');
+acfe_register_script('acfe_script_performance_converter');
 
 endif;

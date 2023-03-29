@@ -33,7 +33,7 @@ class acfe_module_template_compat{
      */
     function admin_head(){
         
-        // Globals
+        // globals
         global $pagenow, $post;
         
         // check screen
@@ -55,6 +55,7 @@ class acfe_module_template_compat{
         
         // get screen
         $screen = acf_get_form_data('location');
+        $screen = acf_get_location_screen($screen);
         
         // Loop
         foreach($local_items as $item){

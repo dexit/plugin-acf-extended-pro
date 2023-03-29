@@ -40,7 +40,11 @@ class acfe_pro_admin_menu{
                  */
                 
                 if($item[2] === 'edit.php?post_type=acfe-template'){
-                    acfe_array_move($submenu['edit.php?post_type=acf-field-group'], $key, 7);
+                    
+                    $position = acfe_is_acf_61() ? 8 : 7;
+                    
+                    acfe_array_move($submenu['edit.php?post_type=acf-field-group'], $key, $position);
+                    
                 }
                 
             }

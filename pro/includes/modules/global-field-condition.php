@@ -22,7 +22,8 @@ class acfe_pro_global_field_condition{
      */
     function __construct(){
         
-        add_action('acf/render_field_settings',   array($this, 'field_settings'), 999);
+        add_action('acf/render_field_settings',   array($this, 'render_field_settings'), 999);
+        add_action('acf/validate_field',          array($this, 'validate_field'), 20);
         
         add_filter('acf/location/rule_types',     array($this, 'rule_types'));
         add_filter('acf/location/rule_operators', array($this, 'rule_operators'), 10, 2);
@@ -66,11 +67,11 @@ class acfe_pro_global_field_condition{
     
     
     /**
-     * field_settings
+     * render_field_settings
      *
      * @param $field
      */
-    function field_settings($field){
+    function render_field_settings($field){
     
         acf_render_field_setting($field, array(
             'label'             => __('Set as Global Conditional Logic'),
@@ -88,6 +89,23 @@ class acfe_pro_global_field_condition{
                 'data-after'    => 'conditional_logic'
             )
         ), true);
+        
+    }
+    
+    
+    /**
+     * validate_field
+     *
+     * @param $field
+     */
+    function validate_field($field){
+        
+        // cleanup key if disabled
+        if(isset($field['acfe_field_group_condition']) && !$field['acfe_field_group_condition']){
+            unset($field['acfe_field_group_condition']);
+        }
+        
+        return $field;
         
     }
     
@@ -173,12 +191,10 @@ class acfe_pro_global_field_condition{
     
             $_fields = acf_get_fields($field_group);
         
-            if(empty($_fields)) continue;
-        
-            foreach($_fields as $_field){
-    
-                $this->get_any_fields($fields, $_field);
-            
+            if(!empty($_fields)){
+                foreach($_fields as $_field){
+                    $this->get_any_fields($fields, $_field);
+                }
             }
         
         }
@@ -189,9 +205,9 @@ class acfe_pro_global_field_condition{
         
         foreach($fields as $field){
     
-            if(!acf_maybe_get($field, 'acfe_field_group_condition')) continue;
-    
-            $valid_fields[] = $field;
+            if(acf_maybe_get($field, 'acfe_field_group_condition')){
+                $valid_fields[] = $field;
+            }
             
         }
         
@@ -226,9 +242,7 @@ class acfe_pro_global_field_condition{
         }
         
         foreach($fields as $field){
-            
             $choices['Global Fields'][$field['key']] = $field['label'] . ' (' . $field['key'] . ')';
-            
         }
         
         return $choices;

@@ -12,10 +12,12 @@ class acfe_field_phone_number extends acf_field{
      * initialize
      */
     function initialize(){
+    
+        $category = acfe_is_acf_61() ? 'advanced' : 'jquery';
         
         $this->name = 'acfe_phone_number';
         $this->label = __('Phone Number', 'acfe');
-        $this->category = 'jquery';
+        $this->category = $category;
         $this->defaults = array(
             'countries'             => array(),
             'preferred_countries'   => array(),

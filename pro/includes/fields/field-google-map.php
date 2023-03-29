@@ -419,9 +419,11 @@ class acfe_field_google_map extends acfe_field_extend{
      * @return mixed
      */
     function update_field($field){
-        
+    
         // default value
-        $field['default_value'] = json_decode($field['default_value'], true);
+        if(acfe_is_json($field['default_value'])){
+            $field['default_value'] = json_decode($field['default_value'], true);
+        }
         
         // zoom
         $field['zoom'] = $field['acfe_google_map_zooms']['zoom'];

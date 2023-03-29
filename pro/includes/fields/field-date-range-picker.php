@@ -16,9 +16,11 @@ class acfe_field_date_range_picker extends acf_field{
      */
     function initialize(){
         
+        $category = acfe_is_acf_61() ? 'advanced' : 'jquery';
+        
         $this->name = 'acfe_date_range_picker';
         $this->label = __('Date Range Picker', 'acfe');
-        $this->category = 'jquery';
+        $this->category = $category;
         $this->defaults = array(
             'display_format'    => 'd/m/Y',
             'return_format'     => 'd/m/Y',
