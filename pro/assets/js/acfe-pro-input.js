@@ -113,6 +113,10 @@
 
         type: 'acfe_block_editor',
 
+        events: {
+            'duplicateField': 'onDuplicate'
+        },
+
         $control: function() {
             return this.$('.acfe-block-editor-wrapper');
         },
@@ -120,6 +124,12 @@
         initialize: function() {
 
             wp.attachEditor(this.$('textarea').get(0), this.get('settings'));
+
+        },
+
+        onDuplicate: function(e, $el, $duplicate) {
+
+            $duplicate.find('.editor').first().remove();
 
         }
 

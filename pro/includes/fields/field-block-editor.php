@@ -318,15 +318,50 @@ class acfe_field_block_editor extends acf_field{
      */
     function input_admin_enqueue_scripts(){
         
-        // suffix
-        $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+        // vars
+        $version = ACFE_VERSION;
+        $min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+        
+        // script url
+        $script_url = "pro/assets/inc/block-editor/block-editor{$min}.js";
     
         // dependencies
-        $dependencies = array('lodash', 'react', 'wp-api-fetch', 'wp-block-editor', 'wp-block-library', 'wp-blocks', 'wp-components', 'wp-compose', 'wp-data', 'wp-deprecated', 'wp-dom-ready', 'wp-editor', 'wp-element', 'wp-format-library', 'wp-i18n', 'wp-is-shallow-equal', 'wp-keyboard-shortcuts', 'wp-keycodes', 'wp-plugins', 'wp-preferences', 'wp-primitives', 'wp-viewport');
-    
+        $dependencies = array(
+            'lodash',
+            'react',
+            'wp-api-fetch',
+            'wp-block-editor',
+            'wp-block-library',
+            'wp-blocks',
+            'wp-components',
+            'wp-compose',
+            'wp-data',
+            'wp-deprecated',
+            'wp-dom-ready',
+            'wp-editor',
+            'wp-element',
+            'wp-format-library',
+            'wp-i18n',
+            'wp-is-shallow-equal',
+            'wp-keyboard-shortcuts',
+            'wp-keycodes',
+            'wp-plugins',
+            'wp-preferences',
+            'wp-primitives',
+            'wp-viewport'
+        );
+        
+        // wp 6.0 / 6.1 / 6.2
+        if(acf_version_compare('wp', '>=', '6.0') && acf_version_compare('wp', '<', '6.3')){
+            
+            // append wp 6.0 to script url
+            $script_url = "pro/assets/inc/block-editor/block-editor-6.0{$min}.js";
+            
+        }
+        
         // register scripts
-        wp_register_script('acf-extended-pro-block-editor', acfe_get_url("pro/assets/inc/block-editor/block-editor{$suffix}.js"), $dependencies, '2.21.0');
-        wp_register_style('acf-extended-pro-block-editor', acfe_get_url("pro/assets/inc/block-editor/block-editor{$suffix}.css"), array(), '2.21.0');
+        wp_register_script('acf-extended-pro-block-editor', acfe_get_url($script_url), $dependencies, $version);
+        wp_register_style('acf-extended-pro-block-editor', acfe_get_url("pro/assets/inc/block-editor/block-editor{$min}.css"), array(), $version);
         
     }
     
@@ -342,6 +377,11 @@ class acfe_field_block_editor extends acf_field{
         
         // hide on gutenberg screen
         if(acfe_is_block_editor()){
+            return false;
+        }
+        
+        // supports only wp 6.0+
+        if(acf_version_compare('wp', '<', '6.0')){
             return false;
         }
         

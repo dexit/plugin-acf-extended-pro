@@ -528,7 +528,19 @@ class acfe_field_color_picker extends acfe_field_extend{
             
             // theme.json
             // https://developer.wordpress.org/themes/advanced-topics/theme-json/
-            if(class_exists('WP_Theme_JSON_Resolver') && WP_Theme_JSON_Resolver::theme_has_support()){
+            $theme_has_json = false;
+            
+            // wp 6.2
+            if(function_exists('wp_theme_has_theme_json')){
+                $theme_has_json = wp_theme_has_theme_json();
+                
+            // wp 5.8 / 5.9 / 6.0 / 6.1
+            }elseif(class_exists('WP_Theme_JSON_Resolver')){
+                $theme_has_json = WP_Theme_JSON_Resolver::theme_has_support();
+                
+            }
+            
+            if($theme_has_json){
     
                 // retrieve theme json
                 $theme_data = WP_Theme_JSON_Resolver::get_theme_data();

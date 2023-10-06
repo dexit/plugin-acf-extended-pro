@@ -206,7 +206,7 @@ class acfe_field_phone_number extends acf_field{
                 'instructions'  => '',
                 'type'          => 'message',
                 'new_lines'     => 'br',
-                'message'       => __('Additional settings such as "National Number", "International Number" return formats and phone number server validation become available when using the <a href="https://github.com/giggsey/libphonenumber-for-php" target="_blank">Libphonenumber for PHP</a> library.<br />You can install this library manually or with the <a href="https://www.acf-extended.com/addons/acf-extended-pro-libphonenumber.zip" target="_blank">ACF Extended: Phone Number Library Addon</a> plugin.', 'acfe'),
+                'message'       => __('Additional settings such as "National Number", "International Number" return formats and phone number server validation are available when using the <a href="https://github.com/giggsey/libphonenumber-for-php" target="_blank">Libphonenumber for PHP</a> library.<br /><br />You can install this library manually or with the <a href="https://www.acf-extended.com/addons/acf-extended-pro-libphonenumber.zip" target="_blank">ACF Extended: Phone Number Library Addon</a> plugin.', 'acfe'),
             ));
         
         }

@@ -20,7 +20,7 @@ class ACFE_Updates {
     function __construct(){
         
         // get license
-        $this->license = acfe_get_settings('license');
+        $this->license = acfe_get_settings('license', '');
         
         // actions
         add_action('admin_menu', array($this, 'admin_menu'));

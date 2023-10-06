@@ -287,7 +287,7 @@ class acfe_payment extends acf_field{
             'name'          => 'paypal_test_signature',
             'type'          => 'text',
             'prepend'       => __('Signature', 'acfe'),
-            '_append'       => 'paypal_test_username',
+            '_appended'     => true,
         ));
     
         // PayPal Test: Merchant ID
@@ -297,7 +297,7 @@ class acfe_payment extends acf_field{
             'name'          => 'paypal_test_merchant_id',
             'type'          => 'text',
             'prepend'       => __('Merchant ID', 'acfe'),
-            '_append'       => 'paypal_test_username',
+            '_append'       => 'paypal_test_signature',
         ));
     
         // PayPal Prod: Username
@@ -327,7 +327,7 @@ class acfe_payment extends acf_field{
             'name'          => 'paypal_signature',
             'type'          => 'text',
             'prepend'       => __('Signature', 'acfe'),
-            '_append'       => 'paypal_username',
+            '_appended'     => true,
         ));
     
         // PayPal Prod: Merchant ID
@@ -337,7 +337,7 @@ class acfe_payment extends acf_field{
             'name'          => 'paypal_merchant_id',
             'type'          => 'text',
             'prepend'       => __('Merchant ID', 'acfe'),
-            '_append'       => 'paypal_username',
+            '_append'       => 'paypal_signature',
         ));
     
         // Mode
