@@ -5515,7 +5515,7 @@ div.components-toolbar>div+div.has-left-divider::before {
 .block-editor-block-contextual-toolbar.is-fixed {
     position: sticky;
     top: 0;
-    width: 100%;
+    width: 100% !important;
     z-index: 31;
     min-height: 48px;
     display: block;
@@ -21340,4 +21340,12 @@ html.wp-toolbar {
     position: absolute;
     top: 0;
     right: 0
+}
+
+.iso-editor .wp-block-embed__wrapper iframe {
+    height: 400px
+}
+
+.iso-editor .block-editor-inserter__preview-container {
+    position: fixed
 }

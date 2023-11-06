@@ -319,45 +319,35 @@ class acfe_field_block_editor extends acf_field{
     function input_admin_enqueue_scripts(){
         
         // vars
+        global $wp_version;
+        $wp = $wp_version;
+        $wp = preg_replace('/-RC\d+?$/', '', $wp); // remove trailing rc
+        
         $version = ACFE_VERSION;
         $min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
         
         // script url
         $script_url = "pro/assets/inc/block-editor/block-editor{$min}.js";
-    
-        // dependencies
-        $dependencies = array(
-            'lodash',
-            'react',
-            'wp-api-fetch',
-            'wp-block-editor',
-            'wp-block-library',
-            'wp-blocks',
-            'wp-components',
-            'wp-compose',
-            'wp-data',
-            'wp-deprecated',
-            'wp-dom-ready',
-            'wp-editor',
-            'wp-element',
-            'wp-format-library',
-            'wp-i18n',
-            'wp-is-shallow-equal',
-            'wp-keyboard-shortcuts',
-            'wp-keycodes',
-            'wp-plugins',
-            'wp-preferences',
-            'wp-primitives',
-            'wp-viewport'
-        );
+        $deps_url = "pro/assets/inc/block-editor/block-editor.deps.php";
         
         // wp 6.0 / 6.1 / 6.2
-        if(acf_version_compare('wp', '>=', '6.0') && acf_version_compare('wp', '<', '6.3')){
+        if(acf_version_compare($wp, '>=', '6.0') && acf_version_compare($wp, '<', '6.3')){
             
-            // append wp 6.0 to script url
+            // append wp version
             $script_url = "pro/assets/inc/block-editor/block-editor-6.0{$min}.js";
+            $deps_url = "pro/assets/inc/block-editor/block-editor-6.0.deps.php";
+            
+        // wp 6.3
+        }elseif(acf_version_compare($wp, '>=', '6.3') && acf_version_compare($wp, '<', '6.4')){
+            
+            // append wp version
+            $script_url = "pro/assets/inc/block-editor/block-editor-6.3{$min}.js";
+            $deps_url = "pro/assets/inc/block-editor/block-editor-6.3.deps.php";
             
         }
+        
+        $dependencies = acfe_include($deps_url);
+        $dependencies = $dependencies['dependencies'];
         
         // register scripts
         wp_register_script('acf-extended-pro-block-editor', acfe_get_url($script_url), $dependencies, $version);
@@ -404,6 +394,24 @@ class acfe_field_block_editor extends acf_field{
         // enqueue
         wp_enqueue_script('acf-extended-pro-block-editor');
         wp_enqueue_style('acf-extended-pro-block-editor');
+        
+        // enqueue uploader
+        if($field['allow_upload']){
+            acf_enqueue_uploader();
+        }
+        
+        // enqueue gutenberg
+        wp_enqueue_style('wp-block-library');
+        
+        if(current_theme_supports('wp-block-styles') && ! wp_should_load_separate_core_block_assets()){
+            wp_enqueue_style('wp-block-library-theme');
+        }
+        
+        // enabled on gutenberg screen
+        add_filter('should_load_block_editor_scripts_and_styles', '__return_true');
+        
+        do_action('enqueue_block_assets');
+        do_action('enqueue_block_editor_assets');
         
         // textarea
         $textarea = array(
@@ -536,6 +544,28 @@ class acfe_field_block_editor extends acf_field{
         }
         
         return $valid;
+        
+    }
+    
+    
+    /**
+     * format_value
+     *
+     * @param $value
+     * @param $post_id
+     * @param $field
+     *
+     * @return array|false|mixed|string[]
+     */
+    function format_value($value, $post_id, $field){
+        
+        // bail early
+        if(empty($value)){
+            return $value;
+        }
+        
+        // return
+        return apply_filters('the_content', $value);
         
     }
     

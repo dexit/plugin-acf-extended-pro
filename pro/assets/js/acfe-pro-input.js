@@ -2296,6 +2296,13 @@
 
         events: {
             'click .acfe-payment-paypal-button': 'onClickPaypal',
+            'showField': 'onShowField',
+        },
+
+        onShowField: function(e, $el, context) {
+            if (this.get('gateway') === 'paypal' && this.get('paypalHidden') && context === 'conditional_logic') {
+                this.hide();
+            }
         },
 
         $control: function() {
@@ -2413,7 +2420,9 @@
             } else if (this.get('gateway') === 'paypal') {
 
                 // hide if no button
-                if (!this.$button().length) this.hide();
+                if (!this.$button().length) {
+                    this.hide();
+                }
 
                 // set default value for required field
                 this.val('paypal');
@@ -2607,18 +2616,47 @@
 
         },
 
-        onValidationBegin: function($form) {
+        getPaymentField: function($form) {
 
-            // set field
-            // todo: check visibility for conditional logic
-            this.field = acf.getFields({
+            // we must get any payment field (visible or not)
+            // because paypal gateway is hidden by default
+            var field = acf.getFields({
                 type: 'acfe_payment',
-                //visible: true,
+                parent: $form,
+                //visible: true, // manually checked later
                 limit: 1
             }).shift();
 
+            if (!field) {
+                return false;
+            }
+
+            // assume field is visible even if within tab
+            // the only rule that should be check is conditional logic
+            var visible = true;
+
+            // manually check if hidden by condition
+            if (field.has('conditions')) {
+                visible = field.getConditions().calculate();
+            }
+
+            if (visible) {
+                return field;
+            }
+
+            return false;
+
+        },
+
+        onValidationBegin: function($form) {
+
+            // set field
+            this.field = this.getPaymentField($form);
+
             // no field found
-            if (!this.field) return;
+            if (!this.field) {
+                return;
+            }
 
             // set global
             this.$form = $form;
@@ -2631,7 +2669,9 @@
         onValidationFailure: function($form, validator) {
 
             // no field found
-            if (!this.field) return;
+            if (!this.field) {
+                return;
+            }
 
             // set global
             this.validator = validator;
@@ -2645,7 +2685,9 @@
         onValidationSuccess: function($form, validator) {
 
             // no field found
-            if (!this.field) return;
+            if (!this.field) {
+                return;
+            }
 
             // globals
             this.validator = validator;
@@ -2659,13 +2701,57 @@
             if (field.get('gateway') === 'stripe') {
 
                 // check field is required or has any value
-                if (!field.has('required') && field.val() === '') return;
+                if (!field.has('required') && field.val() === '') {
+                    return;
+                }
 
                 // prevent form submit
                 this.preventFormSubmit();
 
-                // ajax response
-                var onSuccess = function(json) {
+                // process stripe
+                this.processStripe();
+
+                // paypal
+            } else if (field.get('gateway') === 'paypal') {
+
+                // payment already confirmed
+                if (field.val() !== 'paypal') {
+                    return;
+                }
+
+                // prevent form submit
+                this.preventFormSubmit();
+
+                // process paypal
+                this.processPaypal();
+
+            }
+
+        },
+
+        processStripe: function() {
+
+            // vars
+            var self = this;
+            var field = this.field;
+            var $form = this.$form;
+
+            // ajax data
+            var ajaxData = {
+                action: 'acfe/payment_request',
+                gateway: 'stripe',
+                field_key: field.get('key'),
+                fields: acf.serialize($form, 'acf')
+            };
+
+            // send ajax
+            $.ajax({
+                url: acf.get('ajaxurl'),
+                data: acf.prepareForAjax(ajaxData),
+                type: 'post',
+                dataType: 'json',
+                context: this,
+                success: function(json) {
 
                     // error
                     if (!json.success) {
@@ -2686,31 +2772,17 @@
                         })
                         .then(function(result) {
 
+                            // error
                             if (result.error) {
 
                                 field.showError(result.error.message);
                                 self.unlockForm();
 
+                                // success
                             } else {
 
+                                // lock
                                 self.lockForm();
-
-                                // ajax response
-                                var onSuccessConfirm = function(json) {
-
-                                    if (json.success) {
-
-                                        field.val(json.data.response);
-                                        self.submitForm();
-
-                                    } else {
-
-                                        field.showError(json.data.error);
-                                        self.unlockForm();
-
-                                    }
-
-                                };
 
                                 // ajax data
                                 var ajaxDataConfirm = {
@@ -2727,125 +2799,12 @@
                                     type: 'post',
                                     dataType: 'json',
                                     context: this,
-                                    success: onSuccessConfirm,
-                                });
-
-                            }
-
-                        });
-
-                };
-
-                // ajax data
-                var ajaxData = {
-                    action: 'acfe/payment_request',
-                    gateway: 'stripe',
-                    field_key: field.get('key'),
-                    fields: acf.serialize($form, 'acf')
-                };
-
-                // send ajax
-                $.ajax({
-                    url: acf.get('ajaxurl'),
-                    data: acf.prepareForAjax(ajaxData),
-                    type: 'post',
-                    dataType: 'json',
-                    context: this,
-                    success: onSuccess,
-                });
-
-                // paypal
-            } else if (field.get('gateway') === 'paypal') {
-
-                // payment already confirmed
-                if (field.val() !== 'paypal') return;
-
-                // prevent form submit
-                this.preventFormSubmit();
-
-                // paypal vars
-                var $paypalButton = field.$paypalButton();
-                var $paypalWrap = field.$paypalWrap();
-
-                // check if field is hidden (paypal only and no button)
-                var isHidden = acf.isHidden(field.$el);
-
-                // https://developer.paypal.com/docs/archive/express-checkout/in-context/javascript-advanced-settings/
-                paypal.checkout.setup(field.get('merchantId'), {
-                    buttons: [$paypalButton[0]],
-                    environment: 'sandbox', // production | sandbox
-                    click: function() {
-
-                        // always reset allowing to click again
-                        paypal.checkout.reset();
-
-                        // open popup
-                        paypal.checkout.initXO();
-
-                        // unlock form
-                        setTimeout(function() {
-                            self.unlockForm();
-                        }, 300);
-
-                        // hide paypal wrap
-                        $paypalWrap.addClass('acf-hidden');
-
-                        // other browsers
-                        if (acf.get('browser') !== 'chrome') {
-
-                            // show button
-                            field.$buttonWrap().show();
-
-                            // enable gateway selector
-                            field.enableSelectors();
-
-                            // if field is supposed to be hidden, hide it
-                            if (isHidden) {
-                                field.hide();
-                            }
-
-                        }
-
-                        // ajax response
-                        var onSuccess = function(json) {
-
-                            if (json.success) {
-
-                                paypal.checkout.startFlow(json.data.url);
-
-                            } else {
-
-                                paypal.checkout.closeFlow();
-                                field.showError(json.data.error);
-
-                            }
-
-                            // listen for callback
-                            window.addEventListener('hashchange', function() {
-
-                                // split url with #
-                                var url = acfe.getCurrentUrl().split('#'); // https://www.domain.com/page
-                                var parts = '/' + url[1]; // /?token=EC-013494918W570690J&PayerID=ATAADCVJVFY7G
-
-                                // parse url
-                                var data = acfe.getQueryArgs(parts);
-
-                                // payment done
-                                if (data.token && data.PayerID) {
-
-                                    // remove parts from url
-                                    window.history.replaceState({}, document.title, url[0]);
-
-                                    // lock form
-                                    self.lockForm();
-
-                                    // ajax response
-                                    var onSuccessConfirm = function(json) {
+                                    success: function(json) {
 
                                         if (json.success) {
 
                                             field.val(json.data.response);
-                                            self.submitForm($form, event);
+                                            self.submitForm();
 
                                         } else {
 
@@ -2854,101 +2813,231 @@
 
                                         }
 
-                                    };
+                                    },
+                                });
 
-                                    // ajax data
-                                    var ajaxDataConfirm = {
-                                        action: 'acfe/paypal_confirm',
-                                        token: data.token,
-                                        payer_id: data.PayerID,
-                                        field_key: field.get('key'),
-                                        fields: acf.serialize($form, 'acf')
-                                    };
+                            }
 
-                                    // send ajax
-                                    $.ajax({
-                                        url: acf.get('ajaxurl'),
-                                        data: acf.prepareForAjax(ajaxDataConfirm),
-                                        type: 'post',
-                                        dataType: 'json',
-                                        context: this,
-                                        success: onSuccessConfirm,
-                                    });
-
-                                    // payment canceled
-                                } else if (data.token && !data.PayerID) {
-
-                                    // remove parts from url
-                                    window.history.replaceState({}, document.title, url[0]);
-
-                                    // show error
-                                    field.showError('Payment canceled, please try again.');
-                                    self.unlockForm();
-
-                                }
-
-                            });
-
-                        };
-
-                        // ajax data
-                        var ajaxData = {
-                            action: 'acfe/payment_request',
-                            gateway: 'paypal',
-                            field_key: field.get('key'),
-                            fields: acf.serialize($form, 'acf')
-                        };
-
-                        // send ajax
-                        $.ajax({
-                            url: acf.get('ajaxurl'),
-                            data: acf.prepareForAjax(ajaxData),
-                            type: 'post',
-                            dataType: 'json',
-                            context: this,
-                            success: onSuccess,
                         });
 
+                },
+            });
+
+        },
+
+
+        processPaypal: function() {
+
+            // vars
+            var self = this;
+            var field = this.field;
+            var $form = this.$form;
+
+            // paypal vars
+            var $paypalButton = field.$paypalButton();
+            var $paypalWrap = field.$paypalWrap();
+
+            // check if field is hidden (paypal only and no button)
+            var isHidden = acf.isHidden(field.$el);
+
+            var environment = field.get('mode') === 'test' ? 'sandbox' : 'production';
+
+            // setup paypal
+            // https://developer.paypal.com/docs/archive/express-checkout/in-context/javascript-advanced-settings/
+            paypal.checkout.setup(field.get('merchantId'), {
+                buttons: [$paypalButton[0]],
+                environment: environment,
+                click: this.proxy(this.processPaypalClick),
+            });
+
+            // chrome
+            if (acf.get('browser') === 'chrome') {
+
+                // auto click
+                $paypalButton[0].click();
+
+                // other browsers
+            } else {
+
+                // hide button
+                field.$buttonWrap().hide();
+
+                // show paypal button
+                $paypalWrap.removeClass('acf-hidden');
+
+                // disable gateway selector
+                field.disableSelectors();
+
+                // hide spinner
+                this.setTimeout(function() {
+
+                    acf.hideSpinner(acfe.findSpinner(this.$form));
+
+                    // remove disabled class added by form lock
+                    // can't use this.unlockForm() as it reset validator
+                    $paypalButton.removeClass('disabled');
+                    $paypalButton.removeAttr('disabled');
+
+                    // hidden by tab
+                    // show field within tab
+                    if (field.hiddenByTab) {
+                        field.hiddenByTab.toggle();
                     }
 
-                });
+                }, 300);
 
-                // chrome
-                if (acf.get('browser') === 'chrome') {
-
-                    // auto click
-                    $paypalButton[0].click();
-
-                    // other browsers
-                } else {
-
-                    // hide button
-                    field.$buttonWrap().hide();
-
-                    // show paypal button
-                    $paypalWrap.removeClass('acf-hidden');
-
-                    // disable gateway selector
-                    field.disableSelectors();
-
-                    // hide spinner
-                    this.setTimeout(function() {
-
-                        acf.hideSpinner(acfe.findSpinner(this.$form));
-
-                        // remove disabled class added by form lock
-                        $paypalButton.removeClass('disabled');
-
-                    }, 300);
-
-                    // if field is hidden, temporarily show it
-                    if (isHidden) {
-                        field.show();
-                    }
-
+                // if field is hidden, temporarily show it
+                if (isHidden) {
+                    field.show();
                 }
 
             }
+
+        },
+
+        processPaypalClick: function() {
+
+            // vars
+            var self = this;
+            var field = this.field;
+            var $form = this.$form;
+
+            // paypal vars
+            var $paypalButton = field.$paypalButton();
+            var $paypalWrap = field.$paypalWrap();
+
+            // check if field is hidden (paypal only and no button)
+            var isHidden = acf.isHidden(field.$el);
+
+            // always reset allowing to click again
+            paypal.checkout.reset();
+
+            // open popup
+            paypal.checkout.initXO();
+
+            // unlock form
+            setTimeout(function() {
+                self.unlockForm();
+            }, 300);
+
+            // hide paypal wrap
+            $paypalWrap.addClass('acf-hidden');
+
+            // other browsers
+            if (acf.get('browser') !== 'chrome') {
+
+                // show button
+                field.$buttonWrap().show();
+
+                // enable gateway selector
+                field.enableSelectors();
+
+                // if field is supposed to be hidden, hide it
+                if (isHidden) {
+                    field.hide();
+                }
+
+            }
+
+            // ajax data
+            var ajaxData = {
+                action: 'acfe/payment_request',
+                gateway: 'paypal',
+                field_key: field.get('key'),
+                fields: acf.serialize($form, 'acf')
+            };
+
+            // send ajax
+            $.ajax({
+                url: acf.get('ajaxurl'),
+                data: acf.prepareForAjax(ajaxData),
+                type: 'post',
+                dataType: 'json',
+                context: this,
+                success: function(json) {
+
+                    if (json.success) {
+
+                        acf.doAction('acfe/fields/payment/create_success', json.data, $form, this.field, this);
+
+                        paypal.checkout.startFlow(json.data.url);
+
+                    } else {
+
+                        paypal.checkout.closeFlow();
+                        field.showError(json.data.error);
+                        field.show();
+
+                    }
+
+                    // listen for callback
+                    window.addEventListener('hashchange', function() {
+
+                        // split url with #
+                        var url = acfe.getCurrentUrl().split('#'); // https://www.domain.com/page
+                        var parts = '/' + url[1]; // /?token=EC-013494918W570690J&PayerID=ATAADCVJVFY7G
+
+                        // parse url
+                        var data = acfe.getQueryArgs(parts);
+
+                        // payment done
+                        if (data.token && data.PayerID) {
+
+                            // remove parts from url
+                            window.history.replaceState({}, document.title, url[0]);
+
+                            // lock form
+                            self.lockForm();
+
+                            // ajax data
+                            var ajaxDataConfirm = {
+                                action: 'acfe/paypal_confirm',
+                                token: data.token,
+                                payer_id: data.PayerID,
+                                field_key: field.get('key'),
+                                fields: acf.serialize($form, 'acf')
+                            };
+
+                            // send ajax
+                            $.ajax({
+                                url: acf.get('ajaxurl'),
+                                data: acf.prepareForAjax(ajaxDataConfirm),
+                                type: 'post',
+                                dataType: 'json',
+                                context: this,
+                                success: function(json) {
+
+                                    if (json.success) {
+
+                                        field.val(json.data.response);
+                                        self.submitForm($form, event);
+
+                                    } else {
+
+                                        field.showError(json.data.error);
+                                        self.unlockForm();
+
+                                    }
+
+                                },
+                            });
+
+                            // payment cancelled
+                        } else if (data.token && !data.PayerID) {
+
+                            // remove parts from url
+                            window.history.replaceState({}, document.title, url[0]);
+
+                            // show error
+                            field.showError(acf.get('paymentL10n').paymentCancelled);
+                            self.unlockForm();
+
+                        }
+
+                    });
+
+                },
+            });
 
         },
 
@@ -3218,7 +3307,7 @@
 
             // default Settings
             args.excludeCountries = ['ac', 'io', 'gg', 'mf', 'sj', 'ax'];
-            args.utilsScript = 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/utils.min.js';
+            args.utilsScript = 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/js/utils.min.js';
 
             // settings
             args.onlyCountries = onlyCountries;

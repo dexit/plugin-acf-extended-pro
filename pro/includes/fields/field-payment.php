@@ -9,6 +9,7 @@ if(!class_exists('acfe_payment')):
 class acfe_payment extends acf_field{
     
     var $sub_fields;
+    var $errors;
     
     /**
      * initialize
@@ -23,6 +24,7 @@ class acfe_payment extends acf_field{
             'amount'                    => '',
             'currency'                  => 'USD',
             'description'               => '',
+            'button_paypal'             => __('PayPal Checkout', 'acfe'),
             'button'                    => 0,
             'button_value'              => __('Pay now', 'acfe'),
             'button_class'              => 'button button-primary',
@@ -46,6 +48,21 @@ class acfe_payment extends acf_field{
         );
         
         $this->sub_fields = array('id', 'gateway', 'amount', 'currency', 'items', 'date', 'ip', 'mode', 'object');
+        
+        // errors
+        $errors = array(
+            'amount_null'        => __('Amount cannot be null', 'acfe'),
+            'field_not_found'    => __('An error has occured', 'acfe'),
+            'payment_create'     => __('An error has occured', 'acfe'),
+            'payment_confirm'    => __('An error has occured', 'acfe'),
+            'payment_failed'     => __('Payment failed', 'acfe'),
+            'invalid_data'       => __('An error has occured', 'acfe'),
+            'invalid_card'       => __('Your card number is invalid', 'acfe'),
+            'payment_cancelled'  => __('Payment cancelled, please try again', 'acfe'),
+        );
+        
+        // filters
+        $this->errors = apply_filters('acfe/fields/payment/errors', $errors);
         
         // stripe + paypal request
         add_action('wp_ajax_acfe/payment_request',              array($this, 'payment_create'));
@@ -113,6 +130,21 @@ class acfe_payment extends acf_field{
             'instructions'  => __('A description attached to the payment. Useful for displaying to users', 'acfe'),
             'name'          => 'description',
             'type'          => 'text',
+        ));
+    
+        // Paypal Button
+        acf_render_field_setting($field, array(
+            'label'         => __('Paypal Button', 'acfe'),
+            'instructions'  => __('The paypal checkout button text', 'acfe'),
+            'name'          => 'button_paypal',
+            'type'          => 'text',
+            'conditions'    => array(
+                array(
+                    'field'     => 'gateways',
+                    'operator'  => '==contains',
+                    'value'     => 'paypal'
+                ),
+            ),
         ));
     
         // Button
@@ -206,7 +238,7 @@ class acfe_payment extends acf_field{
     
         // Stripe: Hide Postal Code
         acf_render_field_setting($field, array(
-            'label'         => __('Stripe Hide Postal Code', 'acfe'),
+            'label'         => __('Stripe: Hide Postal Code', 'acfe'),
             'instructions'  => __('Hide Stripe\'s postal code field validation which can be displayed in specific cases', 'acfe'),
             'name'          => 'stripe_hide_zip',
             'type'          => 'true_false',
@@ -385,6 +417,13 @@ class acfe_payment extends acf_field{
         wp_register_script('acfe-polyfill', '//polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch',   array('jquery'), null);
         wp_register_script('acfe-paypal',   '//www.paypalobjects.com/api/checkout.js',                          array('jquery'), null);
         
+        // localize
+        acf_localize_data(array(
+            'paymentL10n' => array(
+                'paymentCancelled' => $this->errors['payment_cancelled'],
+            )
+        ));
+        
     }
     
     
@@ -509,6 +548,7 @@ class acfe_payment extends acf_field{
             'class'         => "acfe-payment-wrap {$field['class']}",
             'data-gateway'  => reset($field['gateways']),
             'data-gateways' => $field['gateways'],
+            'data-mode'     => $field['mode']
         );
     
         // stripe
@@ -522,6 +562,10 @@ class acfe_payment extends acf_field{
         if($this->has_gateway($field, 'paypal')){
             $div['data-merchant-id'] = $this->get_gateway_api($field, 'paypal', 'merchant_id');
             $div['class'] .= ' -paypal';
+        }
+        
+        if(!$field['button'] && $this->has_gateway($field, 'paypal')){
+            $div['data-paypal-hidden'] = true;
         }
     
         // button
@@ -573,7 +617,7 @@ class acfe_payment extends acf_field{
             
             ?>
             <div class="acfe-payment-gateway acfe-payment-paypal acf-hidden">
-                <button class="acfe-payment-paypal-button button button-secondary acf-button"><?php _e('PayPal Checkout'); ?></button>
+                <button class="acfe-payment-paypal-button <?php echo esc_attr($field['button_class']); ?>"><?php echo esc_html($field['button_paypal']); ?></button>
             </div>
             <?php
         
@@ -636,7 +680,7 @@ class acfe_payment extends acf_field{
         // field not found
         if(!$field){
             wp_send_json_error(array(
-                'error' => __('An error has occured', 'acfe')
+                'error' => $this->errors['field_not_found']
             ));
         }
     
@@ -677,12 +721,12 @@ class acfe_payment extends acf_field{
         
         // include
         $this->include_stripe($field);
+        
+        // vars
+        $gateway = 'stripe';
     
         // loop
         acfe_setup_meta($acf, 'acfe/stripe_create', true);
-    
-            // gateway
-            $gateway = 'stripe';
             
             // args
             // https://stripe.com/docs/api/payment_intents/create
@@ -701,7 +745,7 @@ class acfe_payment extends acf_field{
         if($args['amount'] === 0.0){
     
             wp_send_json_error(array(
-                'error' => __("Amount can't be null", 'acfe')
+                'error' => $this->errors['amount_null']
             ));
             
         }
@@ -711,13 +755,20 @@ class acfe_payment extends acf_field{
     
             // create payment intent
             $intent = \Stripe\PaymentIntent::create($args);
-    
-            wp_send_json_success(array(
+            
+            $return = array(
                 'secret' => $intent->client_secret
-            ));
+            );
+            
+            $return = apply_filters('acfe/fields/payment/create_success',                       $return, $intent, $args, $field, $gateway, $post_id, $acf);
+            $return = apply_filters("acfe/fields/payment/create_success/gateway={$gateway}",    $return, $intent, $args, $field, $gateway, $post_id, $acf);
+            $return = apply_filters("acfe/fields/payment/create_success/name={$field['name']}", $return, $intent, $args, $field, $gateway, $post_id, $acf);
+            $return = apply_filters("acfe/fields/payment/create_success/key={$field['key']}",   $return, $intent, $args, $field, $gateway, $post_id, $acf);
+    
+            wp_send_json_success($return);
             
         // error
-        }catch(Error $e){
+        }catch(Exception $e){
             
             wp_send_json_error(array(
                 'error' => $e->getMessage()
@@ -750,7 +801,7 @@ class acfe_payment extends acf_field{
         // field not found
         if(!$field){
             wp_send_json_error(array(
-                'error' => __('An error has occured', 'acfe')
+                'error' => $this->errors['field_not_found']
             ));
         }
     
@@ -785,7 +836,7 @@ class acfe_payment extends acf_field{
             }else{
     
                 wp_send_json_error(array(
-                    'response' => __('Payment failed', 'acfe')
+                    'response' => $this->errors['payment_failed']
                 ));
                 
             }
@@ -821,12 +872,10 @@ class acfe_payment extends acf_field{
         // vars
         $endpoint = $this->get_gateway_api($field, 'paypal', 'endpoint');
         $checkout_url = $this->get_gateway_api($field, 'paypal', 'checkout');
+        $gateway = 'paypal';
     
         // loop
         acfe_setup_meta($acf, 'acfe/paypal_create', true);
-            
-            // gateway
-            $gateway = 'paypal';
         
             // args
             $args = apply_filters("acfe/fields/payment/create",                       $args, $field, $gateway, $post_id);
@@ -838,6 +887,15 @@ class acfe_payment extends acf_field{
             $amount = acf_maybe_get($args, 'amount', 0);
             $currency = acf_maybe_get($args, 'currency', 'USD');
             $description = acf_maybe_get($args, 'description');
+            
+            // check amount is not null
+            if((int) $this->get_gateway_amount($amount, $currency, 'paypal') === 0){
+                
+                wp_send_json_error(array(
+                    'error' => $this->errors['amount_null']
+                ));
+                
+            }
         
             // unset incompatible args
             unset($args['amount']);
@@ -877,15 +935,22 @@ class acfe_payment extends acf_field{
         // success
         if(strtoupper($response['ACK']) === 'SUCCESS'){
             
-            wp_send_json_success(array(
+            $return = array(
                 'url' => $checkout_url . $response['TOKEN']
-            ));
+            );
+            
+            $return = apply_filters('acfe/fields/payment/create_success',                       $return, $response, $args, $field, $gateway, $post_id, $acf);
+            $return = apply_filters("acfe/fields/payment/create_success/gateway={$gateway}",    $return, $response, $args, $field, $gateway, $post_id, $acf);
+            $return = apply_filters("acfe/fields/payment/create_success/name={$field['name']}", $return, $response, $args, $field, $gateway, $post_id, $acf);
+            $return = apply_filters("acfe/fields/payment/create_success/key={$field['key']}",   $return, $response, $args, $field, $gateway, $post_id, $acf);
+            
+            wp_send_json_success($return);
             
         }
         
         // error
         wp_send_json_error(array(
-            'error' => __('An error has occured', 'acfe')
+            'error' => $this->errors['payment_create']
         ));
         
     }
@@ -914,7 +979,7 @@ class acfe_payment extends acf_field{
         // field not found
         if(!$field){
             wp_send_json_error(array(
-                'error' => __('An error has occured', 'acfe')
+                'error' => $this->errors['field_not_found']
             ));
         }
         
@@ -962,7 +1027,7 @@ class acfe_payment extends acf_field{
     
         // error
         wp_send_json_error(array(
-            'error' => __('An error has occured', 'acfe')
+            'error' => $this->errors['payment_confirm']
         ));
         
     }
@@ -1063,7 +1128,7 @@ class acfe_payment extends acf_field{
     
             // stripe: check value is invalid, return an error (even if not required)
             if($value === 'invalid'){
-                return __('Your card number is invalid', 'acfe');
+                return $this->errors['invalid_card'];
             }
             
             return $valid;
@@ -1076,7 +1141,7 @@ class acfe_payment extends acf_field{
         if($field['required']){
             
             if(empty($value) || $value === 'invalid' || $value === 'valid' || $value === 'paypal'){
-                return __('An error has occured', 'acfe');
+                return $this->errors['invalid_data'];
             }
             
         }
@@ -1647,6 +1712,7 @@ class acfe_payment extends acf_field{
     function translate_field($field){
         
         $field['button_value'] = acf_translate($field['button_value']);
+        $field['button_paypal'] = acf_translate($field['button_paypal']);
         
         return $field;
         

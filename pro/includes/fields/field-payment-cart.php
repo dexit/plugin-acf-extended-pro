@@ -480,6 +480,7 @@ class acfe_payment_cart extends acf_field{
         
         // force array
         $items = acf_get_array($value);
+        $items = array_map('wp_unslash', $items);
         
         // loop items
         foreach($items as $item){
@@ -531,6 +532,7 @@ class acfe_payment_cart extends acf_field{
     
         // items
         $items = acf_get_array($value);
+        $items = array_map('wp_unslash', $items);
     
         // get existing cart
         $cart = acf_get_form_data('acfe/payment_cart');
